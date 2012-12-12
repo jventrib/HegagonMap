@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:key="development"
+        android:summary="Development settings"
+        android:title="development" >
+        <CheckBoxPreference
+            android:key="log_state"
+            android:summaryOff="Log disabled"
+            android:summaryOn="Log enabled"
+            android:title="Logging" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:key="show_fps"
+            android:summary="Display FPS on screen"
+            android:summaryOff="Fps off"
+            android:summaryOn="Fps on"
+            android:title="Show FPS" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:key="draw_infos"
+            android:summary="Draw infos on screen"
+            android:summaryOff="Infos off"
+            android:summaryOn="Infos on"
+            android:title="Draw Infos" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:key="rescale_pinch_zoom"
+            android:summary="Rescale During Pinch Zoom"
+            android:summaryOff="Rescale wiil be done after Pinch"
+            android:summaryOn="Rescale wiil be done after Pinch"
+            android:title="Rescale During Pinch Zoom" >
+        </CheckBoxPreference>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="about"
+        android:summary="A propos"
+        android:title="A propos" >
+        <Preference
+            android:key="eulaIGN"
+            android:summary="Conditions générales d’utilisation finale pour une 
+utilisation privée de l’API Géoportail"
+            android:title="API Géoportail" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

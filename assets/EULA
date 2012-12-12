@@ -1,0 +1,236 @@
+﻿Conditions générales d’utilisation finale pour une 
+utilisation privée de l’API Géoportail
+
+1.  CHAMP D’APPLICATION
+L’Institut national de l’information géographique et forestière (IGN) édite l’API Géoportail qui permet à un Licencié 
+d’intégrer dans des sites internet et applications les services et données du Géoportail en vue de fournir un accès à ces 
+services et données aux Utilisateurs Finaux. 
+En vous connectant à un site internet ou une application d’un Licencié, vous êtes Utilisateur Final de l’API du Géoportail 
+au sens des présentes conditions générales et vous engagez à les respecter en toutes leurs dispositions. Ces 
+conditions générales d’utilisation finale définissent vos droits et obligations vis-à-vis de l’IGN. Leur objet n’est pas de 
+régir le rapport contractuel entre vous et le Licencié. 
+
+2. LES SERVICES ET DONNEES ACCESSIBLES 
+Le Licencié vous propose via son site internet ou son application un accès à des services et données du Géoportail. 
+L’IGN vous accorde, à titre non exclusif, des droits d’utilisation de ces services et données pour votre seul usage privé, 
+à l’exclusion de tout usage professionnel.
+La spécification des services et données du Géoportail est évolutive et remise à jour de proche en proche.  La 
+spécification en vigueur est détaillée dans le descriptif technique de l’API du Géoportail.  
+Certains services et données du Géoportail, notamment des services et données provenant de tiers ou sur lesquels des 
+tiers détiennent des droits, peuvent comporter des conditions d’utilisation et restrictions spécifiques. Vous devez en 
+prendre connaissance auprès du Licencié. 
+
+3.  MODALITES D’ACCES ET D’UTILISATION DE L’API GEOPORTAIL 
+La fourniture de l’accès aux services et données du Géoportail au sein du site internet ou de l’application sont de la 
+seule responsabilité du Licencié. Lorsque le Licencié vous fournit des éléments techniques de connexion (clés, 
+identifiants, mots de passe, etc.) permettant l’accès du site internet ou de l’application du Licencié aux services et 
+données du Géoportail, vous êtes responsable de leur utilisation. 
+Les  modalités contractuelles d’accès (durée, quantité, données accessibles, tarifs) sont fixées par le Licencié 
+conformément à sa Licence avec l’IGN. Il vous appartient de respecter ces modalités d’accès.
+Il n’est pas possible à l’IGN de fournir directement à l’Utilisateur Final un accès à l’application du Licencié ou des 
+éléments techniques de connexion en lieu et place du Licencié. 
+
+4.  DROITS ACCORDES A L’UTILISATEUR FINAL 
+Vous êtes autorisé à accéder pour votre seul usage privé aux services et données du Géoportail proposés par le
+Licencié. Cet accès se fait obligatoirement via le site internet ou l’application du Licencié.
+Le Licencié peut en outre vous autoriser à : 
+- afficher des données de tiers ou créer des données dès lors que celles-ci ne permettent pas la reconstitution 
+d’une partie substantielle des données du Géoportail ;
+-  imprimer des données de Géoportail pour votre usage privé ou documentaire dans la limite d’un format A4 pour 
+une résolution de 150 dpi (environ 1230*1750 pixels). La fonction d’impression, lorsqu’elle est proposée sur 
+des données IGN, doit assurer une insertion du copyright « © IGN [année] ». Cette autorisation est portée au
+format A3 dans le cas d’un abonnement.
+Mise en cache de données : le téléchargement, le stockage et/ou l’archivage des données du Géoportail, quel que soit 
+le support, est strictement interdit, sauf le Licencié vous l’autorise conformément à sa licence avec l’IGN. Dans ce cas, 
+le téléchargement et le stockage pendant toute la durée de votre abonnement des données que vous avez consultées 
+est autorisé, dans le but d’y accéder plus rapidement dans le site internet ou l’application du Licencié, y compris hors 
+connexion.    
+La mise en cache de données IGN au-delà des données consultées par l’Utilisateur Final est possible si  le Licencié 
+vous l’autorise conformément à sa licence avec l’IGN
+Un stockage immédiat, automatique, et temporaire de données en vue d’améliorer la performance de fonctionnement de 
+l’application pendant la seule durée de votre connexion (cache) est autorisé. 
+Plafond technique : votre accès à l’API du Géoportail est plafonné service par service, selon le contrat passé entre le 
+Licencié et l’IGN. Les modalités d’application de ce plafond sont décrites dans le descriptif technique de l’API 
+Géoportail. 
+Période d’évaluation : le Licencié peut vous proposer d’évaluer les services et données du Géoportail pendant une 
+période d’essai gratuite et non reconductible d’une durée maximale de sept jours. Lorsque c’est le cas, c’est dans le but 
+de vous permettre de prendre connaissance de leur teneur, de leur qualité et de leurs spécifications, de tester leur 
+adaptation à vos usages.  
+
+5. OBLIGATIONS DE L’UTILISATEUR FINAL
+Vous vous engagez à respecter les modalités contractuelles d’accès (durée, quantité, données accessibles, tarifs) 
+fixées par le Licencié conformément à sa Licence avec l’IGN.
+Protection des éléments techniques de connexion : vous êtes est responsable de la bonne utilisation des éléments 
+techniques de connexion (identifiants, mots de passe, clés, etc.) qui vous sont fournis pour permettre votre accès aux 
+services et données du Géoportail. Il vous incombe d’alerter le Licencié sans délai de toute utilisation  anormale ou 
+frauduleuse des éléments techniques de connexion à votre disposition. 
+Accès loyal et sincère : vous vous engagez à ne pas utiliser ou fournir d’accès aux service et données du Géoportail 
+par des moyens autres que ceux proposés par le Licencié. Vous ne devez pas mettre en œuvre de mesures qui 
+auraient pour effet de fausser sa consommation réelle des services ou des données du Géoportail. 
+Respect des conditions d’utilisation de la marque Géoportail : Lorsque l’API du Géoportail transmet des mentions 
+de copyright, les logos des organismes producteurs de données géographiques et le logo « Géoportail », vous n’êtes 
+pas autorisé à retirer ces éléments qui doivent apparaître dès lors que les données du Géoportail sont affichées au sein 
+du site internet ou de l’application.
+Vous vous engagez à ne pas utiliser le site internet ou l’application du Licencié pour une activité explicitement ou 
+indirectement en lien avec des sites et/ou applications proposant des données prohibés par la loi, notamment :
+- incitant à la haine ou proférant des menaces, harcèlements, rumeurs, terreurs, ou qui encouragent et/ou 
+facilitent de tels agissements envers un tiers, 
+- véhiculant des données racistes, immoraux, violents, obscènes, pornographiques, pédophiles ou encourageant 
+de tels comportements; 
+- encourageant ou facilitant toute activité illégale ; 
+- véhiculant des informations diffamatoires, trompeuses, déformées ou fausses ; 
+-  portant atteinte à la vie privée d’un tiers.
+
+6. PROPRIETE INTELLECTUELLE 
+6.1. Les services du Géoportail 
+L’API du Géoportail et ses services sont protégés par le droit de la propriété intellectuelle. En accédant aux services du 
+Géoportail, vous ne disposez que d’un droit d’utilisation de ceux-ci. La concession accordée relève d'un simple droit
+d’usage selon les modalités définies par les présentes Conditions générales d’utilisation finale.
+6.2. Données du Géoportail et Marque Géoportail 
+L’IGN détient les droits de propriété intellectuelle  sur la Marque Géoportail et sur les données du Géoportail ou est 
+habilité à diffuser ces données par les tiers détenteurs de ces droits. 
+Votre accès à la Marque Géoportail et aux données du Géoportail n'emporte pas acquisition des droits de propriété de 
+l'IGN ou des tiers. La concession accordée relève d'un simple droit d’utilisation, selon les modalités définies par les 
+présentes conditions générales d’utilisation finale. 
+ juillet 2012   49 
+6.3 Données Dérivées 
+Si vous avez créé des données dérivées, vous êtes seul titulaire des droits de propriété intellectuelle sur ces données, 
+si elles ne permettent pas la reconstitution d'une partie substantielle des données de l’IGN.
+Dans le cas contraire, et pour les seules données de l’IGN, vous êtes titulaire de droits de propriété intellectuelle sur les 
+données résultant de ces opérations, sous réserve des droits de propriété de l’IGN sur ses propres données. Vous êtes 
+alors autorisé à les diffuser, en franchise  de droits et d’autorisation, quel que soit le bénéficiaire du transfert, sous 
+réserve que vous informiez ce bénéficiaire (i) des droits de propriété intellectuelle de l’IGN sur ses propres données, (ii) 
+de l’obligation de détenir ou d’acquérir auprès de l’IGN les droits nécessaires à la reconstitution d’une partie 
+substantielle des données de l’IGN.
+
+7. RESPONSABILITE 
+7.1 L’IGN s’engage à fournir les moyens nécessaires et raisonnables pour assurer ou faire assurer un accès continu 
+aux services et données du Géoportail. Cet engagement de l’IGN est valable sous réserve du respect de vos obligations 
+en tant qu’Utilisateur Final, du respect par le Licencié de ses obligations, des périodes de maintenance et d’entretien, 
+des opérations de mise à jour des serveurs, et des éventuelles mesures de plafond technique collectif telles que 
+précisées dans le descriptif technique de l’API du Géoportail.
+L’IGN, n’hébergeant pas le site internet ou l’application du Licencié, n’exerce matériellement ou contractuellement 
+aucun contrôle sur sa gestion ou sur le contenu éditorial qui vous est fourni, et ne saurait être tenu responsable d’une 
+quelconque façon de ces données ou des liens avec d’autres données fournis sous la responsabilité exclusive du 
+Licencié, ainsi que de la performance et de la disponibilité du site internet ou de l’application du Licencié.
+Les Données Dérivées constituées par le Licencié ou vous-même à partir des données du Géoportail n’engagent que 
+leur responsabilité. 
+7.2. L’IGN ne pourra être tenu pour responsable, tant à l’égard du Licencié qu’à votre égard et à celui des tiers, qu’en 
+cas de faute démontrée de sa part dans l’exécution de ses obligations. La responsabilité de l’IGN ne pourra notamment 
+en aucun cas être recherchée et/ou engagée dans les cas suivants : 
+-  inadéquation des services et des données du Géoportail avec les besoins du Licencié et/ou de l’Utilisateur 
+Final 
+- défaut de compatibilité des services et données du Géoportail avec les systèmes informatiques utilisés par le 
+Licencié ou vous-même, 
+- défaut de fiabilité des services proposés par le Licencié, 
+- interruption, défaillance, défaut éventuel de qualité des services du Géoportail pour des raisons de 
+maintenance, d’entretien, de mise à jour des serveurs, de plafond technique,
+- non-respect par le Licencié ou vous-même de ses obligations, 
+- interruption et/ou de défaillance des services du Géoportail pour cas de force majeure. 
+- non-respect par le Licencié et/ou vous-même des termes de la licence sous laquelle est mise à disposition la 
+bibliothèque logicielle.  
+Vous êtes  informé du fait qu’en tout état de cause, le service rendu fait l’objet de la garantie légale contre les 
+conséquences des défauts ou vices cachés. 
+
+8.  DONNEES A CARACTERE PERSONNEL 
+L’utilisation de l’API du Géoportail donne lieu à la collecte et au stockage de données à caractère personnel du Licencié 
+et de l’Utilisateur Final.
+8.1. Les données à caractère personnel recueillies par l’IGN sur le Licencié et/ou l’Utilisateur Final font l’objet d’un 
+traitement informatique ayant pour seule destination la gestion des contrats de licence. Conformément aux dispositions 
+de la loi Informatique et Liberté, le Licencié et/ou  l’Utilisateur Final disposent d'un droit d'accès, de rectification et 
+d’opposition sur les données le concernant.
+L’exercice de ce droit peut se faire : 
+- Par courrier électronique à : geop_autres@geoportail.fr 
+-  Ou à l’adresse suivante : Institut national de l’information géographique et forestière – service client - 73 
+avenue de Paris – 94165 SAINT-MANDE CEDEX. 
+8.2 Toute interconnexion ou rapprochement des données de la BD PARCELLAIRE
+®
+ avec des données à caractère 
+personnel doit faire l’objet des formalités requises auprès de la Commission nationale de l’informatique et des libertés.
+
+9. DONNEES IGN ET DROIT D’ACCES A L’INFORMATION 
+Faisant l’objet d’une diffusion publique les données IGN ne sont pas soumises :
+- aux dispositions du chapitre 1 de la loi n° 78-75 3 du 17 juillet 1978 relatives au droit d’accès aux documents 
+administratifs. 
+-  à l’exercice du droit d’accès à l’information environnementale (article L-124-1 du code de l’environnement).
+En conséquence, les autorités publiques ou personnes morales visées à l’article 1er de la loi n° 78-753 du 17 juillet 
+1978 et à l’article L-124.3 du code de l’environnement, détenant ou recevant des données IGN en qualité de Licencié ou 
+d’utilisateur, ne peuvent les mettre à disposition du public en vertu du droit d’accès. Lorsque ces autorités sont 
+amenées, au titre des textes susvisés, à communiquer au public des documents administratifs et/ou des informations 
+environnementales établis par leurs soins ou pour leur compte à partir des données de l’IGN, cette communication se 
+fera selon les mêmes conditions que celles prévues par l’article 6 des présentes conditions générales.
+
+10. DUREE, RESILIATION ET FIN DE CONTRAT 
+Les droits visés par les présentes conditions générales d’utilisation finale le sont pour la durée souscrite auprès du 
+Licencié. A défaut, les droits accordés le sont pour la seule durée de votre session d’Utilisateur Final.
+L’IGN se réserve le droit de  vérifier ou faire vérifier que les dispositions de la licence accordée au Licencié, des 
+conditions générales et des présentes conditions générales d’utilisation finale sont respectées. L’IGN peut de plein droit 
+résilier la licence du Licencié ou d’interrompre votre accès d’Utilisateur Final en cas de non-respect de celles-ci. 
+A l’arrivée à terme ou à la résiliation du contrat de licence pour quelque cause que ce soit :
+-  les éléments techniques de connexion n’ayant pas fait l’objet d’un début d’utilisation ne seront plus valables ; 
+-  vous n’aurez plus aucun des droits énoncés par sa licence ;
+Par exception, les abonnements ayant fait l’objet d’un début d’utilisation et du paiement des redevances 
+correspondantes par le Licencié demeurent valables pour  la durée souscrite; pendant cette durée, le Licencié  aura 
+l’obligation de maintenir votre possibilité d’accès aux données et services du Géoportail et est seul reste responsable 
+vis-à-vis de vous des préjudices subis en cas de non-respect de cette obligation.
+
+11. MODIFICATION UNILATERALE DES DOCUMENTS CONTRACTUELS 
+11.1 Evolutions techniques, réglementaires et économiques 
+Afin de s’adapter aux évolutions techniques, réglementaires et économiques de ses services, l’IGN se réserve le droit 
+d’apporter unilatéralement à tout moment des modifications aux présentes conditions générales d’utilisation finale, ainsi 
+qu’au descriptif technique. 
+L’Utilisateur final accepte que les modifications unilatérales s’appliquent aux contrats en cours de l’Utilisateur final dès 
+lors qu’il n’en résulte exclusivement, aucune augmentation de prix, aucune altération de la qualité des services et 
+données, et que les caractéristiques essentielles des documents contractuels auxquelles l’Utilisateur finale a 
+subordonné son engagement ne font l’objet d’aucune modification de nature à remettre substantiellement en cause son 
+engagement initial.  
+11.2 Cas fortuit  
+L’IGN conserve la faculté de modifier unilatéralement  les présentes conditions générales, ainsi que le descriptif 
+technique, en cas d’événement imprévisible et externe à l’IGN l’empêchant sérieusement d’exécuter ses propres 
+obligations convenues lors de l’engagement de l’Utilisateur final à respecter les documents contractuels. 
+Dans ce cas, l’Utilisateur final a le droit de mettre un terme à son engagement et à l’utilisation des services et données 
+du Géoportail, s’il ne consent pas aux modifications apportées uniquement par l’IGN et ce, sans prétendre à la moindre 
+indemnisation, que ce soit auprès de l’IGN ou du Licencié. 
+Si l’Utilisateur final a convenu d’un contrat à titre onéreux avec le Licencié pour accéder aux services et données du 
+Géoportail, l’Utilisateur final ne peut prétendre à un éventuel remboursement de ce qui n’a pas été consommé en 
+matière de services et données du Géoportail qu’auprès du Licencié.  
+
+12. LOI – JURIDICTION COMPETENTE 
+Les présentes conditions sont soumises à la loi française. En cas de désaccord persistant entre l’IGN et l’Utilisateur 
+Final sur leur interprétation et leur exécution, le litige sera porté devant le tribunal administratif de Melun ou, le cas 
+échéant, devant le tribunal judiciaire compétent de Créteil lorsque le litige relève de ses attributions, et ce même en cas 
+de demande incidente ou d’appel en garantie, ou de pluralité de défendeurs et nonobstant toute clause contraire. 
+
+13. DEFINITIONS 
+API du Géoportail
+Interface de Programmation d’Applications créée par l’IGN pour permettre aux développeurs de créer des applications 
+ou des sites utilisant des services ou des données du Géoportail. 
+CGUF 
+Les présentes conditions générales d’utilisation finale.
+Donnée du Géoportail 
+Ensemble des Données dont l’IGN détient la propriété  ou le droit de diffusion, et qui sont fournies au travers des 
+services du Géoportail et auxquels on peut accéder via un site internet ou une application. 
+Donnée Dérivée  
+Toute donnée créée par le Licencié, ou un Utilisateur Final, à partir des données du Géoportail, grâce au
+développement et à l’utilisation du site internet ou de l’application du Licencié.
+Reconstitution d'une partie substantielle des données du Géoportail
+Traitement permettant d'isoler, de reconstituer et d'utiliser la totalité, ou un thème des données du Géoportail, sur une 
+fraction non négligeable du territoire. 
+Service du Géoportail 
+Ensemble de fonctionnalités exposées sur internet par l’infrastructure du Géoportail, permettant en temps réel et de 
+manière distante, soit la consultation de données (par exemple l’affichage simple de carte), soit du stockage soit du 
+traitement de données. 
+Usage documentaire
+Utilisation à des fins d’illustration d’un document, pour mettre en consultation une information où les données IGN ne 
+constituent pas un élément essentiel du document. Ce type d’usage est par essence non lucratif et ne recherche ni la 
+valorisation, ni la promotion de l’objet social de ceux qui le mettent en œuvre.
+Utilisateur Final 
+Personne physique utilisant le site internet ou l’application du Licencié pour accéder aux services et données du 
+Géoportail via un réseau de communications électroniques. 
+Usage privé de l’Utilisateur final
+Par usage privé d’Utilisateur Final on entend l’usage des services par une personne physique pour la satisfaction de ses 
+besoins propres, à l’exclusion de toute utilisation collective, y compris d’usages collectifs d’entreprise ou d’association. 
+Est réputé à l’usage privé de l’Utilisateur Final tout site internet ou application pour lesquels l’accès à l’API du Géoportail
+est libre et gratuit. 
+Usage professionnel
+Tout usage autre que l’usage privé de l’Utilisateur Final.
