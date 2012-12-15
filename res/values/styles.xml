@@ -16,8 +16,8 @@
 -->
 <resources>
     <!-- Base application theme is the default theme. -->
-    <style name="Theme" parent="android:Theme">
-            <item name="android:windowNoTitle">true</item>
+    <style name="Theme" parent="android:style/Theme.Holo.Light">
+<!--             <item name="android:windowNoTitle">true</item> -->
     </style>
 
     <!-- Variation on the Light theme that turns off the title -->

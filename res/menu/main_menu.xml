@@ -2,6 +2,12 @@
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
 <!--     <item android:title="Use cache" android:id="@+id/useCacheItem"></item> -->
+
+  <item android:id="@+id/menuSearch"
+          android:title="@string/menu_search"
+          android:icon="@android:drawable/ic_menu_search"
+          android:showAsAction="ifRoom|collapseActionView"
+          android:actionViewClass="com.actionbarsherlock.widget.SearchView" />
     <item android:title="Plein écran" android:id="@+id/fullScreen"></item>
     <item android:title="Préferences" android:id="@+id/preferences"></item>
 </menu>

@@ -3,7 +3,6 @@ package com.jventrib.ignDroid;
 import java.io.File;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -28,9 +27,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
@@ -48,13 +44,18 @@ import android.widget.Toast;
 import android.widget.ZoomButtonsController;
 import android.widget.ZoomButtonsController.OnZoomListener;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.SearchView;
 import com.jhlabs.map.awt.Point2D;
 import com.jventrib.ignDroid.async.AsyncTaskCompleteListener;
 import com.jventrib.ignDroid.location.SearchService;
 import com.jventrib.ignDroid.preference.IgnPreferenceActivity;
 import com.jventrib.ignDroid.util.JveLog;
 
-public class MapActivity extends Activity implements OnGestureListener,
+public class MapActivity extends SherlockActivity implements OnGestureListener,
 		OnDoubleTapListener, SensorEventListener {
 
 	private static final String TAG = "IGNMapActivity";
@@ -266,13 +267,6 @@ public class MapActivity extends Activity implements OnGestureListener,
 		});
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.main_menu, menu);
-		return true;
-	}
-
 	/**
 	 * Init the display screen. This method is called at application startup and
 	 * for each orientation change.
@@ -388,6 +382,15 @@ public class MapActivity extends Activity implements OnGestureListener,
 	private void doSearch() {
 		final EditText addressField = (EditText) findViewById(R.id.addressField);
 		String address = addressField.getText().toString();
+		doSearch(addressField, address);
+	}
+
+	private void doSearch(String address) {
+		doSearch(null, address);
+	}
+
+	
+	private void doSearch(final EditText addressField, String address) {
 		if (address != null && !address.equals("")) {
 			if (address.equals("Dev Mode")) {
 				Preferences.setDevMode(!Preferences.isDevMode());
@@ -400,7 +403,9 @@ public class MapActivity extends Activity implements OnGestureListener,
 						@Override
 						public void onTaskComplete(Point2D.Float result) {
 							moveToPos(result);
-							hideKeyboard(addressField);
+							if (addressField != null) {
+								hideKeyboard(addressField);
+							}
 						}
 					});
 			searchService.submit(address);
@@ -533,6 +538,30 @@ public class MapActivity extends Activity implements OnGestureListener,
 	// /////////////////////////////////////////////////////////////////
 	// Option menu
 	// /////////////////////////////////////////////////////////////////
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getSupportMenuInflater();
+		inflater.inflate(R.menu.main_menu, menu);
+		SearchView searchView = (SearchView) menu.findItem(R.id.menuSearch)
+				.getActionView();
+		searchView.setSubmitButtonEnabled(true);
+		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				doSearch(query);
+				return true;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				return false;
+			}
+		});
+
+		return true;
+	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
