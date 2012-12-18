@@ -9,4 +9,7 @@
     <string name="eula_refuse">Je refuse</string>   
     <string name="menu_search">Recherche</string>   
     <string name="myLocation">Ma Posision</string>   
+    <string name="description_fullscreenSwitch">Switch Fullscreen</string>
+    
+
 </resources>

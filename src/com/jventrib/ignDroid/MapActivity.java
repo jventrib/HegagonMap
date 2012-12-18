@@ -456,12 +456,16 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	}
 
 	private void requestLocationUpdate(LocationListener listener) {
-		locationManager.requestLocationUpdates(
-				LocationManager.NETWORK_PROVIDER, 0, 0, listener);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-				0, listener);
-		mSensorManager.registerListener(this, mSensor,
-				SensorManager.SENSOR_DELAY_NORMAL);
+		try {
+			locationManager.requestLocationUpdates(
+					LocationManager.NETWORK_PROVIDER, 0, 0, listener);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+					0, listener);
+			mSensorManager.registerListener(this, mSensor,
+					SensorManager.SENSOR_DELAY_NORMAL);
+		} catch (Exception e) {
+			Log.w(TAG, "Provider Error", e);
+		}
 
 	}
 
@@ -522,6 +526,14 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
 	}
 
+	
+	
+	
+	public void disableFullScreen(View v) {
+		handleFullScreen(false);
+		
+	}
+	
 	// /////////////////////////////////////////////////////////////////
 	// Option menu
 	// /////////////////////////////////////////////////////////////////
@@ -602,6 +614,8 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		// topBar.setVisibility(fullScreen ? View.GONE : View.VISIBLE);
 		ImageButton locationButton = (ImageButton) findViewById(R.id.fsLocationButton);
 		locationButton.setVisibility(fullScreen ? View.VISIBLE : View.GONE);
+		ImageButton fsOffButton = (ImageButton) findViewById(R.id.fsOffButton);
+		fsOffButton.setVisibility(fullScreen ? View.VISIBLE : View.GONE);
 	}
 
 	// /////////////////////////////////////////////////////////////////
