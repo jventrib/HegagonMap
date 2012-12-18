@@ -7,8 +7,8 @@
         android:title="development" >
         <CheckBoxPreference
             android:key="log_state"
-            android:summaryOff="Log disabled"
-            android:summaryOn="Log enabled"
+            android:summaryOff="Log désactivé"
+            android:summaryOn="Log activé"
             android:title="Logging" >
         </CheckBoxPreference>
         <CheckBoxPreference
@@ -16,20 +16,25 @@
             android:summary="Display FPS on screen"
             android:summaryOff="Fps off"
             android:summaryOn="Fps on"
-            android:title="Show FPS" >
+            android:title="Montrer les FPS" >
         </CheckBoxPreference>
         <CheckBoxPreference
             android:key="draw_infos"
             android:summary="Draw infos on screen"
             android:summaryOff="Infos off"
             android:summaryOn="Infos on"
-            android:title="Draw Infos" >
+            android:title="Dev Infos" >
         </CheckBoxPreference>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="display"
+        android:summary="réglage d&apos;affichage"
+        android:title="affichage" >
         <CheckBoxPreference
             android:key="rescale_pinch_zoom"
-            android:summary="Rescale During Pinch Zoom"
-            android:summaryOff="Rescale wiil be done after Pinch"
-            android:summaryOn="Rescale wiil be done after Pinch"
+            android:summary="Mise à l&apos;échelle au Zoom"
+            android:summaryOff="Mise à l&apos;échelle après le Zoom"
+            android:summaryOn="Mise à l&apos;échelle pendant le Zoom"
             android:title="Rescale During Pinch Zoom" >
         </CheckBoxPreference>
     </PreferenceCategory>

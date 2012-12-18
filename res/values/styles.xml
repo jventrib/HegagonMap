@@ -16,7 +16,7 @@
 -->
 <resources>
     <!-- Base application theme is the default theme. -->
-    <style name="Theme" parent="android:style/Theme.Holo.Light">
+    <style name="Theme" parent="Theme.Sherlock.Light">
 <!--             <item name="android:windowNoTitle">true</item> -->
     </style>
 

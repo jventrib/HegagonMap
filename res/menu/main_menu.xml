@@ -5,9 +5,14 @@
 
   <item android:id="@+id/menuSearch"
           android:title="@string/menu_search"
-          android:icon="@android:drawable/ic_menu_search"
           android:showAsAction="ifRoom|collapseActionView"
-          android:actionViewClass="com.actionbarsherlock.widget.SearchView" />
-    <item android:title="Plein écran" android:id="@+id/fullScreen"></item>
+          android:actionViewClass="com.actionbarsherlock.widget.SearchView"
+          android:icon="@android:drawable/ic_menu_search"
+          android:inputType="textPostalAddress"  />
+  <item android:id="@+id/myLocation"
+	      android:title="@string/myLocation"
+          android:icon="@android:drawable/ic_menu_mylocation"
+          android:showAsAction="ifRoom"/>
+  <item android:title="Plein écran" android:id="@+id/fullScreen"></item>
     <item android:title="Préferences" android:id="@+id/preferences"></item>
 </menu>

@@ -26,29 +26,23 @@ import android.util.LruCache;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
-import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
+import android.widget.SearchView;
 import android.widget.Toast;
 import android.widget.ZoomButtonsController;
 import android.widget.ZoomButtonsController.OnZoomListener;
 
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
 import com.jhlabs.map.awt.Point2D;
 import com.jventrib.ignDroid.async.AsyncTaskCompleteListener;
 import com.jventrib.ignDroid.location.SearchService;
@@ -65,9 +59,9 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	DisplayMetrics dm;
 	private ZoomButtonsController controller;
 	private LocationManager locationManager;
-	private ImageButton locationButton;
+	private com.actionbarsherlock.view.MenuItem locationButton;
 	public SurfaceHolder surfaceHolder;
-	private ImageButton searchButton;
+	// private ImageButton searchButton;
 	// private AdView adView;
 	public static File cacheDir;
 
@@ -86,7 +80,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (Build.VERSION.SDK_INT >= 12) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			// Get memory class of this device, exceeding this amount will throw
 			// an
 			// OutOfMemory exception.
@@ -108,7 +102,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		}
 
 		// Init the cache directory
-		cacheDir = getExternalCacheDir();
+		cacheDir = getCacheDir();
 
 		Preferences.init(this);
 
@@ -219,22 +213,12 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 				.getSystemService(Context.LOCATION_SERVICE);
 		// locationListener = new AbstractLocationListener(this);
 
-		locationButton = (ImageButton) findViewById(R.id.locationButton);
-		locationButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				enableLocation();
-				hideKeyboard((EditText) findViewById(R.id.addressField));
-			}
-
-		});
-
 		fsLocationButton = (ImageButton) findViewById(R.id.fsLocationButton);
 		fsLocationButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				enableLocation();
-				hideKeyboard((EditText) findViewById(R.id.addressField));
+				hideKeyboard(findViewById(R.id.menuSearch));
 			}
 
 		});
@@ -244,27 +228,27 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	}
 
 	private void initSearch() {
-		searchButton = (ImageButton) findViewById(R.id.searchButton);
-		searchButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				doSearch();
-			}
-		});
+		// searchButton = (ImageButton) findViewById(R.id.searchButton);
+		// searchButton.setOnClickListener(new OnClickListener() {
+		// @Override
+		// public void onClick(View v) {
+		// doSearch();
+		// }
+		// });
 
-		EditText editText = (EditText) findViewById(R.id.addressField);
-		editText.setOnEditorActionListener(new OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView v, int actionId,
-					KeyEvent event) {
-				boolean handled = false;
-				if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-					doSearch();
-					handled = true;
-				}
-				return handled;
-			}
-		});
+		// EditText editText = (EditText) findViewById(R.id.addressField);
+		// editText.setOnEditorActionListener(new OnEditorActionListener() {
+		// @Override
+		// public boolean onEditorAction(TextView v, int actionId,
+		// KeyEvent event) {
+		// boolean handled = false;
+		// if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+		// doSearch();
+		// handled = true;
+		// }
+		// return handled;
+		// }
+		// });
 	}
 
 	/**
@@ -379,17 +363,16 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		controller.setZoomOutEnabled(!viewport.isZoomMin());
 	}
 
-	private void doSearch() {
-		final EditText addressField = (EditText) findViewById(R.id.addressField);
-		String address = addressField.getText().toString();
-		doSearch(addressField, address);
-	}
+	// private void doSearch() {
+	// final EditText addressField = (EditText) findViewById(R.id.addressField);
+	// String address = addressField.getText().toString();
+	// doSearch(addressField, address);
+	// }
 
 	private void doSearch(String address) {
 		doSearch(null, address);
 	}
 
-	
 	private void doSearch(final EditText addressField, String address) {
 		if (address != null && !address.equals("")) {
 			if (address.equals("Dev Mode")) {
@@ -405,6 +388,8 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 							moveToPos(result);
 							if (addressField != null) {
 								hideKeyboard(addressField);
+							} else {
+								hideKeyboard(findViewById(R.id.menuSearch));
 							}
 						}
 					});
@@ -419,15 +404,17 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	}
 
 	private void enableLocation() {
-		locationButton.setImageResource(R.drawable.gps_lpi_v2);
-		fsLocationButton.setImageResource(R.drawable.gps_lpi_v2);
+		locationButton.setIcon(android.R.drawable.ic_menu_compass);
+		fsLocationButton.setImageResource(android.R.drawable.ic_menu_compass);
 		viewport.lock();
 		viewport.moveToLocation(viewport.getCurrentBestLocation());
 	}
 
 	private void disableLocation() {
-		locationButton.setImageResource(R.drawable.gps_lpi_v2_tr);
-		fsLocationButton.setImageResource(R.drawable.gps_lpi_v2_tr);
+		// locationButton.setImageResource(R.drawable.gps_lpi_v2_tr);
+		locationButton.setIcon(android.R.drawable.ic_menu_mylocation);
+		fsLocationButton
+				.setImageResource(android.R.drawable.ic_menu_mylocation);
 		// Unregister the listener with the Location Manager
 		// locationManager.removeUpdates(locationListener);
 		viewport.unlock();
@@ -530,9 +517,9 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		return true;
 	}
 
-	private void hideKeyboard(EditText editText) {
+	private void hideKeyboard(View view) {
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(editText.getApplicationWindowToken(), 0);
+		imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
 	}
 
 	// /////////////////////////////////////////////////////////////////
@@ -540,31 +527,48 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	// /////////////////////////////////////////////////////////////////
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
+	public boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu) {
+
+		com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
+
 		inflater.inflate(R.menu.main_menu, menu);
-		SearchView searchView = (SearchView) menu.findItem(R.id.menuSearch)
-				.getActionView();
+		com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) menu
+				.findItem(R.id.menuSearch).getActionView();
 		searchView.setSubmitButtonEnabled(true);
-		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+		searchView
+				.setOnQueryTextListener(new com.actionbarsherlock.widget.SearchView.OnQueryTextListener() {
 
-			@Override
-			public boolean onQueryTextSubmit(String query) {
-				doSearch(query);
-				return true;
-			}
+					@Override
+					public boolean onQueryTextSubmit(String query) {
+						doSearch(query);
+						return true;
+					}
 
-			@Override
-			public boolean onQueryTextChange(String newText) {
-				return false;
-			}
-		});
+					@Override
+					public boolean onQueryTextChange(String newText) {
+						return false;
+					}
+				});
 
+		locationButton = (com.actionbarsherlock.view.MenuItem) menu
+				.findItem(R.id.myLocation);
+		locationButton
+				.setOnMenuItemClickListener(new com.actionbarsherlock.view.MenuItem.OnMenuItemClickListener() {
+
+					@Override
+					public boolean onMenuItemClick(
+							com.actionbarsherlock.view.MenuItem item) {
+						enableLocation();
+						hideKeyboard(findViewById(R.id.menuSearch));
+						return true;
+					}
+				});
 		return true;
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(
+			com.actionbarsherlock.view.MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
 
@@ -588,9 +592,15 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	}
 
 	private void handleFullScreen(boolean fullScreen) {
-		LinearLayout topBar = (LinearLayout) findViewById(R.id.topBar);
+		if (fullScreen) {
+			getSupportActionBar().hide();
+		} else {
+			getSupportActionBar().show();
+		}
+
+		// LinearLayout topBar = (LinearLayout) findViewById(R.id.topBar);
+		// topBar.setVisibility(fullScreen ? View.GONE : View.VISIBLE);
 		ImageButton locationButton = (ImageButton) findViewById(R.id.fsLocationButton);
-		topBar.setVisibility(fullScreen ? View.GONE : View.VISIBLE);
 		locationButton.setVisibility(fullScreen ? View.VISIBLE : View.GONE);
 	}
 
