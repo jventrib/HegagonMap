@@ -530,6 +530,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	
 	
 	public void disableFullScreen(View v) {
+		Preferences.setFullScreen(false);
 		handleFullScreen(false);
 		
 	}
