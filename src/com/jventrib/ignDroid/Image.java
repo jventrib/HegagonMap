@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.os.Build;
 
 import com.jventrib.ignDroid.download.CacheBitmapDownloadService;
+import com.jventrib.ignDroid.enums.LoadState;
+import com.jventrib.ignDroid.preference.Preferences;
 import com.jventrib.ignDroid.util.JveLog;
 
 public class Image {

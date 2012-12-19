@@ -1,4 +1,6 @@
-package com.jventrib.ignDroid;
+package com.jventrib.ignDroid.geo;
+
+import com.jventrib.ignDroid.Viewport;
 
 import android.location.Location;
 

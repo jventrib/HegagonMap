@@ -11,6 +11,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.jventrib.ignDroid.MapActivity.MapRenderThread;
+import com.jventrib.ignDroid.preference.Preferences;
 
 /**
  * Main view class

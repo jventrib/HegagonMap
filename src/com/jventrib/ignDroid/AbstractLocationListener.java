@@ -16,7 +16,7 @@ public abstract class AbstractLocationListener implements LocationListener {
 	/**
 	 * @param mapActivity
 	 */
-	AbstractLocationListener() {
+	public AbstractLocationListener() {
 	}
 
 	protected Location currentBestLocation;

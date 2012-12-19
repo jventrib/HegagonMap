@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid;
+package com.jventrib.ignDroid.preference;
 
 import android.content.Context;
 import android.content.SharedPreferences;

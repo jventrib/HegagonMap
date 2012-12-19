@@ -214,7 +214,7 @@ public abstract class Point2D implements Cloneable {
      *
      * @see java.awt.geom.Point2D.Float
      * @see java.awt.geom.Point2D.Double
-     * @see java.awt.Point
+     * @see com.jventrib.ignDroid.geo.Point
      * @since 1.2
      */
     protected Point2D() {

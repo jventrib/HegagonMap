@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid;
+package com.jventrib.ignDroid.geo;
 
 import com.jhlabs.map.awt.Point2D.Float;
 import com.jhlabs.map.proj.MercatorProjection;
@@ -28,7 +28,7 @@ public class AbstractPositionableElement {
 	 * @param locLong
 	 * @param locLat
 	 */
-	protected void moveToPosition(float locLong, float locLat) {
+	public void moveToPosition(float locLong, float locLat) {
 		Float pos = MercatorProjection.getInstance().project(new com.jhlabs.map.awt.Point2D.Float(locLong, locLat));
 		coordX = pos.x;
 		coordY = pos.y;

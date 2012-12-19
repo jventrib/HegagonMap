@@ -45,8 +45,10 @@ import android.widget.ZoomButtonsController.OnZoomListener;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.jhlabs.map.awt.Point2D;
 import com.jventrib.ignDroid.async.AsyncTaskCompleteListener;
+import com.jventrib.ignDroid.geo.Point;
 import com.jventrib.ignDroid.location.SearchService;
 import com.jventrib.ignDroid.preference.IgnPreferenceActivity;
+import com.jventrib.ignDroid.preference.Preferences;
 import com.jventrib.ignDroid.util.JveLog;
 
 public class MapActivity extends SherlockActivity implements OnGestureListener,

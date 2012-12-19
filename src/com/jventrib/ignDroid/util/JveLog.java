@@ -2,7 +2,7 @@ package com.jventrib.ignDroid.util;
 
 import android.util.Log;
 
-import com.jventrib.ignDroid.Preferences;
+import com.jventrib.ignDroid.preference.Preferences;
 
 public class JveLog {
 

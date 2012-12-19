@@ -9,6 +9,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Handler;
 
+import com.jventrib.ignDroid.geo.AbstractPositionableElement;
+import com.jventrib.ignDroid.preference.Preferences;
 import com.jventrib.ignDroid.util.JveLog;
 
 public class Tile extends AbstractPositionableElement {

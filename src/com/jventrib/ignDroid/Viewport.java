@@ -29,6 +29,9 @@ import android.view.animation.Transformation;
 import com.jhlabs.map.awt.Point2D;
 import com.jhlabs.map.awt.Point2D.Float;
 import com.jhlabs.map.proj.MercatorProjection;
+import com.jventrib.ignDroid.geo.AbstractPositionableElement;
+import com.jventrib.ignDroid.geo.LocationablePoint;
+import com.jventrib.ignDroid.geo.Point;
 
 public class Viewport extends AbstractPositionableElement implements
 		LocationListener {
@@ -46,7 +49,7 @@ public class Viewport extends AbstractPositionableElement implements
 
 	// private static final String TAG = "Viewport";
 
-	static float[] zoomRatios = { 156543.0339280410f, 78271.5169640205f,
+	public static float[] zoomRatios = { 156543.0339280410f, 78271.5169640205f,
 			39135.7584820102f, 19567.8792410051f, 9783.9396205026f,
 			4891.9698102513f, 2445.9849051256f, 1222.9924525628f,
 			611.4962262814f, 305.7481131407f, 152.8740565704f, 76.4370282852f,
@@ -56,7 +59,7 @@ public class Viewport extends AbstractPositionableElement implements
 
 	// float coordX;
 	// float coordY;
-	int scale;
+	public int scale;
 	int nbTileX;
 	int nbTileY;
 	int marginX;
@@ -64,8 +67,8 @@ public class Viewport extends AbstractPositionableElement implements
 
 	public int mapScreenWidth;
 	public int mapScreenHeight;
-	float centerX;
-	float centerY;
+	public float centerX;
+	public float centerY;
 	private Tile[][] images;
 
 	public boolean running = true;

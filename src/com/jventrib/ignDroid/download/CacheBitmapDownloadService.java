@@ -16,10 +16,10 @@ import android.os.Build;
 import android.util.Log;
 
 import com.jventrib.ignDroid.Image;
-import com.jventrib.ignDroid.LoadState;
 import com.jventrib.ignDroid.MapActivity;
-import com.jventrib.ignDroid.Preferences;
 import com.jventrib.ignDroid.Viewport;
+import com.jventrib.ignDroid.enums.LoadState;
+import com.jventrib.ignDroid.preference.Preferences;
 
 public class CacheBitmapDownloadService {
 
