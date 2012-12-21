@@ -1,6 +1,8 @@
 package com.jventrib.ignDroid;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.Date;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
@@ -26,7 +28,6 @@ import android.util.LruCache;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
@@ -37,7 +38,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.SearchView;
 import android.widget.Toast;
 import android.widget.ZoomButtonsController;
 import android.widget.ZoomButtonsController.OnZoomListener;
@@ -54,6 +54,7 @@ import com.jventrib.ignDroid.util.JveLog;
 public class MapActivity extends SherlockActivity implements OnGestureListener,
 		OnDoubleTapListener, SensorEventListener {
 
+	private static final int CACHE_TIMEOUT_MINUTE = 10;
 	private static final String TAG = "IGNMapActivity";
 	MapView main;
 	GestureDetector gestureScanner;
@@ -72,6 +73,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	private SensorManager mSensorManager;
 	private Sensor mSensor;
 	private ImageButton fsLocationButton;
+	private Date stopTime;
 
 	// /////////////////////////////////////////////////////////////////
 	// Lifecycle
@@ -130,7 +132,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 				new GestureListenerFactory()
 						.getGestureListener(rescalePinchZoom));
 
-		// clearCache();
+		clearTimedCache();
 	}
 
 	@Override
@@ -149,6 +151,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	@Override
 	protected void onStop() {
 		super.onStop();
+		markTimedCache();
 		// layer.stopLoadThread();
 
 		SharedPreferences settings = getPreferences(0);
@@ -160,11 +163,53 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		// clearCache();
 	}
 
+	/**
+	 * Mark the time when the application has been stopped.
+	 */
+	private void markTimedCache() {
+		stopTime = new Date(System.currentTimeMillis());
+	}
+
+	/**
+	 * Clear the Tile cache.
+	 */
+	@TargetApi(12)
 	private void clearCache() {
 		if (!Preferences.isDevMode()) {
 			deleteCache(this);
 			cacheDir.mkdirs();
+			
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && Viewport.mMemoryCache != null) {
+				//Also reset LRU Cache
+				Viewport.mMemoryCache.evictAll();
+			}
+			
+			if (viewport != null) {
+				//And reset viewport
+				viewport.refresh();
+			}
 		}
+	}
+
+	/**
+	 * Clean cache if application had been stop for more than 10 minutes. This
+	 * is to conform to IGN free license which prohibit persistent cache.
+	 */
+	private void clearTimedCache() {
+
+		if (stopTime != null) {
+			Date restartTime = new Date(System.currentTimeMillis());
+			Calendar c = Calendar.getInstance();
+			c.setTime(restartTime);
+			c.add(Calendar.SECOND, -CACHE_TIMEOUT_MINUTE);
+			Date restartMinusTen = c.getTime();
+			if (stopTime.before(restartMinusTen)) {
+				// More than 10 min, cache has be cleaned
+				Log.d(TAG, "Application stopped for too long, cleaning cache");
+				clearCache();
+			}
+		}
+
 	}
 
 	@Override
@@ -175,6 +220,10 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		// layer.stopLoadThread();
 	}
 
+	/**
+	 * Delete the cache files
+	 * @param context
+	 */
 	public static void deleteCache(Context context) {
 		try {
 			File dir = cacheDir;
@@ -185,6 +234,11 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		}
 	}
 
+	/**
+	 * Recursive method to delete all files and dir in the application cache.
+	 * @param dir
+	 * @return
+	 */
 	public static boolean deleteDir(File dir) {
 		if (dir != null && dir.isDirectory()) {
 			String[] children = dir.list();
@@ -461,8 +515,8 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		try {
 			locationManager.requestLocationUpdates(
 					LocationManager.NETWORK_PROVIDER, 0, 0, listener);
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-					0, listener);
+			locationManager.requestLocationUpdates(
+					LocationManager.GPS_PROVIDER, 0, 0, listener);
 			mSensorManager.registerListener(this, mSensor,
 					SensorManager.SENSOR_DELAY_NORMAL);
 		} catch (Exception e) {
@@ -528,15 +582,12 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
 	}
 
-	
-	
-	
 	public void disableFullScreen(View v) {
 		Preferences.setFullScreen(false);
 		handleFullScreen(false);
-		
+
 	}
-	
+
 	// /////////////////////////////////////////////////////////////////
 	// Option menu
 	// /////////////////////////////////////////////////////////////////
