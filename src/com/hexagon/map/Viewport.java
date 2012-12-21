@@ -637,11 +637,11 @@ public class Viewport extends AbstractPositionableElement implements
 	}
 
 	boolean isZoomMax() {
-		return scale >= MAX_ZOOM;
+		return newScale >= MAX_ZOOM;
 	}
 
 	boolean isZoomMin() {
-		return scale <= MIN_ZOOM;
+		return newScale <= MIN_ZOOM;
 	}
 
 }
