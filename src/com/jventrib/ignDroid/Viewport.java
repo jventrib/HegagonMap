@@ -326,6 +326,8 @@ public class Viewport extends AbstractPositionableElement implements
 	}
 
 	public void refresh() {
+		newScale = scale;
+
 		int offsetX = nbTileX / 2;
 		int offsetY = nbTileY / 2;
 		centerX = mapScreenWidth / 2;
@@ -360,7 +362,6 @@ public class Viewport extends AbstractPositionableElement implements
 		p.posy = calcPixelY(p.mapy);
 	}
 
-	
 	@TargetApi(12)
 	public static void addBitmapToMemoryCache(String key, Bitmap bitmap) {
 		if (getBitmapFromMemCache(key) == null) {
@@ -539,7 +540,7 @@ public class Viewport extends AbstractPositionableElement implements
 	}
 
 	public void zoomInAnimated() {
-		newScale = scale + 1;
+		newScale++;
 		screenZoomAnimation.initialZoom = 1.0f;
 		screenZoomAnimation.finalZoom = 2.0f;
 		screenZoomAnimation.initialize(0, 0, 0, 0);
@@ -547,7 +548,7 @@ public class Viewport extends AbstractPositionableElement implements
 	}
 
 	public void zoomOutAnimated() {
-		newScale = scale - 1;
+		newScale--;
 		screenZoomAnimation.initialZoom = 1.0f;
 		screenZoomAnimation.finalZoom = 0.5f;
 		screenZoomAnimation.initialize(0, 0, 0, 0);
@@ -590,7 +591,9 @@ public class Viewport extends AbstractPositionableElement implements
 	}
 
 	/**
-	 * Draw the viewport, including the tiles, the location Point and the target point
+	 * Draw the viewport, including the tiles, the location Point and the target
+	 * point
+	 * 
 	 * @param canvas
 	 * @param paint
 	 */
