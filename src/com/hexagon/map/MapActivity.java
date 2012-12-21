@@ -1,11 +1,8 @@
-package com.jventrib.ignDroid;
+package com.hexagon.map;
 
 import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
-
-import org.acra.ReportingInteractionMode;
-import org.acra.annotation.ReportsCrashes;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
@@ -46,13 +43,13 @@ import android.widget.ZoomButtonsController;
 import android.widget.ZoomButtonsController.OnZoomListener;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.hexagon.map.async.AsyncTaskCompleteListener;
+import com.hexagon.map.geo.Point;
+import com.hexagon.map.location.SearchService;
+import com.hexagon.map.preference.MapPreferenceActivity;
+import com.hexagon.map.preference.Preferences;
+import com.hexagon.map.util.JveLog;
 import com.jhlabs.map.awt.Point2D;
-import com.jventrib.ignDroid.async.AsyncTaskCompleteListener;
-import com.jventrib.ignDroid.geo.Point;
-import com.jventrib.ignDroid.location.SearchService;
-import com.jventrib.ignDroid.preference.IgnPreferenceActivity;
-import com.jventrib.ignDroid.preference.Preferences;
-import com.jventrib.ignDroid.util.JveLog;
 
 public class MapActivity extends SherlockActivity implements OnGestureListener,
 		OnDoubleTapListener, SensorEventListener {
@@ -324,23 +321,6 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 
 		main = new MapView(this, this);
 
-		controller = new ZoomButtonsController(main);
-		controller.setOnZoomListener(new OnZoomListener() {
-
-			public void onZoom(boolean zoomIn) {
-				if (zoomIn) {
-					zoomIn();
-				} else {
-					zoomOut();
-				}
-			}
-
-			public void onVisibilityChanged(boolean arg0) {
-
-			}
-		});
-		controller.setVisible(true);
-		controller.setAutoDismissed(true);
 
 		setContentView(R.layout.main);
 		LinearLayout content = (LinearLayout) findViewById(R.id.mapLayout);
@@ -354,6 +334,25 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		// adView.loadAd(new AdRequest());
 
 		handleFullScreen(Preferences.isFullScreen());
+
+		
+		controller = new ZoomButtonsController(main);
+		controller.setOnZoomListener(new OnZoomListener() {
+
+			public void onZoom(boolean zoomIn) {
+				if (zoomIn) {
+					zoomIn();
+				} else {
+					zoomOut();
+				}
+			}
+
+			public void onVisibilityChanged(boolean visible) {
+				controller.setVisible(visible);
+			}
+		});
+//		controller.setVisible(true);
+		controller.setAutoDismissed(true);
 
 	}
 
@@ -654,7 +653,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 			// Toast.LENGTH_SHORT).show();
 			// return true;
 		case R.id.preferences:
-			Intent intent = new Intent(this, IgnPreferenceActivity.class);
+			Intent intent = new Intent(this, MapPreferenceActivity.class);
 			startActivity(intent);
 
 			return true;

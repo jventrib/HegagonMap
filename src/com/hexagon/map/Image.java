@@ -1,14 +1,14 @@
-package com.jventrib.ignDroid;
+package com.hexagon.map;
 
 import org.apache.http.client.methods.HttpGet;
 
 import android.graphics.Bitmap;
 import android.os.Build;
 
-import com.jventrib.ignDroid.download.CacheBitmapDownloadService;
-import com.jventrib.ignDroid.enums.LoadState;
-import com.jventrib.ignDroid.preference.Preferences;
-import com.jventrib.ignDroid.util.JveLog;
+import com.hexagon.map.download.CacheBitmapDownloadService;
+import com.hexagon.map.enums.LoadState;
+import com.hexagon.map.preference.Preferences;
+import com.hexagon.map.util.JveLog;
 
 public class Image {
 

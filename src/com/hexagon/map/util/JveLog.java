@@ -1,8 +1,8 @@
-package com.jventrib.ignDroid.util;
+package com.hexagon.map.util;
 
 import android.util.Log;
 
-import com.jventrib.ignDroid.preference.Preferences;
+import com.hexagon.map.preference.Preferences;
 
 public class JveLog {
 

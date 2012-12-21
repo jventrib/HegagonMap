@@ -1,13 +1,13 @@
-package com.jventrib.ignDroid.preference;
+package com.hexagon.map.preference;
 
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 
-import com.jventrib.ignDroid.R;
+import com.hexagon.map.R;
 
-public class IgnPreferenceActivity extends PreferenceActivity {
+public class MapPreferenceActivity extends PreferenceActivity {
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -27,7 +27,7 @@ public class IgnPreferenceActivity extends PreferenceActivity {
 
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				Eula.show(IgnPreferenceActivity.this);
+				Eula.show(MapPreferenceActivity.this);
 				return true;
 			}
 		});

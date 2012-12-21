@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid.location;
+package com.hexagon.map.location;
 
 import android.location.Location;
 

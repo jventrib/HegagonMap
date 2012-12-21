@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid.util;
+package com.hexagon.map.util;
 
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;

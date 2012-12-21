@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid;
+package com.hexagon.map;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +9,9 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Handler;
 
-import com.jventrib.ignDroid.geo.AbstractPositionableElement;
-import com.jventrib.ignDroid.preference.Preferences;
-import com.jventrib.ignDroid.util.JveLog;
+import com.hexagon.map.geo.AbstractPositionableElement;
+import com.hexagon.map.preference.Preferences;
+import com.hexagon.map.util.JveLog;
 
 public class Tile extends AbstractPositionableElement {
 

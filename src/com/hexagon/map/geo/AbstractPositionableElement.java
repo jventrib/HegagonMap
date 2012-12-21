@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid.geo;
+package com.hexagon.map.geo;
 
 import com.jhlabs.map.awt.Point2D.Float;
 import com.jhlabs.map.proj.MercatorProjection;

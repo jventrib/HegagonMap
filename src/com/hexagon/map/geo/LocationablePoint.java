@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid.geo;
+package com.hexagon.map.geo;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -6,9 +6,9 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
 
+import com.hexagon.map.AbstractLocationListener;
 import com.jhlabs.map.awt.Point2D.Float;
 import com.jhlabs.map.proj.MercatorProjection;
-import com.jventrib.ignDroid.AbstractLocationListener;
 
 public class LocationablePoint extends Point implements LocationListener {
 

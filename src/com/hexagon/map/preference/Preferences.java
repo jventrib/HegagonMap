@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid.preference;
+package com.hexagon.map.preference;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -1,6 +1,6 @@
-package com.jventrib.ignDroid.geo;
+package com.hexagon.map.geo;
 
-import com.jventrib.ignDroid.Viewport;
+import com.hexagon.map.Viewport;
 
 import android.location.Location;
 

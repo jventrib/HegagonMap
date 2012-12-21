@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid.location;
+package com.hexagon.map.location;
 
 import java.io.StringReader;
 import java.net.URI;
@@ -23,10 +23,10 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.jventrib.ignDroid.MapActivity;
-import com.jventrib.ignDroid.R;
-import com.jventrib.ignDroid.async.AsyncTaskCompleteListener;
-import com.jventrib.ignDroid.util.JveLog;
+import com.hexagon.map.MapActivity;
+import com.hexagon.map.R;
+import com.hexagon.map.async.AsyncTaskCompleteListener;
+import com.hexagon.map.util.JveLog;
 
 public class SearchService extends AsyncTask<String, Void, com.jhlabs.map.awt.Point2D.Float> {
 

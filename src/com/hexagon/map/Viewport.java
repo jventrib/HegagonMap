@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid;
+package com.hexagon.map;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,12 +26,11 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 
+import com.hexagon.map.geo.AbstractPositionableElement;
+import com.hexagon.map.geo.LocationablePoint;
+import com.hexagon.map.geo.Point;
 import com.jhlabs.map.awt.Point2D;
-import com.jhlabs.map.awt.Point2D.Float;
 import com.jhlabs.map.proj.MercatorProjection;
-import com.jventrib.ignDroid.geo.AbstractPositionableElement;
-import com.jventrib.ignDroid.geo.LocationablePoint;
-import com.jventrib.ignDroid.geo.Point;
 
 public class Viewport extends AbstractPositionableElement implements
 		LocationListener {
@@ -146,7 +145,7 @@ public class Viewport extends AbstractPositionableElement implements
 		// opt.inDither = true;
 		opt.inPreferredConfig = Bitmap.Config.RGB_565; //
 		noSrcBmp = BitmapFactory.decodeResource(context.getResources(),
-				com.jventrib.ignDroid.R.drawable.nosrc, opt);
+				R.drawable.nosrc, opt);
 
 		listener = new AbstractLocationListener() {
 
@@ -379,7 +378,7 @@ public class Viewport extends AbstractPositionableElement implements
 			if (lock) {
 				float longitude = new java.lang.Float(location.getLongitude());
 				float latitude = new java.lang.Float(location.getLatitude());
-				Float pos = new Float(longitude, latitude);
+				Point2D.Float pos = new Point2D.Float(longitude, latitude);
 				moveToPositionAnimated(pos);
 			}
 		}

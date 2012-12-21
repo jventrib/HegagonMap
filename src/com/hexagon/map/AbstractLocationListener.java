@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.jventrib.ignDroid;
+package com.hexagon.map;
 
 
 import android.location.Location;

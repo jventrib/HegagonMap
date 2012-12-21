@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid.preference;
+package com.hexagon.map.preference;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -10,7 +10,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 
-import com.jventrib.ignDroid.R;
+import com.hexagon.map.R;
 
 class Eula {
         private static final String ASSET_EULA = "EULA";

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.jventrib.ignDroid"
+    package="com.hexagon.map"
     android:versionCode="1"
     android:versionName="0.5" >
 
@@ -25,7 +25,7 @@
         android:required="true" />
 
     <application
-        android:name="com.jventrib.ignDroid.IgnDroidApplication"
+        android:name="com.hexagon.map.HexagonMapApplication"
         android:allowBackup="true"
         android:allowTaskReparenting="false"
         android:hardwareAccelerated="true"
@@ -49,7 +49,7 @@
                 <data android:scheme="geo" />
             </intent-filter>
         </activity>
-        <activity android:name=".preference.IgnPreferenceActivity" >
+        <activity android:name=".preference.MapPreferenceActivity" >
         </activity>
         <activity
             android:name="com.google.ads.AdActivity"

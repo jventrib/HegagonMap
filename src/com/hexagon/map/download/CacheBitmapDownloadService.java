@@ -1,4 +1,4 @@
-package com.jventrib.ignDroid.download;
+package com.hexagon.map.download;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,11 +15,11 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
 
-import com.jventrib.ignDroid.Image;
-import com.jventrib.ignDroid.MapActivity;
-import com.jventrib.ignDroid.Viewport;
-import com.jventrib.ignDroid.enums.LoadState;
-import com.jventrib.ignDroid.preference.Preferences;
+import com.hexagon.map.Image;
+import com.hexagon.map.MapActivity;
+import com.hexagon.map.Viewport;
+import com.hexagon.map.enums.LoadState;
+import com.hexagon.map.preference.Preferences;
 
 public class CacheBitmapDownloadService {
 
