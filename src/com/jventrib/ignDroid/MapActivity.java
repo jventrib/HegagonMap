@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
+
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -178,14 +181,15 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		if (!Preferences.isDevMode()) {
 			deleteCache(this);
 			cacheDir.mkdirs();
-			
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && Viewport.mMemoryCache != null) {
-				//Also reset LRU Cache
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+					&& Viewport.mMemoryCache != null) {
+				// Also reset LRU Cache
 				Viewport.mMemoryCache.evictAll();
 			}
-			
+
 			if (viewport != null) {
-				//And reset viewport
+				// And reset viewport
 				viewport.refresh();
 			}
 		}
@@ -222,6 +226,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 
 	/**
 	 * Delete the cache files
+	 * 
 	 * @param context
 	 */
 	public static void deleteCache(Context context) {
@@ -236,6 +241,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 
 	/**
 	 * Recursive method to delete all files and dir in the application cache.
+	 * 
 	 * @param dir
 	 * @return
 	 */

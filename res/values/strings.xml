@@ -10,6 +10,6 @@
     <string name="menu_search">Recherche</string>   
     <string name="myLocation">Ma Posision</string>   
     <string name="description_fullscreenSwitch">Switch Fullscreen</string>
+    <string name="crash_toast_text">Une erreur est survenue, un rapport est envoyé au développeur</string>
     
-
 </resources>

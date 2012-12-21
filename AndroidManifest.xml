@@ -25,6 +25,8 @@
         android:required="true" />
 
     <application
+        android:name="com.jventrib.ignDroid.IgnDroidApplication"
+        android:allowBackup="true"
         android:allowTaskReparenting="false"
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
