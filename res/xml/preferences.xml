@@ -35,7 +35,7 @@
             android:summary="Mise à l&apos;échelle au Zoom"
             android:summaryOff="Mise à l&apos;échelle après le Zoom"
             android:summaryOn="Mise à l&apos;échelle pendant le Zoom"
-            android:title="Rescale During Pinch Zoom" >
+            android:title="Mise à l&apos;échelle au Zoom" >
         </CheckBoxPreference>
     </PreferenceCategory>
     <PreferenceCategory
