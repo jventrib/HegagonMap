@@ -31,11 +31,11 @@
         android:summary="réglage d&apos;affichage"
         android:title="affichage" >
         <CheckBoxPreference
-            android:key="Mise à l&apos;échelle au Zoom"
+            android:key="rescale_pinch_zoom"
             android:summary="Mise à l&apos;échelle au Zoom"
             android:summaryOff="Mise à l&apos;échelle après le Zoom"
             android:summaryOn="Mise à l&apos;échelle pendant le Zoom"
-            android:title="Mise à l&apos;échelle au Zoom" >
+            android:title="Mise à l&apos;échelle" >
         </CheckBoxPreference>
     </PreferenceCategory>
     <PreferenceCategory
