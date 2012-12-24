@@ -540,14 +540,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	@Override
 	public boolean onTouchEvent(MotionEvent me) {
 
-		if (me.getAction() == MotionEvent.ACTION_POINTER_UP
-				|| me.getAction() == MotionEvent.ACTION_UP) {
-			pinchDone = false;
-		}
 		mScaleDetector.onTouchEvent(me);
-		if (pinchDone) {
-			return true;
-		}
 		viewport.resetInertiaScroll();
 		// zoom control are reset to visible at each touch on the screen
 		controller.setVisible(true);
@@ -769,8 +762,23 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		public void onScaleEnd(ScaleGestureDetector detector) {
 			int zoomOffset = Math.round(viewport.zoomScale) - 1;
 			zoom(zoomOffset);
+			if (zoomOffset == 0) {
+				viewport.zoomReset(null);
+			}
+			float oldScale = viewport.zoomScale;
+			if (viewport.zoomScale < 0.5f) {
+				oldScale = viewport.zoomScale * 2;
+				
+			} else if (viewport.zoomScale < 2.0f) {
+				oldScale = viewport.zoomScale / 2;
+			}
 			viewport.zoomScale = 1.0f;
 			viewport.refresh();
+			if (zoomOffset != 0) {
+				viewport.zoomReset(oldScale);
+			}
+
+			pinchDone = true;
 		}
 
 		@Override
@@ -783,7 +791,6 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 			Log.d(TAG, "zoom ongoing, scale: " + detector.getScaleFactor());
 			viewport.zoomScale = detector.getScaleFactor();
 			pinchDone = true;
-
 			return false;
 		}
 

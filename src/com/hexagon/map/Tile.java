@@ -69,7 +69,7 @@ public class Tile extends AbstractPositionableElement {
 		if (visible && Preferences.drawMap) {
 			m  =  new Matrix(scaleM);
 			m.preTranslate(posx, posy);
-			if (image != null && image.bmp != null) {
+			if (image != null && image.bmp != null && m != null) {
 				if (image.alpha < 255) {
 					Paint paintAlpha = new Paint(paint);
 					canvas.drawBitmap(layer.noSrcBmp, m, paint);

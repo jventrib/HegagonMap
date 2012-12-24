@@ -554,6 +554,20 @@ public class Viewport extends AbstractPositionableElement implements
 		screenZoomAnimation.start();
 	}
 
+	public void zoomReset(Float oldScale) {
+		if (oldScale != null) {
+			screenZoomAnimation.initialZoom = oldScale;
+		} else {
+			screenZoomAnimation.initialZoom = zoomScale;
+		}
+		screenZoomAnimation.finalZoom = Math.round(zoomScale);
+		if (screenZoomAnimation.finalZoom < 0.5f) screenZoomAnimation.finalZoom = 0.5f;
+		if (screenZoomAnimation.finalZoom > 2.0f) screenZoomAnimation.finalZoom = 2.0f;
+		screenZoomAnimation.initialize(0, 0, 0, 0);
+		screenZoomAnimation.start();
+	}
+
+	
 	public void moveToLastLocation() {
 		moveToLocation(getCurrentBestLocation());
 	}
