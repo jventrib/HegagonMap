@@ -8,14 +8,17 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Handler;
+import android.util.Log;
 
+import com.hexagon.map.enums.LoadState;
 import com.hexagon.map.geo.AbstractPositionableElement;
 import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
 
-public class Tile extends AbstractPositionableElement {
+public class Tile extends AbstractPositionableElement implements Cloneable {
 
-//	private static final String URL = "http://gpp3-wxs.ign.fr/czj03g5y31qfnzwu782qd79t/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX=!SCALE!&TILEROW=!ROW!&TILECOL=!COL!";
+	// private static final String URL =
+	// "http://gpp3-wxs.ign.fr/czj03g5y31qfnzwu782qd79t/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX=!SCALE!&TILEROW=!ROW!&TILECOL=!COL!";
 
 	private static final String TAG = "Tile";
 
@@ -26,18 +29,20 @@ public class Tile extends AbstractPositionableElement {
 
 	public boolean visible = true;
 
-	private final Viewport layer;
+	private final Viewport viewport;
 
 	final Handler initGeoCookieHandler = new Handler();
 
 	protected boolean threadRunning = Preferences.threadPool;
 
-	private Image image;
+	Image image = new Image();
 
 	private Matrix m = new Matrix();
 
+	// public AbstractPositionableElement position = new Point();
+
 	public Tile(Viewport layer, int ix, int iy) {
-		this.layer = layer;
+		this.viewport = layer;
 		indexX = ix;
 		indexY = iy;
 	}
@@ -46,36 +51,35 @@ public class Tile extends AbstractPositionableElement {
 		int x = posx;
 		int y = posy;
 		if (visible && Preferences.drawMap) {
-			if (image != null && image.bmp != null) {
+			if (image != null && image.bmp != null && image.isLoaded()) {
 				canvas.drawBitmap(image.bmp, x, y, paint);
 			} else {
-				canvas.drawBitmap(layer.noSrcBmp, x, y, paint);
+				canvas.drawBitmap(viewport.noSrcBmp, x, y, paint);
 			}
 		}
 		if (Preferences.isDrawInfos()) {
 			drawDebugInfos(canvas, paint, x, y);
 		}
-		
-		
-		
+
 		List<? super String> l = new ArrayList<String>();
 		l.add("test");
 	}
-
 
 	public void draw(Canvas canvas, Matrix scaleM, Paint paint) {
 		int x = posx;
 		int y = posy;
 		if (visible && Preferences.drawMap) {
-			m  =  new Matrix(scaleM);
+			m = new Matrix(scaleM);
 			m.preTranslate(posx, posy);
-			if (image != null && image.bmp != null && m != null) {
+			if (image != null && image.bmp != null && m != null
+					&& image.isLoaded()) {
 				if (image.alpha < 255) {
 					Paint paintAlpha = new Paint(paint);
-					canvas.drawBitmap(layer.noSrcBmp, m, paint);
+					// canvas.drawBitmap(layer.noSrcBmp, m, paint);
 					image.alpha = image.alpha + 20;
 
-					if (image.alpha > 255) image.alpha = 255;
+					if (image.alpha > 255)
+						image.alpha = 255;
 					paintAlpha.setAlpha(image.alpha);
 					canvas.drawBitmap(image.bmp, m, paintAlpha);
 				} else {
@@ -83,9 +87,9 @@ public class Tile extends AbstractPositionableElement {
 					canvas.drawBitmap(image.bmp, m, paint);
 				}
 			} else {
-				canvas.drawBitmap(layer.noSrcBmp, m, paint);
-//				BitmapDrawable bd = new BitmapDrawable(layer.noSrcBmp);
-//				bd.draw(canvas);
+				canvas.drawBitmap(viewport.noSrcBmp, m, paint);
+				// BitmapDrawable bd = new BitmapDrawable(layer.noSrcBmp);
+				// bd.draw(canvas);
 			}
 		}
 		if (Preferences.isDrawInfos()) {
@@ -110,7 +114,7 @@ public class Tile extends AbstractPositionableElement {
 		canvas.drawText("TileX : " + mapTileX + "/ TileY : " + mapTileY, x,
 				y + 40, paint);
 		canvas.drawText("x : " + x + "/ y: " + y, x, y + 60, paint);
-		canvas.drawText("visible : " + visible , x, y + 80, paint);
+		canvas.drawText("visible : " + visible, x, y + 80, paint);
 		if (image != null && image.getCacheFileName() != null) {
 			canvas.drawText(image.getCacheFileName(), x, y + 100, paint);
 		}
@@ -124,25 +128,23 @@ public class Tile extends AbstractPositionableElement {
 		// Anti rebound value. Value too low will cause several rebounds of tile
 		// offset rotation !
 		int m = 50;
-		if (posx > layer.mapScreenWidth + layer.marginX + m) {
-			rotateOffsetX = -layer.nbTileX;
+		if (posx > viewport.mapScreenWidth + viewport.marginX + m) {
+			rotateOffsetX = -viewport.nbTileX;
 		} else {
-			if (posx < -layer.marginX - Viewport.tileWidth - m) {
-				rotateOffsetX = layer.nbTileX;
+			if (posx < -viewport.marginX - Viewport.tileWidth - m) {
+				rotateOffsetX = viewport.nbTileX;
 			}
 		}
-		if (posy > layer.mapScreenHeight + layer.marginY + m) {
-			rotateOffsetY = -layer.nbTileY;
+		if (posy > viewport.mapScreenHeight + viewport.marginY + m) {
+			rotateOffsetY = -viewport.nbTileY;
 		} else {
-			if (posy < -layer.marginY - Viewport.tileHeight - m) {
-				rotateOffsetY = layer.nbTileY;
+			if (posy < -viewport.marginY - Viewport.tileHeight - m) {
+				rotateOffsetY = viewport.nbTileY;
 			}
 		}
 		if (rotateOffsetX != 0 || rotateOffsetY != 0) {
 			this.fillImage(mapTileX + rotateOffsetX, mapTileY + rotateOffsetY);
 			this.clearImage();
-			image = null;
-			
 		}
 		this.updateMapImage();
 	}
@@ -150,16 +152,30 @@ public class Tile extends AbstractPositionableElement {
 	void fillImage(int tileX, int tileY) {
 		mapTileX = tileX;
 		mapTileY = tileY;
-		float tw = layer.calcMapTileWidth();
-		float th = layer.calcMapTileHeight();
+		float tw = viewport.calcMapTileWidth();
+		float th = viewport.calcMapTileHeight();
 		mapx = Math.round(tw * tileX + tw / 2);
 		mapy = Math.round(th * tileY + th / 2);
 		positionImage();
 	}
 
+	
+	void fillImage() {
+		float tw = viewport.calcMapTileWidth();
+		float th = viewport.calcMapTileHeight();
+		mapx = Math.round(tw * mapTileX + tw / 2);
+		mapy = Math.round(th * mapTileY + th / 2);
+		positionImage();
+	}
+
 	void positionImage() {
-		posx = layer.calcPixelX(0) + Viewport.tileWidth * mapTileX;
-		posy = layer.calcPixelY(0) + Viewport.tileHeight * mapTileY;
+		posx = viewport.calcPixelX(0) + Viewport.tileWidth * mapTileX;
+		posy = viewport.calcPixelY(0) + Viewport.tileHeight * mapTileY;
+	}
+
+	void positionOldImage() {
+		posx = viewport.calcOldPixelX(0) + Viewport.tileWidth * mapTileX;
+		posy = viewport.calcOldPixelY(0) + Viewport.tileHeight * mapTileY;
 	}
 
 	/**
@@ -174,7 +190,8 @@ public class Tile extends AbstractPositionableElement {
 			image.abortDownload();
 		}
 
-		image = null;
+		// image = null;
+		image.state = LoadState.CLEARED;
 		visible = false;
 		JveLog.d(TAG, this + "-task cancelled");
 		// }
@@ -197,8 +214,8 @@ public class Tile extends AbstractPositionableElement {
 		JveLog.d(TAG, this + "-y2 : " + y2);
 
 		boolean vis = Viewport.rectIntersectRect(x1, x2, y1, y2,
-				-horizontalMargin - tw, layer.mapScreenWidth + horizontalMargin
-						+ tw, -verticalMargin - th, layer.mapScreenHeight
+				-horizontalMargin - tw, viewport.mapScreenWidth + horizontalMargin
+						+ tw, -verticalMargin - th, viewport.mapScreenHeight
 						+ verticalMargin + th);
 		if (!vis) {
 			if (visible) {
@@ -215,8 +232,8 @@ public class Tile extends AbstractPositionableElement {
 				String calcTileSrc = calcTileSrc();
 				String cacheFileName = calcCacheName();
 				image.update(calcTileSrc, cacheFileName);
-//				image = new Image(calcTileSrc, cacheFileName);
-//				Log.d(TAG, "cache name : " + cacheFileName);
+				// image = new Image(calcTileSrc, cacheFileName);
+				// Log.d(TAG, "cache name : " + cacheFileName);
 			}
 			if (!visible) {
 				visible = true;
@@ -225,7 +242,7 @@ public class Tile extends AbstractPositionableElement {
 	}
 
 	private String calcCacheName() {
-		String scaleString = Integer.toString(layer.scale);
+		String scaleString = Integer.toString(viewport.scale);
 		String mapTileXS = Integer.valueOf(Math.abs(mapTileX)).toString();
 		String mapTileYS = Integer.valueOf(Math.abs(mapTileY)).toString();
 
@@ -234,8 +251,8 @@ public class Tile extends AbstractPositionableElement {
 	}
 
 	public String calcTileSrc() {
-		String src = layer.context.getString(R.string.tileUrl);
-		String scaleString = Integer.toString(layer.scale);
+		String src = viewport.context.getString(R.string.tileUrl);
+		String scaleString = Integer.toString(viewport.scale);
 		String mapTileXS = Integer.valueOf(Math.abs(mapTileX)).toString();
 		String mapTileYS = Integer.valueOf(Math.abs(mapTileY)).toString();
 		src = src.replaceAll("!SCALE!", scaleString)
@@ -247,6 +264,17 @@ public class Tile extends AbstractPositionableElement {
 
 	public String toString() {
 		return "Tile" + "-" + indexX + "-" + indexY;
+	}
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+
+		Tile clone = (Tile) super.clone();
+		if (image != null) {
+			clone.image = (Image) this.image.clone();
+		}
+		return clone;
+
 	}
 
 }

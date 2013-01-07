@@ -121,6 +121,9 @@ public class CacheBitmapDownloadService {
 						.decodeByteArray(b, 0, length, opt);
 				is.close();
 				image.bmp = bitmap;
+				image.state = LoadState.LOADED;
+				image.visibleOnTop = true;
+
 				if (Build.VERSION.SDK_INT >= 12) {
 					Viewport.addBitmapToMemoryCache(image.getCacheFileName(),
 							bitmap);
@@ -169,7 +172,9 @@ public class CacheBitmapDownloadService {
 
 		@Override
 		public void run() {
-			getTileBitmap(image);
+			synchronized (image) {
+				getTileBitmap(image);
+			}
 		}
 	}
 

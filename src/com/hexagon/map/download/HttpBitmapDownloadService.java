@@ -78,15 +78,18 @@ public class HttpBitmapDownloadService {
 
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
-			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
-					"HexagonMap");
+//			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
+//					"HexagonMap");
 			
+			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
+					"Android");
 			
 			httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY,
 					CookiePolicy.RFC_2109);
 			HttpResponse response;
 			image.method = new HttpGet(new URI(image.getSrc()));
-			image.method.addHeader("Referer", "HexagonMap.fr");
+//			image.method.addHeader("Referer", "HexagonMap.fr");
+			
 			// image.method.addHeader("Cookie", "jknch=hcnkj; ign=" +
 			// getToken());
 			// method.addHeader("Cookie", "jknch=hcnkj; ign=");
@@ -179,6 +182,8 @@ public class HttpBitmapDownloadService {
 				}
 			} else {
 				image.state = LoadState.LOADED;
+				image.visibleOnTop = true;
+
 				if (Preferences.isLogging()) {
 					// JveLog.d(TAG, this + "-state=loaded, src = " + getSrc());
 				}
@@ -269,7 +274,9 @@ public class HttpBitmapDownloadService {
 
 		@Override
 		public void run() {
-			getHttpBitmap(image);
+			synchronized (image) {
+				getHttpBitmap(image);
+			}
 		}
 	}
 

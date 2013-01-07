@@ -74,6 +74,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	private Sensor mSensor;
 	private ImageButton fsLocationButton;
 	private Date stopTime;
+	public long pinchDoneTime;
 
 	// /////////////////////////////////////////////////////////////////
 	// Lifecycle
@@ -131,7 +132,6 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		mScaleDetector = new ScaleGestureDetector(this,
 				new GestureListenerFactory()
 						.getGestureListener(rescalePinchZoom));
-
 		clearTimedCache();
 	}
 
@@ -321,7 +321,6 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 
 		main = new MapView(this, this);
 
-
 		setContentView(R.layout.main);
 		LinearLayout content = (LinearLayout) findViewById(R.id.mapLayout);
 
@@ -335,7 +334,11 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 
 		handleFullScreen(Preferences.isFullScreen());
 
-		
+		initZoomController();
+
+	}
+
+	private void initZoomController() {
 		controller = new ZoomButtonsController(main);
 		controller.setOnZoomListener(new OnZoomListener() {
 
@@ -351,9 +354,8 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 				controller.setVisible(visible);
 			}
 		});
-//		controller.setVisible(true);
+		// controller.setVisible(true);
 		controller.setAutoDismissed(true);
-
 	}
 
 	/**
@@ -394,7 +396,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	}
 
 	private void zoomIn() {
-		if (!viewport.isZoomMax()) {
+		if (!viewport.isZoomMax() && !viewport.zoomOnGoing) {
 			JveLog.d(TAG, "zoom in");
 			JveLog.d(TAG, "scale : " + viewport.scale);
 			viewport.zoomInAnimated();
@@ -403,18 +405,20 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	}
 
 	private void zoomOut() {
-		JveLog.d(TAG, "zoom out");
-		JveLog.d(TAG, "scale : " + viewport.scale);
-		viewport.zoomOutAnimated();
-		handleZoomControl();
+		if (!viewport.isZoomMin() && !viewport.zoomOnGoing) {
+			JveLog.d(TAG, "zoom out");
+			JveLog.d(TAG, "scale : " + viewport.scale);
+			viewport.zoomOutAnimated();
+			handleZoomControl();
+		}
 	}
 
 	private void zoom(int zoomOffset) {
 		if (zoomOffset > 0 && !viewport.isZoomMax()) {
-			viewport.scale += zoomOffset;
+			viewport.zoomAnimated(zoomOffset);
 		}
 		if (zoomOffset < 0 && !viewport.isZoomMin()) {
-			viewport.scale += zoomOffset;
+			viewport.zoomAnimated(zoomOffset);
 		}
 		handleZoomControl();
 	}
@@ -539,6 +543,19 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 
 	@Override
 	public boolean onTouchEvent(MotionEvent me) {
+		// long timeSincePinch = System.currentTimeMillis() - pinchDoneTime;
+		// if (timeSincePinch < 4) {
+		// return false;
+		// }
+		//
+		// if (me.getAction() == MotionEvent.ACTION_POINTER_UP
+		// || me.getAction() == MotionEvent.ACTION_UP) {
+		// pinchDone = false;
+		// }
+		// mScaleDetector.onTouchEvent(me);
+		// if (pinchDone) {
+		// return true;
+		// }
 
 		mScaleDetector.onTouchEvent(me);
 		viewport.resetInertiaScroll();
@@ -658,6 +675,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	private void handleFullScreen(boolean fullScreen) {
 		if (fullScreen) {
 			getSupportActionBar().hide();
+
 		} else {
 			getSupportActionBar().show();
 		}
@@ -668,6 +686,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		locationButton.setVisibility(fullScreen ? View.VISIBLE : View.GONE);
 		ImageButton fsOffButton = (ImageButton) findViewById(R.id.fsOffButton);
 		fsOffButton.setVisibility(fullScreen ? View.VISIBLE : View.GONE);
+		initZoomController();
 	}
 
 	// /////////////////////////////////////////////////////////////////
@@ -731,6 +750,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 
 		@Override
 		public boolean onScaleBegin(ScaleGestureDetector detector) {
+			viewport.copyGrid();
 			initialScaleFactor = 1.0f;
 			return true;
 		}
@@ -758,40 +778,58 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	public class TouchUpReScaleGestureListener implements
 			OnScaleGestureListener {
 
+		private static final float ZOOM_OUT_THESHOLD = 0.5f;
+		private static final float ZOOM_IN_THESHOLD = 2.0f;
+
 		@Override
 		public void onScaleEnd(ScaleGestureDetector detector) {
 			int zoomOffset = Math.round(viewport.zoomScale) - 1;
+			Log.d(TAG, "zoom offset : " + zoomOffset);
+
+			if (zoomOffset > 1)
+				zoomOffset = 1;
+			if (zoomOffset < -1)
+				zoomOffset = -1;
 			zoom(zoomOffset);
 			if (zoomOffset == 0) {
 				viewport.zoomReset(null);
 			}
 			float oldScale = viewport.zoomScale;
-			if (viewport.zoomScale < 0.5f) {
-				oldScale = viewport.zoomScale * 2;
-				
-			} else if (viewport.zoomScale < 2.0f) {
-				oldScale = viewport.zoomScale / 2;
-			}
+			// if (viewport.zoomScale < ZOOM_OUT_THESHOLD) {
+			// oldScale = ZOOM_OUT_THESHOLD;
+			//
+			// } else if (viewport.zoomScale > ZOOM_IN_THESHOLD) {
+			// oldScale = ZOOM_IN_THESHOLD;
+			// }
 			viewport.zoomScale = 1.0f;
-			viewport.refresh();
+			// viewport.refresh();
 			if (zoomOffset != 0) {
 				viewport.zoomReset(oldScale);
 			}
 
 			pinchDone = true;
+			pinchDoneTime = System.currentTimeMillis();
 		}
 
 		@Override
 		public boolean onScaleBegin(ScaleGestureDetector detector) {
+			if (viewport.zoomOnGoing) {
+				return true;
+			}
+			viewport.copyGrid();
 			return true;
 		}
 
 		@Override
 		public boolean onScale(ScaleGestureDetector detector) {
-			Log.d(TAG, "zoom ongoing, scale: " + detector.getScaleFactor());
-			viewport.zoomScale = detector.getScaleFactor();
+			if (!viewport.zoomOnGoing) {
+				return true;
+			}
+
+			JveLog.d(TAG, "zoom ongoing, scale: " + detector.getScaleFactor());
+			viewport.zoomScale *= detector.getScaleFactor();
 			pinchDone = true;
-			return false;
+			return true;
 		}
 
 	}

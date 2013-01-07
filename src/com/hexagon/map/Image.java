@@ -10,29 +10,37 @@ import com.hexagon.map.enums.LoadState;
 import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
 
-public class Image {
+public class Image implements Cloneable {
 
 	public volatile LoadState state = LoadState.LOADING;
 
 	public volatile HttpGet method;
 
-	private String src;
+	private volatile String src;
 
-	private String cacheFileName;
+	private volatile String cacheFileName;
 
 	public Bitmap bmp;
 
 	public int alpha = 255;
 
+	public boolean visibleOnTop = true;
+
+//	public boolean visibleOnTop = false;
+
 	public Image(String src, String cacheFileName) {
 		update(src, cacheFileName);
 	}
 
-	public void update(String src, String cacheFileName) {
+	public Image() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public synchronized void update(String src, String cacheFileName) {
 		this.src = src;
 		this.cacheFileName = cacheFileName;
-		state = LoadState.LOADING;
 		startLoadBitmap();
+		alpha = 0;
 	}
 
 	public void setSrc(String src) {
@@ -49,11 +57,14 @@ public class Image {
 					.getBitmapFromMemCache(cacheFileName);
 			if (bitmapFromMemCache != null) {
 				bmp = bitmapFromMemCache;
+				state = LoadState.LOADED;
+				visibleOnTop = true;
 				JveLog.d("Image", "Loaded from LRU Cache");
 				return;
 			}
 		}
 		// JveLog.d("Image", "NOT Loaded from LRU Cache");
+		state = LoadState.LOADING;
 
 		CacheBitmapDownloadService.getInstance().submit(this);
 	}
@@ -86,6 +97,21 @@ public class Image {
 
 	public boolean isCleared() {
 		return (state == LoadState.CLEARED);
+	}
+	
+	@Override
+	protected Image clone() throws CloneNotSupportedException {
+		Image clone = (Image) super.clone();
+		if (bmp != null) {
+//			clone.bmp = Bitmap.createBitmap(bmp);
+			clone.bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth()/2, bmp.getHeight(), null, true);
+			clone.bmp = bmp.copy(bmp.getConfig(), false);
+		}
+		return clone;
+	}
+
+	public boolean isLoaded() {
+		return (state == LoadState.LOADED);
 	}
 
 }

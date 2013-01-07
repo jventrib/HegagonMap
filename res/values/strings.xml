@@ -2,8 +2,12 @@
 <resources>
     <string name="app_name">HexagonMap</string>
     <string name="description_search">Search</string>
-    <string name="tileUrl">http://gpp3-wxs.ign.fr/4l9i6682teki4ang459b653o/geoportail/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetTile&amp;LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&amp;STYLE=normal&amp;FORMAT=image/jpeg&amp;TILEMATRIXSET=PM&amp;TILEMATRIX=!SCALE!&amp;TILEROW=!ROW!&amp;TILECOL=!COL!</string>
-    <string name="searchUrl">http://gpp3-wxs.ign.fr/4l9i6682teki4ang459b653o/geoportail/ols?</string>
+<!-- DEV -->
+    <string name="tileUrl">http://gpp3-wxs.ign.fr/czj03g5y31qfnzwu782qd79t/geoportail/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetTile&amp;LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&amp;STYLE=normal&amp;FORMAT=image/jpeg&amp;TILEMATRIXSET=PM&amp;TILEMATRIX=!SCALE!&amp;TILEROW=!ROW!&amp;TILECOL=!COL!</string>
+    <string name="searchUrl">http://gpp3-wxs.ign.fr/czj03g5y31qfnzwu782qd79t/geoportail/ols?</string>
+<!-- PROD -->
+<!--     <string name="tileUrl">http://gpp3-wxs.ign.fr/4l9i6682teki4ang459b653o/geoportail/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetTile&amp;LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&amp;STYLE=normal&amp;FORMAT=image/jpeg&amp;TILEMATRIXSET=PM&amp;TILEMATRIX=!SCALE!&amp;TILEROW=!ROW!&amp;TILECOL=!COL!</string> -->
+<!--     <string name="searchUrl">http://gpp3-wxs.ign.fr/4l9i6682teki4ang459b653o/geoportail/ols?</string> -->
     <string name="eula_title">Conditions générales d’utilisation finale, API Géoportail</string>
     <string name="eula_accept">OK</string>   
     <string name="eula_refuse">Je refuse</string>   

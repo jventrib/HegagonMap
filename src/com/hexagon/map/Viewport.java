@@ -1,6 +1,9 @@
 package com.hexagon.map;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,11 +32,14 @@ import android.view.animation.Transformation;
 import com.hexagon.map.geo.AbstractPositionableElement;
 import com.hexagon.map.geo.LocationablePoint;
 import com.hexagon.map.geo.Point;
+import com.hexagon.map.util.JveLog;
 import com.jhlabs.map.awt.Point2D;
 import com.jhlabs.map.proj.MercatorProjection;
 
 public class Viewport extends AbstractPositionableElement implements
 		LocationListener {
+
+	private static final String TAG = "Viewport";
 
 	// Make this bigger will preload more tiles surrounding the screen, making
 	// less checkboard tile, but more bitmap to move, increasing bandwith
@@ -68,7 +74,8 @@ public class Viewport extends AbstractPositionableElement implements
 	public int mapScreenHeight;
 	public float centerX;
 	public float centerY;
-	private Tile[][] images;
+	private Tile[][] grid1;
+	private Tile[][] grid2;
 
 	public boolean running = true;
 
@@ -90,6 +97,8 @@ public class Viewport extends AbstractPositionableElement implements
 
 	AbstractLocationListener listener;
 	private int newScale;
+	private int oldScale;
+
 	public float zoomScale = 1.0f;
 	public float azimuth_angle;
 
@@ -98,6 +107,7 @@ public class Viewport extends AbstractPositionableElement implements
 
 	public LocationablePoint locationPoint = new LocationablePoint();
 	Point targetPoint;
+	volatile boolean zoomOnGoing;
 
 	// //////////////////////////////////////////////////////////////
 
@@ -123,7 +133,8 @@ public class Viewport extends AbstractPositionableElement implements
 		marginY = 0;
 
 		mapScreenWidth = dm.widthPixels;
-		mapScreenHeight = dm.heightPixels - 75;
+//		mapScreenHeight = dm.heightPixels - 75;
+		mapScreenHeight = dm.heightPixels;
 
 		int tempX = mapScreenWidth + 2 * marginX;
 		int tempY = mapScreenHeight + 2 * marginY;
@@ -133,14 +144,22 @@ public class Viewport extends AbstractPositionableElement implements
 
 		centerX = mapScreenWidth / 2;
 		centerY = mapScreenHeight / 2;
-		images = new Tile[nbTileX][nbTileY];
+		grid1 = new Tile[nbTileX][nbTileY];
 		for (int ix = 0; ix < this.nbTileX; ix++) {
-			images[ix] = new Tile[nbTileY];
+			grid1[ix] = new Tile[nbTileY];
 			for (int iy = 0; iy < this.nbTileY; iy++) {
-				this.images[ix][iy] = createTile(ix, iy);
+				this.grid1[ix][iy] = createTile(ix, iy);
 			}
-
 		}
+
+		grid2 = new Tile[nbTileX][nbTileY];
+		for (int ix = 0; ix < this.nbTileX; ix++) {
+			grid2[ix] = new Tile[nbTileY];
+			for (int iy = 0; iy < this.nbTileY; iy++) {
+				this.grid2[ix][iy] = createTile(ix, iy);
+			}
+		}
+
 		BitmapFactory.Options opt = new BitmapFactory.Options();
 		// opt.inDither = true;
 		opt.inPreferredConfig = Bitmap.Config.RGB_565; //
@@ -213,12 +232,15 @@ public class Viewport extends AbstractPositionableElement implements
 	}
 
 	public void move() {
+		if (zoomOnGoing)
+			return;
+
 		for (int ix = 0; ix < nbTileX; ix++) {
 			for (int iy = 0; iy < nbTileY; iy++) {
-				Tile t = images[ix][iy];
+				Tile t = grid1[ix][iy];
 				t.positionImage();
 				t.correctMapImage();
-				if (!t.visible) {
+				if (!t.visible && t.image.visibleOnTop) {
 					// Out of syncro, scrolling was too quick, need to recompute
 					// all tiles
 					refresh();
@@ -234,6 +256,14 @@ public class Viewport extends AbstractPositionableElement implements
 
 	int calcPixelY(float _3c) {
 		return Math.round(centerY + (_3c - coordY) / zoomRatios[scale]);
+	}
+
+	int calcOldPixelX(float _3c) {
+		return Math.round(centerX + (_3c - coordX) / zoomRatios[oldScale]);
+	}
+
+	int calcOldPixelY(float _3c) {
+		return Math.round(centerY + (_3c - coordY) / zoomRatios[oldScale]);
 	}
 
 	private float calcMapDeltaX(float initiaPos, int delta) {
@@ -317,41 +347,70 @@ public class Viewport extends AbstractPositionableElement implements
 		List<Tile> result = new ArrayList<Tile>();
 		for (int ix = 0; ix < this.nbTileX; ix++) {
 			for (int iy = 0; iy < this.nbTileY; iy++) {
-				result.add(images[ix][iy]);
+				result.add(grid1[ix][iy]);
 			}
 		}
 		return result;
 
 	}
 
-	public void refresh() {
+	public synchronized List<Tile> getTilesList2() {
+		List<Tile> result = new ArrayList<Tile>();
+		for (int ix = 0; ix < this.nbTileX; ix++) {
+			for (int iy = 0; iy < this.nbTileY; iy++) {
+				result.add(grid2[ix][iy]);
+			}
+		}
+		return result;
+
+	}
+
+	public synchronized void refresh() {
+
+		if (zoomOnGoing)
+			return;
+
 		newScale = scale;
 
 		int offsetX = nbTileX / 2;
 		int offsetY = nbTileY / 2;
 		centerX = mapScreenWidth / 2;
 		centerY = mapScreenHeight / 2;
-		int numTileX = this.calcNumTileX(coordX);
-		int numTileY = this.calcNumTileY(coordY);
+		int numTileX = calcNumTileX(coordX);
+		int numTileY = calcNumTileY(coordY);
+
+		List<Tile> sortedTiles = new ArrayList<Tile>();
 		for (int ix = 0; ix < this.nbTileX; ix++) {
 			for (int iy = 0; iy < this.nbTileY; iy++) {
-				Tile t = this.images[ix][iy];
-				int tileOffsetX = numTileX + ix - offsetX;
-				int tileOffsetY = numTileY + iy - offsetY;
-				t.clearImage();
-				t.fillImage(tileOffsetX, tileOffsetY);
-				t.correctMapImage();
-				t.updateMapImage();
+				Tile t = this.grid1[ix][iy];
+				synchronized (t) {
+					int tileOffsetX = numTileX + ix - offsetX;
+					int tileOffsetY = numTileY + iy - offsetY;
+
+					t.mapTileX = tileOffsetX;
+					t.mapTileY = tileOffsetY;
+
+					sortedTiles.add(t);
+				}
 			}
 		}
+
+		Collections.sort(sortedTiles, new TileComparator(numTileX, numTileY));
+		for (Tile t : sortedTiles) {
+			t.clearImage();
+			t.fillImage();
+			t.correctMapImage();
+			t.updateMapImage();
+		}
+
 	}
 
-	public void zoomIn() {
+	public synchronized void zoomIn() {
 		scale++;
 		refresh();
 	}
 
-	public void zoomOut() {
+	public synchronized void zoomOut() {
 		scale--;
 		refresh();
 	}
@@ -390,6 +449,24 @@ public class Viewport extends AbstractPositionableElement implements
 
 	public void unlock() {
 		lock = false;
+	}
+
+	private final class TileComparator implements Comparator<Tile> {
+
+		private int numTileX;
+		private int numTileY;
+
+		public TileComparator(int numTileX, int numTileY) {
+			this.numTileX = numTileX;
+			this.numTileY = numTileY;
+		}
+
+		@Override
+		public int compare(Tile lhs, Tile rhs) {
+			int lIndex = lhs.mapTileX - numTileX + lhs.mapTileY - numTileY;
+			int rIndex = rhs.mapTileX - numTileX + rhs.mapTileY - numTileY;
+			return rIndex - lIndex;
+		}
 	}
 
 	private class ScreenScrollAnimation extends Animation {
@@ -450,21 +527,21 @@ public class Viewport extends AbstractPositionableElement implements
 		}
 
 		@Override
-		protected void applyTransformation(float interpolatedTime,
+		protected synchronized void applyTransformation(float interpolatedTime,
 				Transformation t) {
 			float deltaZoom = finalZoom - initialZoom;
-
-			synchronized (getMapActivity().surfaceHolder) {
-				zoomScale = deltaZoom * interpolatedTime + initialZoom;
-			}
+			zoomScale = deltaZoom * interpolatedTime + initialZoom;
 
 		}
 
 		@Override
-		public void onAnimationEnd(Animation animation) {
+		public synchronized void onAnimationEnd(Animation animation) {
+			zoomOnGoing = false;
+			oldScale = scale;
 			scale = newScale;
+			JveLog.d(TAG, "zoomOnGoing : " + zoomOnGoing);
 			refresh();
-			zoomScale = 1.0f;
+			// zoomScale = 1.0f;
 		}
 
 		@Override
@@ -472,7 +549,8 @@ public class Viewport extends AbstractPositionableElement implements
 		}
 
 		@Override
-		public void onAnimationStart(Animation animation) {
+		public synchronized void onAnimationStart(Animation animation) {
+			zoomOnGoing = true;
 		}
 
 	}
@@ -538,7 +616,8 @@ public class Viewport extends AbstractPositionableElement implements
 		}
 	}
 
-	public void zoomInAnimated() {
+	public synchronized void zoomInAnimated() {
+		copyGrid();
 		newScale++;
 		screenZoomAnimation.initialZoom = 1.0f;
 		screenZoomAnimation.finalZoom = 2.0f;
@@ -546,7 +625,8 @@ public class Viewport extends AbstractPositionableElement implements
 		screenZoomAnimation.start();
 	}
 
-	public void zoomOutAnimated() {
+	public synchronized void zoomOutAnimated() {
+		copyGrid();
 		newScale--;
 		screenZoomAnimation.initialZoom = 1.0f;
 		screenZoomAnimation.finalZoom = 0.5f;
@@ -555,19 +635,22 @@ public class Viewport extends AbstractPositionableElement implements
 	}
 
 	public void zoomReset(Float oldScale) {
+
 		if (oldScale != null) {
 			screenZoomAnimation.initialZoom = oldScale;
+			screenZoomAnimation.finalZoom = Math.round(oldScale);
 		} else {
 			screenZoomAnimation.initialZoom = zoomScale;
+			screenZoomAnimation.finalZoom = Math.round(zoomScale);
 		}
-		screenZoomAnimation.finalZoom = Math.round(zoomScale);
-		if (screenZoomAnimation.finalZoom < 0.5f) screenZoomAnimation.finalZoom = 0.5f;
-		if (screenZoomAnimation.finalZoom > 2.0f) screenZoomAnimation.finalZoom = 2.0f;
+		if (screenZoomAnimation.finalZoom < 0.5f)
+			screenZoomAnimation.finalZoom = 0.5f;
+		if (screenZoomAnimation.finalZoom > 2.0f)
+			screenZoomAnimation.finalZoom = 2.0f;
 		screenZoomAnimation.initialize(0, 0, 0, 0);
 		screenZoomAnimation.start();
 	}
 
-	
 	public void moveToLastLocation() {
 		moveToLocation(getCurrentBestLocation());
 	}
@@ -610,25 +693,41 @@ public class Viewport extends AbstractPositionableElement implements
 	 * @param canvas
 	 * @param paint
 	 */
-	public void draw(Canvas canvas, Paint paint) {
+	public synchronized void draw(Canvas canvas, Paint paint) {
 		handleAnimations();
 		paint.setColor(Color.LTGRAY);
 		canvas.drawRect(0, 0, mapScreenWidth, mapScreenHeight, paint);
-		List<Tile> tiles = getTilesList();
-		m.setScale(zoomScale, zoomScale, mapScreenWidth / 2,
-				mapScreenHeight / 2);
 
-		for (Tile t : tiles) {
-			if (t.visible) {
-				// t.draw(canvas, mapActivity.scrollX, mapActivity.scrollY,
-				// paint);
-				t.draw(canvas, m, paint);
+		List<Tile> tiles;
+		Matrix m1;
+		m1 = new Matrix(m);
+		m1.setScale(zoomScale, zoomScale, mapScreenWidth / 2,
+				mapScreenHeight / 2);
+		if (!isGridLoaded()) {
+			tiles = getTilesList2();
+			for (Tile t : tiles) {
+				if (t.visible) {
+					t.positionOldImage();
+					synchronized (t) {
+						t.draw(canvas, m1, paint);
+					}
+				}
 			}
 		}
+		tiles = getTilesList();
+		Paint paint2 = new Paint(paint);
+		// paint2.setAlpha(100);
+
+		for (Tile t : tiles) {
+			if (t.image.visibleOnTop && !zoomOnGoing) {
+				t.draw(canvas, m, paint2);
+			}
+		}
+
 		Point p = locationPoint;
 		p.getPosFromCoord(this);
 		paint.setColor(Color.RED);
-		mLocation.set(m);
+		mLocation.set(zoomOnGoing ? m1 : m);
 		mLocation.preTranslate(p.posx, p.posy);
 		mLocation.preRotate(azimuth_angle, locationPoint.bmp.getWidth() / 2,
 				locationPoint.bmp.getHeight() / 2);
@@ -658,4 +757,42 @@ public class Viewport extends AbstractPositionableElement implements
 		return newScale <= MIN_ZOOM;
 	}
 
+	public synchronized void copyGrid() {
+		zoomOnGoing = true;
+		oldScale = scale;
+		try {
+			for (int ix = 0; ix < nbTileX; ix++) {
+				for (int iy = 0; iy < nbTileY; iy++) {
+					Tile tileSrc = grid1[ix][iy];
+					grid2[ix][iy] = (Tile) tileSrc.clone();
+					if (tileSrc.image != null) {
+						tileSrc.image.visibleOnTop = false;
+					}
+				}
+			}
+			// zoomScale = 1.0f;
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public synchronized void zoomAnimated(int zoomOffset) {
+		newScale += zoomOffset;
+
+	}
+
+	public synchronized boolean isGridLoaded() {
+		for (int ix = 0; ix < this.nbTileX; ix++) {
+			for (int iy = 0; iy < this.nbTileY; iy++) {
+				Tile t = this.grid1[ix][iy];
+				boolean v = t.image.visibleOnTop;
+				boolean opaque = t.image.alpha == 255;
+				if (zoomOnGoing || !v || !opaque) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }
