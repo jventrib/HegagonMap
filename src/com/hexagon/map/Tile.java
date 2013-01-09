@@ -76,7 +76,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 				if (image.alpha < 255) {
 					Paint paintAlpha = new Paint(paint);
 					// canvas.drawBitmap(layer.noSrcBmp, m, paint);
-					image.alpha = image.alpha + 20;
+					image.alpha = image.alpha + 40;
 
 					if (image.alpha > 255)
 						image.alpha = 255;
@@ -121,7 +121,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
 	}
 
-	void correctMapImage() {
+	void correctMapImage(boolean fadeIn) {
 		int rotateOffsetX = 0;
 		int rotateOffsetY = 0;
 
@@ -146,7 +146,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 			this.fillImage(mapTileX + rotateOffsetX, mapTileY + rotateOffsetY);
 			this.clearImage();
 		}
-		this.updateMapImage();
+		this.updateMapImage(fadeIn);
 	}
 
 	void fillImage(int tileX, int tileY) {
@@ -159,7 +159,6 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 		positionImage();
 	}
 
-	
 	void fillImage() {
 		float tw = viewport.calcMapTileWidth();
 		float th = viewport.calcMapTileHeight();
@@ -197,7 +196,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 		// }
 	}
 
-	void updateMapImage() {
+	void updateMapImage(boolean fadeIn) {
 		int horizontalMargin = 2;
 		int verticalMargin = 2;
 		int x1, x2, y1, y2, tw, th;
@@ -214,9 +213,9 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 		JveLog.d(TAG, this + "-y2 : " + y2);
 
 		boolean vis = Viewport.rectIntersectRect(x1, x2, y1, y2,
-				-horizontalMargin - tw, viewport.mapScreenWidth + horizontalMargin
-						+ tw, -verticalMargin - th, viewport.mapScreenHeight
-						+ verticalMargin + th);
+				-horizontalMargin - tw, viewport.mapScreenWidth
+						+ horizontalMargin + tw, -verticalMargin - th,
+				viewport.mapScreenHeight + verticalMargin + th);
 		if (!vis) {
 			if (visible) {
 				visible = false;
@@ -224,14 +223,10 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 			JveLog.d(TAG, this + "-Visible : false");
 		} else {
 
-			if (image == null) {
+			if (image.isCleared()) {
 				String calcTileSrc = calcTileSrc();
 				String cacheFileName = calcCacheName();
-				image = new Image(calcTileSrc, cacheFileName);
-			} else if (image.isCleared()) {
-				String calcTileSrc = calcTileSrc();
-				String cacheFileName = calcCacheName();
-				image.update(calcTileSrc, cacheFileName);
+				image.update(calcTileSrc, cacheFileName, fadeIn);
 				// image = new Image(calcTileSrc, cacheFileName);
 				// Log.d(TAG, "cache name : " + cacheFileName);
 			}
@@ -251,7 +246,12 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 	}
 
 	public String calcTileSrc() {
-		String src = viewport.context.getString(R.string.tileUrl);
+		String src;
+		if (Preferences.isDevServer()) {
+			src = viewport.context.getString(R.string.tileUrlDev);
+		} else {
+			src = viewport.context.getString(R.string.tileUrl);
+		}
 		String scaleString = Integer.toString(viewport.scale);
 		String mapTileXS = Integer.valueOf(Math.abs(mapTileX)).toString();
 		String mapTileYS = Integer.valueOf(Math.abs(mapTileY)).toString();

@@ -25,19 +25,27 @@
             android:summaryOn="Infos on"
             android:title="Dev Infos" >
         </CheckBoxPreference>
-    </PreferenceCategory>
-    <PreferenceCategory
-        android:key="display"
-        android:summary="réglage d&apos;affichage"
-        android:title="affichage" >
         <CheckBoxPreference
-            android:key="rescale_pinch_zoom"
-            android:summary="Mise à l&apos;échelle au Zoom"
-            android:summaryOff="Mise à l&apos;échelle après le Zoom"
-            android:summaryOn="Mise à l&apos;échelle pendant le Zoom"
-            android:title="Mise à l&apos;échelle" >
+            android:key="ign_dev_server"
+            android:summary="IGN Dev server"
+            android:summaryOff="Prod server used"
+            android:summaryOn="Dev server used"
+            android:title="IGN Dev server" >
         </CheckBoxPreference>
-    </PreferenceCategory>
+        </PreferenceCategory>
+<!--     <PreferenceCategory -->
+<!--         android:key="display" -->
+<!--         android:enabled="false" -->
+<!--         android:summary="réglage d&apos;affichage" -->
+<!--         android:title="affichage" > -->
+<!--         <CheckBoxPreference -->
+<!--             android:key="rescale_pinch_zoom" -->
+<!--             android:summary="Mise à l&apos;échelle au Zoom" -->
+<!--             android:summaryOff="Mise à l&apos;échelle après le Zoom" -->
+<!--             android:summaryOn="Mise à l&apos;échelle pendant le Zoom" -->
+<!--             android:title="Mise à l&apos;échelle" > -->
+<!--         </CheckBoxPreference> -->
+<!--     </PreferenceCategory> -->
     <PreferenceCategory
         android:key="about"
         android:summary="A propos"

@@ -380,7 +380,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		// center on tapped point
 		float distX = e.getX() - (dm.widthPixels / 2);
 		float distY = e.getY() - (dm.heightPixels / 2);
-		viewport.mouseDrag(Math.round(distX), Math.round(distY));
+		viewport.mouseDragAnimated(Math.round(distX), Math.round(distY));
 		zoomIn();
 		return true;
 	}
@@ -464,7 +464,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	}
 
 	private void moveToPos(Point2D.Float pos) {
-		viewport.moveToPositionAnimated(pos);
+		viewport.moveToPositionAnimated(pos, true);
 		disableLocation();
 	}
 

@@ -26,9 +26,11 @@ import android.util.Log;
 import com.hexagon.map.MapActivity;
 import com.hexagon.map.R;
 import com.hexagon.map.async.AsyncTaskCompleteListener;
+import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
 
-public class SearchService extends AsyncTask<String, Void, com.jhlabs.map.awt.Point2D.Float> {
+public class SearchService extends
+		AsyncTask<String, Void, com.jhlabs.map.awt.Point2D.Float> {
 
 	private AsyncTaskCompleteListener<com.jhlabs.map.awt.Point2D.Float> callback;
 	private static final String PATTERN = "!PATTERN!";
@@ -38,13 +40,14 @@ public class SearchService extends AsyncTask<String, Void, com.jhlabs.map.awt.Po
 	public float posLong;
 	public float posLat;
 
-	public SearchService(MapActivity context, AsyncTaskCompleteListener<com.jhlabs.map.awt.Point2D.Float> cb) {
+	public SearchService(MapActivity context,
+			AsyncTaskCompleteListener<com.jhlabs.map.awt.Point2D.Float> cb) {
 		this.mapActivity = context;
 		callback = cb;
 	}
 
 	public void submit(String pattern) {
-		
+
 		execute(pattern);
 	}
 
@@ -56,22 +59,35 @@ public class SearchService extends AsyncTask<String, Void, com.jhlabs.map.awt.Po
 	@Override
 	protected void onPostExecute(com.jhlabs.map.awt.Point2D.Float result) {
 		callback.onTaskComplete(result);
-//		mapActivity.moveToSearch(result);
+		// mapActivity.moveToSearch(result);
 	}
 
 	public com.jhlabs.map.awt.Point2D.Float search(String pattern) {
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
-			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
-					"HexagonMap");
+			if (Preferences.isDevServer()) {
+				httpClient.getParams().setParameter(
+						CoreProtocolPNames.USER_AGENT, "Android");
+			} else {
+				httpClient.getParams().setParameter(
+						CoreProtocolPNames.USER_AGENT, "HexagonMap.fr");
+			}
+//			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
+//					"HexagonMap");
 			httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY,
 					CookiePolicy.RFC_2109);
 			String response;
 			Resources res = mapActivity.getResources();
-			String searchUrl = res.getString(R.string.searchUrl);
+			String searchUrl;
+			if (Preferences.isDevServer()) {
+				searchUrl = res.getString(R.string.searchUrlDev);
+			} else {
+				searchUrl = res.getString(R.string.searchUrl);
+			}
 			HttpPost method = new HttpPost(new URI(searchUrl));
-			method.addHeader("Referer", "HexagonMap.fr");
-
+			if (!Preferences.isDevServer()) {
+				method.addHeader("Referer", "HexagonMap.fr");
+			}
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			stringBuilder
@@ -112,7 +128,8 @@ public class SearchService extends AsyncTask<String, Void, com.jhlabs.map.awt.Po
 			posLat = Float.valueOf(p[0]);
 			Log.d(TAG, "reponse :  " + value);
 
-			com.jhlabs.map.awt.Point2D.Float point = new com.jhlabs.map.awt.Point2D.Float(posLong, posLat);
+			com.jhlabs.map.awt.Point2D.Float point = new com.jhlabs.map.awt.Point2D.Float(
+					posLong, posLat);
 			return point;
 		} catch (Exception e) {
 			e.printStackTrace();

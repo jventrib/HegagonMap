@@ -133,7 +133,7 @@ public class Viewport extends AbstractPositionableElement implements
 		marginY = 0;
 
 		mapScreenWidth = dm.widthPixels;
-//		mapScreenHeight = dm.heightPixels - 75;
+		// mapScreenHeight = dm.heightPixels - 75;
 		mapScreenHeight = dm.heightPixels;
 
 		int tempX = mapScreenWidth + 2 * marginX;
@@ -153,12 +153,12 @@ public class Viewport extends AbstractPositionableElement implements
 		}
 
 		grid2 = new Tile[nbTileX][nbTileY];
-		for (int ix = 0; ix < this.nbTileX; ix++) {
-			grid2[ix] = new Tile[nbTileY];
-			for (int iy = 0; iy < this.nbTileY; iy++) {
-				this.grid2[ix][iy] = createTile(ix, iy);
-			}
-		}
+		// for (int ix = 0; ix < this.nbTileX; ix++) {
+		// grid2[ix] = new Tile[nbTileY];
+		// for (int iy = 0; iy < this.nbTileY; iy++) {
+		// this.grid2[ix][iy] = createTile(ix, iy);
+		// }
+		// }
 
 		BitmapFactory.Options opt = new BitmapFactory.Options();
 		// opt.inDither = true;
@@ -226,6 +226,14 @@ public class Viewport extends AbstractPositionableElement implements
 		move();
 	}
 
+	
+	public void mouseDragAnimated(int l, int m) {
+		float newCoordX = calcMapDeltaX(getcoordX(), l);
+		float newCoordY = calcMapDeltaY(getcoordY(), m);
+		com.jhlabs.map.awt.Point2D.Float pos = new com.jhlabs.map.awt.Point2D.Float(newCoordX, newCoordY);
+		moveToPositionAnimated(pos, false);
+	}
+
 	public void initPosition() {
 		refresh();
 		// move(0, 0);
@@ -239,7 +247,7 @@ public class Viewport extends AbstractPositionableElement implements
 			for (int iy = 0; iy < nbTileY; iy++) {
 				Tile t = grid1[ix][iy];
 				t.positionImage();
-				t.correctMapImage();
+				t.correctMapImage(false);
 				if (!t.visible && t.image.visibleOnTop) {
 					// Out of syncro, scrolling was too quick, need to recompute
 					// all tiles
@@ -356,9 +364,13 @@ public class Viewport extends AbstractPositionableElement implements
 
 	public synchronized List<Tile> getTilesList2() {
 		List<Tile> result = new ArrayList<Tile>();
+
 		for (int ix = 0; ix < this.nbTileX; ix++) {
 			for (int iy = 0; iy < this.nbTileY; iy++) {
-				result.add(grid2[ix][iy]);
+				Tile tile = grid2[ix][iy];
+				if (tile != null) {
+					result.add(tile);
+				}
 			}
 		}
 		return result;
@@ -399,8 +411,8 @@ public class Viewport extends AbstractPositionableElement implements
 		for (Tile t : sortedTiles) {
 			t.clearImage();
 			t.fillImage();
-			t.correctMapImage();
-			t.updateMapImage();
+			t.correctMapImage(true);
+//			t.updateMapImage(true);
 		}
 
 	}
@@ -438,7 +450,7 @@ public class Viewport extends AbstractPositionableElement implements
 				float longitude = new java.lang.Float(location.getLongitude());
 				float latitude = new java.lang.Float(location.getLatitude());
 				Point2D.Float pos = new Point2D.Float(longitude, latitude);
-				moveToPositionAnimated(pos);
+				moveToPositionAnimated(pos, true);
 			}
 		}
 	}
@@ -601,13 +613,15 @@ public class Viewport extends AbstractPositionableElement implements
 
 	}
 
-	public void moveToPositionAnimated(Point2D.Float pos) {
+	public void moveToPositionAnimated(Point2D.Float pos, boolean project) {
 		if (pos != null) {
 			if (locationChangedAnimation.hasEnded()
 					|| !locationChangedAnimation.hasStarted()) {
 				locationChangedAnimation.initialX = getcoordX();
 				locationChangedAnimation.initialY = getcoordY();
-				pos = MercatorProjection.getInstance().project(pos);
+				if (project) {
+					pos = MercatorProjection.getInstance().project(pos);
+				}
 				locationChangedAnimation.finalX = pos.x;
 				locationChangedAnimation.finalY = pos.y;
 				locationChangedAnimation.initialize(0, 0, 0, 0);
@@ -708,9 +722,7 @@ public class Viewport extends AbstractPositionableElement implements
 			for (Tile t : tiles) {
 				if (t.visible) {
 					t.positionOldImage();
-					synchronized (t) {
-						t.draw(canvas, m1, paint);
-					}
+					t.draw(canvas, m1, paint);
 				}
 			}
 		}

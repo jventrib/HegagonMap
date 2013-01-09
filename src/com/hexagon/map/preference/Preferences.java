@@ -44,6 +44,11 @@ public class Preferences {
 		return prefs.getBoolean("devMode", false);
 	}
 
+	public static boolean isDevServer() {
+		return prefs.getBoolean("ign_dev_server", false);
+	}
+
+	
 	public static void setDevMode(boolean b) {
 		String param = "devMode";
 		setParamBoolean(param, b);

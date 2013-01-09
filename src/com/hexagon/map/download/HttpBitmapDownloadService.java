@@ -38,7 +38,6 @@ public class HttpBitmapDownloadService {
 	// private HttpGet method;
 	private boolean alreadyRunning;
 	private String token;
-	private Object lock = new Object();
 	// private File cacheDir;
 
 	private ExecutorService httpGetExecutor;
@@ -78,31 +77,28 @@ public class HttpBitmapDownloadService {
 
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
-//			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
-//					"HexagonMap");
-			
-			httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
-					"Android");
-			
+			// httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
+			// "HexagonMap");
+
+			if (Preferences.isDevServer()) {
+				httpClient.getParams().setParameter(
+						CoreProtocolPNames.USER_AGENT, "Android");
+			} else {
+				httpClient.getParams().setParameter(
+						CoreProtocolPNames.USER_AGENT, "HexagonMap.fr");
+			}
 			httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY,
 					CookiePolicy.RFC_2109);
 			HttpResponse response;
 			image.method = new HttpGet(new URI(image.getSrc()));
-//			image.method.addHeader("Referer", "HexagonMap.fr");
-			
-			// image.method.addHeader("Cookie", "jknch=hcnkj; ign=" +
-			// getToken());
-			// method.addHeader("Cookie", "jknch=hcnkj; ign=");
-
+			if (!Preferences.isDevServer()) {
+				image.method.addHeader("Referer", "HexagonMap.fr");
+			}
 			if (image.state == LoadState.CLEARED)
 				return;
 
-			synchronized (lock) {
-				if (Preferences.isLogging()) {
-					JveLog.d(TAG, this + "-performing get " + image.getSrc()
-							+ ". Method : " + image.method);
-				}
-			}
+			JveLog.d(TAG, this + "-performing get " + image.getSrc()
+					+ ". Method : " + image.method);
 			response = httpClient.execute(image.method);
 			// if (Parameters.logging) {
 			// JveLog.d(TAG, this + "- get done or aborted " + getSrc()
@@ -175,24 +171,25 @@ public class HttpBitmapDownloadService {
 				os.close();
 			}
 
-			// synchronized (monitor) {
-			if (image.state == LoadState.CLEARED) {
-				if (Preferences.isLogging()) {
-					JveLog.d(TAG, this + "-outdated, state=loaded");
-				}
-			} else {
-				image.state = LoadState.LOADED;
-				image.visibleOnTop = true;
+			synchronized (image) {
+				if (image.state == LoadState.CLEARED) {
+					if (Preferences.isLogging()) {
+						JveLog.d(TAG, this + "-outdated, state=loaded");
+					}
+				} else {
+					image.state = LoadState.LOADED;
+					image.visibleOnTop = true;
 
-				if (Preferences.isLogging()) {
-					// JveLog.d(TAG, this + "-state=loaded, src = " + getSrc());
+					if (Preferences.isLogging()) {
+						// JveLog.d(TAG, this + "-state=loaded, src = " +
+						// getSrc());
+					}
 				}
-			}
-			// }
-			image.bmp = bitmap;
-			if (Build.VERSION.SDK_INT >= 12) {
-				Viewport.addBitmapToMemoryCache(image.getCacheFileName(),
-						bitmap);
+				image.bmp = bitmap;
+				if (Build.VERSION.SDK_INT >= 12) {
+					Viewport.addBitmapToMemoryCache(image.getCacheFileName(),
+							bitmap);
+				}
 			}
 			// return null;
 		} catch (Exception e) {
@@ -274,9 +271,9 @@ public class HttpBitmapDownloadService {
 
 		@Override
 		public void run() {
-			synchronized (image) {
-				getHttpBitmap(image);
-			}
+			// synchronized (image) {
+			getHttpBitmap(image);
+			// }
 		}
 	}
 

@@ -28,19 +28,21 @@ public class Image implements Cloneable {
 
 //	public boolean visibleOnTop = false;
 
-	public Image(String src, String cacheFileName) {
-		update(src, cacheFileName);
-	}
+//	public Image(String src, String cacheFileName) {
+//		update(src, cacheFileName);
+//	}
 
 	public Image() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public synchronized void update(String src, String cacheFileName) {
+	public synchronized void update(String src, String cacheFileName, boolean fadeIn) {
 		this.src = src;
 		this.cacheFileName = cacheFileName;
 		startLoadBitmap();
-		alpha = 0;
+		if (fadeIn) {
+			alpha = 0;
+		}
 	}
 
 	public void setSrc(String src) {

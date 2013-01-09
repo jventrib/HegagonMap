@@ -120,13 +120,14 @@ public class CacheBitmapDownloadService {
 				Bitmap bitmap = BitmapFactory
 						.decodeByteArray(b, 0, length, opt);
 				is.close();
-				image.bmp = bitmap;
-				image.state = LoadState.LOADED;
-				image.visibleOnTop = true;
-
-				if (Build.VERSION.SDK_INT >= 12) {
-					Viewport.addBitmapToMemoryCache(image.getCacheFileName(),
-							bitmap);
+				synchronized (image) {
+					image.bmp = bitmap;
+					image.state = LoadState.LOADED;
+					image.visibleOnTop = true;
+					if (Build.VERSION.SDK_INT >= 12) {
+						Viewport.addBitmapToMemoryCache(
+								image.getCacheFileName(), bitmap);
+					}
 				}
 			} else {
 				HttpBitmapDownloadService.getInstance().submit(image);
@@ -172,9 +173,9 @@ public class CacheBitmapDownloadService {
 
 		@Override
 		public void run() {
-			synchronized (image) {
-				getTileBitmap(image);
-			}
+			// synchronized (image) {
+			getTileBitmap(image);
+			// }
 		}
 	}
 
