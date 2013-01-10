@@ -78,7 +78,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 				if (image.alpha < 255) {
 					Paint paintAlpha = new Paint(paint);
 					// canvas.drawBitmap(layer.noSrcBmp, m, paint);
-					image.alpha = image.alpha + 40;
+					image.alpha = image.alpha + 30;
 
 					if (image.alpha > 255)
 						image.alpha = 255;
@@ -228,7 +228,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 			if (image == null) {
 				String calcTileSrc = calcTileSrc();
 				String cacheFileName = calcCacheName();
-				image = new Image(calcTileSrc, cacheFileName, this);
+				image = new Image(calcTileSrc, cacheFileName, fadeIn, this);
 			} else if (image.isCleared()) {
 				String calcTileSrc = calcTileSrc();
 				String cacheFileName = calcCacheName();

@@ -29,8 +29,8 @@ public class Image implements Cloneable {
 
 //	public boolean visibleOnTop = false;
 
-	public Image(String src, String cacheFileName, Tile tile) {
-		update(src, cacheFileName, false, tile);
+	public Image(String src, String cacheFileName, boolean fadeIn, Tile tile) {
+		update(src, cacheFileName, fadeIn, tile);
 	}
 
 	public Image() {
