@@ -1,7 +1,6 @@
 package com.hexagon.map;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -248,7 +247,7 @@ public class Viewport extends AbstractPositionableElement implements
 				Tile t = grid1[ix][iy];
 				t.positionImage();
 				t.correctMapImage(false);
-				if (!t.visible && t.image.visibleOnTop) {
+				if (!t.visible && t.visibleOnTop) {
 					// Out of syncro, scrolling was too quick, need to recompute
 					// all tiles
 					refresh();
@@ -731,7 +730,7 @@ public class Viewport extends AbstractPositionableElement implements
 		// paint2.setAlpha(100);
 
 		for (Tile t : tiles) {
-			if (t.image.visibleOnTop && !zoomOnGoing) {
+			if (t.visibleOnTop && !zoomOnGoing) {
 				t.draw(canvas, m, paint2);
 			}
 		}
@@ -778,7 +777,7 @@ public class Viewport extends AbstractPositionableElement implements
 					Tile tileSrc = grid1[ix][iy];
 					grid2[ix][iy] = (Tile) tileSrc.clone();
 					if (tileSrc.image != null) {
-						tileSrc.image.visibleOnTop = false;
+						tileSrc.visibleOnTop = false;
 					}
 				}
 			}
@@ -798,7 +797,7 @@ public class Viewport extends AbstractPositionableElement implements
 		for (int ix = 0; ix < this.nbTileX; ix++) {
 			for (int iy = 0; iy < this.nbTileY; iy++) {
 				Tile t = this.grid1[ix][iy];
-				boolean v = t.image.visibleOnTop;
+				boolean v = t.visibleOnTop;
 				boolean opaque = t.image.alpha == 255;
 				if (zoomOnGoing || !v || !opaque) {
 					return false;

@@ -24,21 +24,23 @@ public class Image implements Cloneable {
 
 	public int alpha = 255;
 
-	public boolean visibleOnTop = true;
+	public Tile tile;
+
 
 //	public boolean visibleOnTop = false;
 
-//	public Image(String src, String cacheFileName) {
-//		update(src, cacheFileName);
-//	}
+	public Image(String src, String cacheFileName, Tile tile) {
+		update(src, cacheFileName, false, tile);
+	}
 
 	public Image() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public synchronized void update(String src, String cacheFileName, boolean fadeIn) {
+	public synchronized void update(String src, String cacheFileName, boolean fadeIn, Tile tile) {
 		this.src = src;
 		this.cacheFileName = cacheFileName;
+		this.tile = tile;
 		startLoadBitmap();
 		if (fadeIn) {
 			alpha = 0;
@@ -60,7 +62,7 @@ public class Image implements Cloneable {
 			if (bitmapFromMemCache != null) {
 				bmp = bitmapFromMemCache;
 				state = LoadState.LOADED;
-				visibleOnTop = true;
+				tile.visibleOnTop = true;
 				JveLog.d("Image", "Loaded from LRU Cache");
 				return;
 			}

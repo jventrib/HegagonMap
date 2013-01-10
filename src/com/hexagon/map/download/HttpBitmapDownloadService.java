@@ -178,7 +178,7 @@ public class HttpBitmapDownloadService {
 					}
 				} else {
 					image.state = LoadState.LOADED;
-					image.visibleOnTop = true;
+					image.tile.visibleOnTop = true;
 
 					if (Preferences.isLogging()) {
 						// JveLog.d(TAG, this + "-state=loaded, src = " +

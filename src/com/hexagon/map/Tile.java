@@ -29,6 +29,8 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
 	public boolean visible = true;
 
+	public boolean visibleOnTop = true;
+
 	private final Viewport viewport;
 
 	final Handler initGeoCookieHandler = new Handler();
@@ -189,8 +191,8 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 			image.abortDownload();
 		}
 
-		// image = null;
-		image.state = LoadState.CLEARED;
+		 image = null;
+//		image.state = LoadState.CLEARED;
 		visible = false;
 		JveLog.d(TAG, this + "-task cancelled");
 		// }
@@ -223,10 +225,14 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 			JveLog.d(TAG, this + "-Visible : false");
 		} else {
 
-			if (image.isCleared()) {
+			if (image == null) {
 				String calcTileSrc = calcTileSrc();
 				String cacheFileName = calcCacheName();
-				image.update(calcTileSrc, cacheFileName, fadeIn);
+				image = new Image(calcTileSrc, cacheFileName, this);
+			} else if (image.isCleared()) {
+				String calcTileSrc = calcTileSrc();
+				String cacheFileName = calcCacheName();
+				image.update(calcTileSrc, cacheFileName, fadeIn, this);
 				// image = new Image(calcTileSrc, cacheFileName);
 				// Log.d(TAG, "cache name : " + cacheFileName);
 			}

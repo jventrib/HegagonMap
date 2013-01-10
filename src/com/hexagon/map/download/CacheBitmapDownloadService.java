@@ -123,7 +123,7 @@ public class CacheBitmapDownloadService {
 				synchronized (image) {
 					image.bmp = bitmap;
 					image.state = LoadState.LOADED;
-					image.visibleOnTop = true;
+					image.tile.visibleOnTop = true;
 					if (Build.VERSION.SDK_INT >= 12) {
 						Viewport.addBitmapToMemoryCache(
 								image.getCacheFileName(), bitmap);
