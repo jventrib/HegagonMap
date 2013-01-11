@@ -543,25 +543,22 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 
 	@Override
 	public boolean onTouchEvent(MotionEvent me) {
-		// long timeSincePinch = System.currentTimeMillis() - pinchDoneTime;
-		// if (timeSincePinch < 4) {
-		// return false;
-		// }
-		//
-		// if (me.getAction() == MotionEvent.ACTION_POINTER_UP
-		// || me.getAction() == MotionEvent.ACTION_UP) {
-		// pinchDone = false;
-		// }
-		// mScaleDetector.onTouchEvent(me);
-		// if (pinchDone) {
-		// return true;
-		// }
+		final int action = me.getAction();
+		final int fingersCount = me.getPointerCount();
+		if ((action == MotionEvent.ACTION_POINTER_UP) && (fingersCount == 2)) {
+			onTwoFingersTap();
+			return true;
+		}
 
 		mScaleDetector.onTouchEvent(me);
 		viewport.resetInertiaScroll();
 		// zoom control are reset to visible at each touch on the screen
 		controller.setVisible(true);
 		return gestureScanner.onTouchEvent(me);
+	}
+
+	private void onTwoFingersTap() {
+		zoomOut();
 	}
 
 	public boolean onScroll(MotionEvent e1, MotionEvent e2,
