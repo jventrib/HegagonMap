@@ -3,6 +3,9 @@ package com.hexagon.map;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.microedition.khronos.opengles.GL10;
+
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -12,6 +15,7 @@ import android.util.Log;
 
 import com.hexagon.map.enums.LoadState;
 import com.hexagon.map.geo.AbstractPositionableElement;
+import com.hexagon.map.opengl.Square;
 import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
 
@@ -41,6 +45,8 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
 	private Matrix m = new Matrix();
 
+	private Square square = new Square();
+	
 	// public AbstractPositionableElement position = new Point();
 
 	public Tile(Viewport layer, int ix, int iy) {
@@ -99,6 +105,27 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 		}
 	}
 
+	
+	
+	public void draw(GL10 gl, Matrix scaleM) {
+		int x = posx;
+		int y = posy;
+		if (visible && Preferences.drawMap) {
+			m = new Matrix(scaleM);
+			m.preTranslate(posx, posy);
+			if (image != null && image.bmp != null && m != null
+					&& image.isLoaded()) {
+//				square.loadGLTexture(gl, image.bmp);
+				square.draw(gl, m);
+				}
+			} else {
+				square.loadGLTexture(viewport.noSrcBmp);
+				square.draw(gl, m);
+			}
+		
+	}
+
+	
 	/**
 	 * Draw some debug infos on tile. Infos including : - TileX, TileY - Src of
 	 * the bitmap - Tile object reference
@@ -282,5 +309,11 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 		return clone;
 
 	}
+
+	public void loadGLTexture(Bitmap bmp) {
+		square.loadGLTexture(bmp);
+		
+	}
+
 
 }

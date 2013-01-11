@@ -32,6 +32,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
@@ -46,6 +47,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.hexagon.map.async.AsyncTaskCompleteListener;
 import com.hexagon.map.geo.Point;
 import com.hexagon.map.location.SearchService;
+import com.hexagon.map.opengl.GLMapView;
 import com.hexagon.map.preference.MapPreferenceActivity;
 import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
@@ -56,9 +58,9 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 
 	private static final int CACHE_TIMEOUT_MINUTE = 10;
 	private static final String TAG = "IGNMapActivity";
-	MapView main;
+	SurfaceView main;
 	GestureDetector gestureScanner;
-	Viewport viewport;
+	public Viewport viewport;
 	DisplayMetrics dm;
 	private ZoomButtonsController controller;
 	private LocationManager locationManager;
@@ -319,7 +321,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
 
-		main = new MapView(this, this);
+		main = new GLMapView(this, this);
 
 		setContentView(R.layout.main);
 		LinearLayout content = (LinearLayout) findViewById(R.id.mapLayout);

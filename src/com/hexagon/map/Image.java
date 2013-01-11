@@ -61,6 +61,7 @@ public class Image implements Cloneable {
 					.getBitmapFromMemCache(cacheFileName);
 			if (bitmapFromMemCache != null) {
 				bmp = bitmapFromMemCache;
+				tile.loadGLTexture(bmp);
 				state = LoadState.LOADED;
 				tile.visibleOnTop = true;
 				JveLog.d("Image", "Loaded from LRU Cache");

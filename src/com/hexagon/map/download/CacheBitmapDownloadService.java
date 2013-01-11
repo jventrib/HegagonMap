@@ -122,6 +122,7 @@ public class CacheBitmapDownloadService {
 				is.close();
 				synchronized (image) {
 					image.bmp = bitmap;
+					image.tile.loadGLTexture(image.bmp);
 					image.state = LoadState.LOADED;
 					image.tile.visibleOnTop = true;
 					if (Build.VERSION.SDK_INT >= 12) {

@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -107,6 +109,8 @@ public class Viewport extends AbstractPositionableElement implements
 	public LocationablePoint locationPoint = new LocationablePoint();
 	Point targetPoint;
 	volatile boolean zoomOnGoing;
+
+	public GL10 gl;
 
 	// //////////////////////////////////////////////////////////////
 
@@ -591,9 +595,9 @@ public class Viewport extends AbstractPositionableElement implements
 	}
 
 	public void handleScroll(float distX, float distY) {
-		synchronized (getMapActivity().surfaceHolder) {
+//		synchronized (getMapActivity().surfaceHolder) {
 			mouseDrag(Math.round(distX), Math.round(distY));
-		}
+//		}
 	}
 
 	public void handleInertiaScroll(float velocityX, float velocityY) {
@@ -756,6 +760,32 @@ public class Viewport extends AbstractPositionableElement implements
 
 	}
 
+	
+	
+	/**
+	 * Draw the viewport, including the tiles, the location Point and the target
+	 * point
+	 * 
+	 * @param canvas
+	 * @param paint
+	 */
+	public synchronized void draw(GL10 gl) {
+		handleAnimations();
+
+		List<Tile> tiles;
+		tiles = getTilesList();
+		// paint2.setAlpha(100);
+
+		for (Tile t : tiles) {
+			if (t.visibleOnTop && !zoomOnGoing) {
+				t.draw(gl, m);
+			}
+		}
+
+
+	}
+
+	
 	private MapActivity getMapActivity() {
 		return (MapActivity) context;
 	}

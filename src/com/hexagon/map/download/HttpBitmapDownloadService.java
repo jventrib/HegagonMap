@@ -186,6 +186,8 @@ public class HttpBitmapDownloadService {
 					}
 				}
 				image.bmp = bitmap;
+				image.tile.loadGLTexture(image.bmp);
+
 				if (Build.VERSION.SDK_INT >= 12) {
 					Viewport.addBitmapToMemoryCache(image.getCacheFileName(),
 							bitmap);
