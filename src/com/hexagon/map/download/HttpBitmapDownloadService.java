@@ -1,39 +1,68 @@
 package com.hexagon.map.download;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.BufferedHttpEntity;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.util.Log;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.hexagon.map.Image;
 import com.hexagon.map.MapActivity;
+import com.hexagon.map.R;
 import com.hexagon.map.Viewport;
 import com.hexagon.map.enums.LoadState;
 import com.hexagon.map.preference.Preferences;
+import com.hexagon.map.util.AeSimpleSHA1;
 import com.hexagon.map.util.JveLog;
 
 public class HttpBitmapDownloadService {
 
+	private static final int LOCAL_COUNT_THRESHOLD = 50;
 	private static final String TAG = "Tile";
 	// private HttpGet method;
 	private boolean alreadyRunning;
@@ -43,6 +72,12 @@ public class HttpBitmapDownloadService {
 	private ExecutorService httpGetExecutor;
 	private static ThreadLocal<byte[]> imageData = new ThreadLocal<byte[]>();
 	private static HttpBitmapDownloadService instance;
+	private Context context;
+	private Activity activity;
+	private String cookie;
+	private int localCount;
+	private Integer globalCount;
+	private boolean alreadyNotified;
 
 	public static HttpBitmapDownloadService getInstance() {
 		if (instance == null) {
@@ -59,7 +94,7 @@ public class HttpBitmapDownloadService {
 		// "/Android/data/com.jventrib.ignDroid/cache/");
 		// cacheDir.mkdirs();
 
-		httpGetExecutor = Executors.newFixedThreadPool(2, new ThreadFactory() {
+		httpGetExecutor = Executors.newFixedThreadPool(1, new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
 				Thread thread = new Thread(r);
@@ -71,6 +106,10 @@ public class HttpBitmapDownloadService {
 	}
 
 	public void getHttpBitmap(Image image) {
+
+		if (!hasPermission()) {
+			return;
+		}
 		if (image.state == LoadState.CLEARED)
 			return;
 		InputStream is = null;
@@ -190,6 +229,8 @@ public class HttpBitmapDownloadService {
 					Viewport.addBitmapToMemoryCache(image.getCacheFileName(),
 							bitmap);
 				}
+				handleCount();
+
 			}
 			// return null;
 		} catch (Exception e) {
@@ -200,6 +241,145 @@ public class HttpBitmapDownloadService {
 				JveLog.e(TAG, "Error while closing stream", e1);
 			}
 		}
+	}
+
+	private boolean hasPermission() {
+
+		// AccountManager manager = AccountManager.get(getActivity());
+		// Account[] accounts = manager.getAccountsByType("com.google");
+		// Account account = accounts[0];
+		// String token = this.buildToken(manager, account);
+		// Log.d(TAG, "First token: " + token);
+		// manager.invalidateAuthToken(account.type, token);
+		// String authToken = buildToken(manager, account);
+		// getCookie(authToken);
+		if (globalCount == null || localCount >= LOCAL_COUNT_THRESHOLD) {
+			String href = "https://hexagonstat.appspot.com/hexagonmapcounter";
+			getGlobalCount(href);
+
+		}
+		if (globalCount > 98000 && !alreadyNotified) {
+			activity.runOnUiThread(new Runnable() {
+				public void run() {
+					Toast.makeText(
+							activity,
+							"Le quota d'utilisation pour ce mois est dépassé !",
+							Toast.LENGTH_SHORT).show();
+				}
+			});
+			alreadyNotified = true;
+			return false;
+		}
+		return true;
+
+	}
+
+	private void handleCount() {
+		localCount++;
+		if (localCount >= LOCAL_COUNT_THRESHOLD) {
+			updateGlobalCount();
+			localCount = 0;
+		}
+	}
+
+	private void updateGlobalCount() {
+		String href = "https://hexagonstat.appspot.com/hexagonmapcounter?inc="
+				+ localCount;
+
+		getGlobalCount(href);
+	}
+
+	
+
+	
+	private void getGlobalCount(String href) {
+
+		
+		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
+
+		DefaultHttpClient client = new DefaultHttpClient();
+
+		SchemeRegistry registry = new SchemeRegistry();
+		SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
+		socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+		registry.register(new Scheme("https", socketFactory, 443));
+		SingleClientConnManager mgr = new SingleClientConnManager(client.getParams(), registry);
+		DefaultHttpClient httpClient = new DefaultHttpClient(mgr, client.getParams());
+
+		// Set verifier     
+		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+
+		// Example send http request
+		
+		
+		CookieStore cookieStore = new BasicCookieStore();
+		BasicClientCookie cookie = new BasicClientCookie("pass", getHash("yxcvbn"));
+		cookie.setDomain("appspot.com");
+		cookie.setPath("/");
+		cookieStore.addCookie(cookie);
+
+		HttpContext localContext = new BasicHttpContext();
+		localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+
+		final HttpParams params = new BasicHttpParams();
+		HttpClientParams.setRedirecting(params, false);
+		httpClient.setParams(params);
+		HttpGet httpget = new HttpGet(href);
+		// httpget.setHeader("Cookie", cookie);
+		try {
+			HttpResponse response = httpClient.execute(httpget, localContext);
+//			HttpResponse response = httpClient.execute(httpget);
+			StatusLine status = response.getStatusLine();
+			if (status.getStatusCode() != 200) {
+				throw new IOException("Invalid response from server: "
+						+ status.toString());
+			}
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				// entity.consumeContent();
+				InputStream inputStream = entity.getContent();
+				ByteArrayOutputStream content = new ByteArrayOutputStream();
+
+				// Read response into a buffered stream
+				int readBytes = 0;
+				byte[] sBuffer = new byte[512];
+				while ((readBytes = inputStream.read(sBuffer)) != -1) {
+					content.write(sBuffer, 0, readBytes);
+				}
+				String dataAsString = new String(content.toByteArray());
+
+				Log.d(TAG, "response: " + dataAsString);
+				globalCount = Integer.parseInt(dataAsString);
+				activity.runOnUiThread(new Runnable() {
+					public void run() {
+						ProgressBar mProgress = (ProgressBar) activity.findViewById(R.id.globalCountProgressBar);
+						mProgress.setProgress(globalCount);
+					}
+				});
+
+				
+			}
+
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private String getHash(String text) {
+		try {
+			return AeSimpleSHA1.SHA1("yxcvbn"+text);
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return text;
 	}
 
 	public void initGeoCookie() {
@@ -260,6 +440,29 @@ public class HttpBitmapDownloadService {
 
 	}
 
+	
+	public void launchUpdateCount() {
+		Runnable task = new UpdateCounterAsyncTask();
+		httpGetExecutor.submit(task);
+
+	}
+
+	public Context getContext() {
+		return context;
+	}
+
+	public void setContext(Context context) {
+		this.context = context;
+	}
+
+	public Activity getActivity() {
+		return activity;
+	}
+
+	public void setActivity(Activity activity) {
+		this.activity = activity;
+	}
+
 	private final class DownloadAsyncTask implements Runnable {
 
 		Image image;
@@ -276,5 +479,20 @@ public class HttpBitmapDownloadService {
 			// }
 		}
 	}
+	
+	private final class UpdateCounterAsyncTask implements Runnable {
+
+		public UpdateCounterAsyncTask() {
+			super();
+		}
+
+		@Override
+		public void run() {
+			// synchronized (image) {
+			updateGlobalCount();
+			// }
+		}
+	}
+
 
 }

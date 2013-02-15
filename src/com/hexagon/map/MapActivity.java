@@ -44,6 +44,7 @@ import android.widget.ZoomButtonsController.OnZoomListener;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.hexagon.map.async.AsyncTaskCompleteListener;
+import com.hexagon.map.download.HttpBitmapDownloadService;
 import com.hexagon.map.geo.Point;
 import com.hexagon.map.location.SearchService;
 import com.hexagon.map.preference.MapPreferenceActivity;
@@ -85,6 +86,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		HttpBitmapDownloadService.getInstance().setActivity(this);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			// Get memory class of this device, exceeding this amount will throw
 			// an
@@ -218,6 +220,7 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 		// adView.destroy();
 		super.onDestroy();
 		clearCache();
+		HttpBitmapDownloadService.getInstance().launchUpdateCount();
 		// layer.stopLoadThread();
 	}
 

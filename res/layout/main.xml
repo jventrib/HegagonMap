@@ -64,7 +64,8 @@
     <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="wrap_content"
+        android:layout_weight="1" >
 
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -96,5 +97,14 @@
         
         
         </FrameLayout>
+
+    <ProgressBar
+        android:id="@+id/globalCountProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="3dp"
+        android:layout_gravity="bottom"
+        android:max="100000"
+        android:minHeight="3dp" />
 
 </LinearLayout>
