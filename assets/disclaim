@@ -1,0 +1,24 @@
+﻿INFORMATION IMPORTANTE
+
+HexagonMap vous permet d'accéder gratuitement aux cartes IGN. 
+Pour cela l'application exploite la licence gratuite à destination du grand public proposé par l'IGN.
+Cette licence s'accompagne de limitations : Pas de mise en cache de manière persistante et un maximum de 100000 transactions par mois.
+
+Cette application a avant tout été développé pour répondre à un besoin personnel, ainsi que pour approfondir mes connaissances en développement Android.
+J'ai décidé de mettre l'application sur Play Store pour faire profiter d'autres personnes de mon travail.
+
+Aujourd'hui le problème est le suivant : le seuil des 100000 transactions mensuel est assez largement dépassé. Plusieurs alternatives se présentent donc :
+
+- Arrêt pur et simple du service 
+- Passage sur un modèle payant. D'autres applications proposent un service semblable sur ce modèle et ils le font très bien. De plus ce n'est pas la vocation première de ce projet.
+- Mise en place d'une limite à 100000 transactions. C'est la voie que j'ai choisi de prendre.
+
+HexagonMap cessera donc de fonctionner une fois ce pallier de 100000 transactions atteint, et jusqu'au mois suivant.
+Par transaction, on entend téléchargement d'une "tuile", c'est à dire un carré de carte de 256 pixels de coté.
+
+Un compteur visuel de la limite globale est ajouté en bas de l'écran, sous la forme d'une barre de progression. Une fois cette barre totalement remplie, les cartes ne se téléchargent plus.
+
+Je suis conscients du coté restrictif de cette limite, mais c'est à ce prix que je peux continuer de proposer l'application.
+Je ne peux que vous inciter à un usage raisonné du service.
+
+Merci de votre compréhension.

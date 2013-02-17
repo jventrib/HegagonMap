@@ -85,7 +85,8 @@ public class MapActivity extends SherlockActivity implements OnGestureListener,
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		new Disclaimer(this).show();
+		
 		HttpBitmapDownloadService.getInstance().setActivity(this);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			// Get memory class of this device, exceeding this amount will throw

@@ -47,6 +47,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.provider.Settings.Secure;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -88,11 +89,6 @@ public class HttpBitmapDownloadService {
 	}
 
 	private HttpBitmapDownloadService() {
-		// cacheDir = new File(Environment.getExternalStorageDirectory(),
-		// "/Android/data/com.jventrib.ignDroid/cache/");
-		// cacheDir = new File(Environment.getExternalStorageDirectory(),
-		// "/Android/data/com.jventrib.ignDroid/cache/");
-		// cacheDir.mkdirs();
 
 		httpGetExecutor = Executors.newFixedThreadPool(1, new ThreadFactory() {
 			@Override
@@ -107,7 +103,7 @@ public class HttpBitmapDownloadService {
 
 	public void getHttpBitmap(Image image) {
 
-		if (!hasPermission()) {
+		if (!Preferences.isDevServer() && !hasPermission()) {
 			return;
 		}
 		if (image.state == LoadState.CLEARED)
@@ -229,7 +225,9 @@ public class HttpBitmapDownloadService {
 					Viewport.addBitmapToMemoryCache(image.getCacheFileName(),
 							bitmap);
 				}
-				handleCount();
+				if (!Preferences.isDevServer()) {
+					handleCount();
+				}
 
 			}
 			// return null;
@@ -245,29 +243,23 @@ public class HttpBitmapDownloadService {
 
 	private boolean hasPermission() {
 
-		// AccountManager manager = AccountManager.get(getActivity());
-		// Account[] accounts = manager.getAccountsByType("com.google");
-		// Account account = accounts[0];
-		// String token = this.buildToken(manager, account);
-		// Log.d(TAG, "First token: " + token);
-		// manager.invalidateAuthToken(account.type, token);
-		// String authToken = buildToken(manager, account);
-		// getCookie(authToken);
 		if (globalCount == null || localCount >= LOCAL_COUNT_THRESHOLD) {
 			String href = "https://hexagonstat.appspot.com/hexagonmapcounter";
-			getGlobalCount(href);
+			getGlobalCount(href, false);
 
 		}
-		if (globalCount > 98000 && !alreadyNotified) {
-			activity.runOnUiThread(new Runnable() {
-				public void run() {
-					Toast.makeText(
-							activity,
-							"Le quota d'utilisation pour ce mois est dépassé !",
-							Toast.LENGTH_SHORT).show();
-				}
-			});
-			alreadyNotified = true;
+		if (globalCount > 98000) {
+			if (!alreadyNotified) {
+				activity.runOnUiThread(new Runnable() {
+					public void run() {
+						Toast.makeText(
+								activity,
+								"Le quota d'utilisation pour ce mois est dépassé !",
+								Toast.LENGTH_LONG).show();
+					}
+				});
+				alreadyNotified = true;
+			}
 			return false;
 		}
 		return true;
@@ -286,13 +278,13 @@ public class HttpBitmapDownloadService {
 		String href = "https://hexagonstat.appspot.com/hexagonmapcounter?inc="
 				+ localCount;
 
-		getGlobalCount(href);
+		getGlobalCount(href, true);
 	}
 
 	
 
 	
-	private void getGlobalCount(String href) {
+	private void getGlobalCount(String href, boolean incMode) {
 
 		
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
@@ -317,7 +309,16 @@ public class HttpBitmapDownloadService {
 		cookie.setDomain("appspot.com");
 		cookie.setPath("/");
 		cookieStore.addCookie(cookie);
-
+		
+		if (incMode) {
+			String android_id = Secure.getString(getContext()
+					.getContentResolver(), Secure.ANDROID_ID);
+			BasicClientCookie cookie2 = new BasicClientCookie("androidId",
+					android_id);
+			cookie2.setDomain("appspot.com");
+			cookie2.setPath("/");
+			cookieStore.addCookie(cookie2);
+		}
 		HttpContext localContext = new BasicHttpContext();
 		localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
 
@@ -488,9 +489,11 @@ public class HttpBitmapDownloadService {
 
 		@Override
 		public void run() {
-			// synchronized (image) {
-			updateGlobalCount();
-			// }
+			if (!Preferences.isDevServer()) {
+				// synchronized (image) {
+				updateGlobalCount();
+				// }
+			}
 		}
 	}
 
