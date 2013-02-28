@@ -3,8 +3,8 @@
     <string name="app_name">HexagonMap</string>
     <string name="description_search">Search</string>
 <!-- DEV -->
-    <string name="tileUrlDev">http://gpp3-wxs.ign.fr/czj03g5y31qfnzwu782qd79t/geoportail/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetTile&amp;LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&amp;STYLE=normal&amp;FORMAT=image/jpeg&amp;TILEMATRIXSET=PM&amp;TILEMATRIX=!SCALE!&amp;TILEROW=!ROW!&amp;TILECOL=!COL!</string>
-    <string name="searchUrlDev">http://gpp3-wxs.ign.fr/czj03g5y31qfnzwu782qd79t/geoportail/ols?</string>
+    <string name="tileUrlDev">http://gpp3-wxs.ign.fr/tt7hrh0u0sbno45w62p3u45v/geoportail/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetTile&amp;LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&amp;STYLE=normal&amp;FORMAT=image/jpeg&amp;TILEMATRIXSET=PM&amp;TILEMATRIX=!SCALE!&amp;TILEROW=!ROW!&amp;TILECOL=!COL!</string>
+    <string name="searchUrlDev">http://gpp3-wxs.ign.fr/tt7hrh0u0sbno45w62p3u45v/geoportail/ols?</string>
 <!-- PROD -->
     <string name="tileUrl">http://gpp3-wxs.ign.fr/4l9i6682teki4ang459b653o/geoportail/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetTile&amp;LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&amp;STYLE=normal&amp;FORMAT=image/jpeg&amp;TILEMATRIXSET=PM&amp;TILEMATRIX=!SCALE!&amp;TILEROW=!ROW!&amp;TILECOL=!COL!</string>
     <string name="searchUrl">http://gpp3-wxs.ign.fr/4l9i6682teki4ang459b653o/geoportail/ols?</string>
