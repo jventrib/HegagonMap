@@ -89,7 +89,6 @@ public class HttpBitmapDownloadService {
 	}
 
 	private HttpBitmapDownloadService() {
-
 		httpGetExecutor = Executors.newFixedThreadPool(1, new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
@@ -248,7 +247,8 @@ public class HttpBitmapDownloadService {
 			getGlobalCount(href, false);
 
 		}
-		if (globalCount > 98000) {
+		int downloadLimit = Integer.parseInt(getContext().getString(R.string.download_limit));
+		if (globalCount > downloadLimit) {
 			if (!alreadyNotified) {
 				activity.runOnUiThread(new Runnable() {
 					public void run() {
