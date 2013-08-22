@@ -107,7 +107,7 @@ public class Image implements Cloneable {
 	@Override
 	protected Image clone() throws CloneNotSupportedException {
 		Image clone = (Image) super.clone();
-		if (bmp != null) {
+		if (bmp != null && !bmp.isRecycled()) {
 //			clone.bmp = Bitmap.createBitmap(bmp);
 			clone.bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth()/2, bmp.getHeight(), null, true);
 			clone.bmp = bmp.copy(bmp.getConfig(), false);

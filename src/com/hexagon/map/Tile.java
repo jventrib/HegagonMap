@@ -11,10 +11,9 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Handler;
-import android.util.Log;
 
-import com.hexagon.map.enums.LoadState;
 import com.hexagon.map.geo.AbstractPositionableElement;
+import com.hexagon.map.opengl.Matrix4;
 import com.hexagon.map.opengl.Square;
 import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
@@ -43,7 +42,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
 	Image image = new Image();
 
-	private Matrix m = new Matrix();
+	private Matrix4 m = new Matrix4();
 
 	private Square square = new Square();
 	
@@ -72,7 +71,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 		List<? super String> l = new ArrayList<String>();
 		l.add("test");
 	}
-
+/*
 	public void draw(Canvas canvas, Matrix scaleM, Paint paint) {
 		int x = posx;
 		int y = posy;
@@ -104,14 +103,14 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 			drawDebugInfos(canvas, paint, x, y);
 		}
 	}
-
+*/
 	
 	
-	public void draw(GL10 gl, Matrix scaleM) {
+	public void draw(GL10 gl, Matrix4 scaleM) {
 		int x = posx;
 		int y = posy;
 		if (visible && Preferences.drawMap) {
-			m = new Matrix(scaleM);
+			m = new Matrix4(scaleM);
 			m.preTranslate(posx, posy);
 			if (image != null && image.bmp != null && m != null
 					&& image.isLoaded()) {

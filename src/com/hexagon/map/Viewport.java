@@ -12,10 +12,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -33,6 +30,7 @@ import android.view.animation.Transformation;
 import com.hexagon.map.geo.AbstractPositionableElement;
 import com.hexagon.map.geo.LocationablePoint;
 import com.hexagon.map.geo.Point;
+import com.hexagon.map.opengl.Matrix4;
 import com.hexagon.map.util.JveLog;
 import com.jhlabs.map.awt.Point2D;
 import com.jhlabs.map.proj.MercatorProjection;
@@ -103,8 +101,8 @@ public class Viewport extends AbstractPositionableElement implements
 	public float zoomScale = 1.0f;
 	public float azimuth_angle;
 
-	private Matrix m = new Matrix();
-	private Matrix mLocation = new Matrix();
+	private Matrix4 m = new Matrix4();
+	private Matrix4 mLocation = new Matrix4();
 
 	public LocationablePoint locationPoint = new LocationablePoint();
 	Point targetPoint;
@@ -712,7 +710,7 @@ public class Viewport extends AbstractPositionableElement implements
 	 * 
 	 * @param canvas
 	 * @param paint
-	 */
+	 
 	public synchronized void draw(Canvas canvas, Paint paint) {
 		handleAnimations();
 		paint.setColor(Color.LTGRAY);
@@ -762,7 +760,7 @@ public class Viewport extends AbstractPositionableElement implements
 		}
 
 	}
-
+*/
 	
 	
 	/**
@@ -775,14 +773,40 @@ public class Viewport extends AbstractPositionableElement implements
 	public synchronized void draw(GL10 gl) {
 		synchronized (frame) {
 			handleAnimations();
+			
+			
 			List<Tile> tiles;
+			Matrix4 m1;
+			m1 = new Matrix4(m);
+			m1.setScale(zoomScale, zoomScale, mapScreenWidth / 2,
+					mapScreenHeight / 2);
+			if (!isGridLoaded()) {
+				tiles = getTilesList2();
+				for (Tile t : tiles) {
+					if (t.visible) {
+						t.positionOldImage();
+						t.draw(gl, m1);
+					}
+				}
+			}
 			tiles = getTilesList();
 			// paint2.setAlpha(100);
+
 			for (Tile t : tiles) {
 				if (t.visibleOnTop && !zoomOnGoing) {
 					t.draw(gl, m);
 				}
 			}
+
+			
+//			List<Tile> tiles;
+//			tiles = getTilesList();
+//			// paint2.setAlpha(100);
+//			for (Tile t : tiles) {
+//				if (t.visibleOnTop && !zoomOnGoing) {
+//					t.draw(gl, m);
+//				}
+//			}
 		}
 
 

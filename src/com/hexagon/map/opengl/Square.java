@@ -6,9 +6,10 @@ import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import com.hexagon.map.util.MatrixUtil;
+
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.opengl.GLES10;
 import android.opengl.GLUtils;
 import android.util.DisplayMetrics;
@@ -100,15 +101,18 @@ public class Square {
 	 * 
 	 * @param m
 	 */
-	public void draw(GL10 gl, Matrix m) {
+	public void draw(GL10 gl, Matrix4 m) {
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
 
-		float[] pts = new float[2];
-		m.mapPoints(pts);
-
-		gl.glLoadIdentity();
-		gl.glTranslatef(pts[0], pts[1], 0.0f);
+//		float[] pts = new float[2];
+//		m.mapPoints(pts);
+//		float[] anM = new float[9];
+//		m.getValues(anM);
+//		float[] glM = MatrixUtil.convertM9ToM16(anM);
+		
+		gl.glLoadMatrixf(m.m, 0);
+//		gl.glTranslatef(pts[0], pts[1], 0.0f);
 
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);

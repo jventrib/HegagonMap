@@ -52,7 +52,7 @@ class MapView extends SurfaceView implements SurfaceHolder.Callback {
 			startTime = System.currentTimeMillis();
 		}
 
-		mapActivity.viewport.draw(canvas, paint);
+//		mapActivity.viewport.draw(canvas, paint);
 
 		if (iteration == 49) {
 			long endTime = System.currentTimeMillis();
