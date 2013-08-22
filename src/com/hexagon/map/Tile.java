@@ -115,11 +115,11 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 			m.preTranslate(posx, posy);
 			if (image != null && image.bmp != null && m != null
 					&& image.isLoaded()) {
-//				square.loadGLTexture(gl, image.bmp);
+				square.loadGLTexture(image.bmp);
 				square.draw(gl, m);
 				}
 			} else {
-				square.loadGLTexture(viewport.noSrcBmp);
+				//square.loadGLTexture(viewport.noSrcBmp);
 				square.draw(gl, m);
 			}
 		
@@ -311,7 +311,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 	}
 
 	public void loadGLTexture(Bitmap bmp) {
-		square.loadGLTexture(bmp);
+//		square.loadGLTexture(bmp);
 		
 	}
 

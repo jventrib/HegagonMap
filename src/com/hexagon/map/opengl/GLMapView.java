@@ -11,12 +11,11 @@ import android.graphics.Paint;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
-import android.opengl.Matrix;
 import android.util.DisplayMetrics;
 import android.view.SurfaceHolder;
 
 import com.hexagon.map.MapActivity;
-import com.hexagon.map.Tile;
+import com.hexagon.map.preference.Preferences;
 
 /**
  * Main view class
@@ -30,8 +29,7 @@ public class GLMapView extends GLSurfaceView implements SurfaceHolder.Callback {
 
 		private Square mSquare;
 		private Triangle mTriangle;
-		
-		
+
 		@Override
 		public void onDrawFrame(GL10 gl) {
 			GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -43,12 +41,12 @@ public class GLMapView extends GLSurfaceView implements SurfaceHolder.Callback {
 			// Calculate the projection and view transformation
 			// Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
 
-//			gl.glTranslatef(100.0f, 100.0f, 0.0f);
+			// gl.glTranslatef(100.0f, 100.0f, 0.0f);
 
-//			mSquare.draw(gl);
-			
+			// mSquare.draw(gl);
+
 			mapActivity.viewport.draw(gl);
-	
+
 
 		}
 
@@ -75,7 +73,7 @@ public class GLMapView extends GLSurfaceView implements SurfaceHolder.Callback {
 			gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			mSquare = new Square();
 			mTriangle = new Triangle();
-			
+
 		}
 
 	}

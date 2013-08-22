@@ -41,7 +41,7 @@ public class Preferences {
 	}
 
 	public static boolean isDevMode() {
-		return prefs.getBoolean("devMode", false);
+		return prefs.getBoolean("devMode", true);
 	}
 
 	public static boolean isDevServer() {

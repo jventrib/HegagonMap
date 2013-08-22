@@ -112,6 +112,8 @@ public class Viewport extends AbstractPositionableElement implements
 
 	public GL10 gl;
 
+	private Object frame = new Object();
+
 	// //////////////////////////////////////////////////////////////
 
 	public Location getCurrentBestLocation() {
@@ -243,19 +245,20 @@ public class Viewport extends AbstractPositionableElement implements
 	}
 
 	public void move() {
-		if (zoomOnGoing)
-			return;
-
-		for (int ix = 0; ix < nbTileX; ix++) {
-			for (int iy = 0; iy < nbTileY; iy++) {
-				Tile t = grid1[ix][iy];
-				t.positionImage();
-				t.correctMapImage(false);
-				if (!t.visible && t.visibleOnTop) {
-					// Out of syncro, scrolling was too quick, need to recompute
-					// all tiles
-					refresh();
-					return;
+		synchronized (frame) {
+			if (zoomOnGoing)
+				return;
+			for (int ix = 0; ix < nbTileX; ix++) {
+				for (int iy = 0; iy < nbTileY; iy++) {
+					Tile t = grid1[ix][iy];
+					t.positionImage();
+					t.correctMapImage(false);
+					if (!t.visible && t.visibleOnTop) {
+						// Out of syncro, scrolling was too quick, need to recompute
+						// all tiles
+						refresh();
+						return;
+					}
 				}
 			}
 		}
@@ -770,15 +773,15 @@ public class Viewport extends AbstractPositionableElement implements
 	 * @param paint
 	 */
 	public synchronized void draw(GL10 gl) {
-		handleAnimations();
-
-		List<Tile> tiles;
-		tiles = getTilesList();
-		// paint2.setAlpha(100);
-
-		for (Tile t : tiles) {
-			if (t.visibleOnTop && !zoomOnGoing) {
-				t.draw(gl, m);
+		synchronized (frame) {
+			handleAnimations();
+			List<Tile> tiles;
+			tiles = getTilesList();
+			// paint2.setAlpha(100);
+			for (Tile t : tiles) {
+				if (t.visibleOnTop && !zoomOnGoing) {
+					t.draw(gl, m);
+				}
 			}
 		}
 

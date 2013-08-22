@@ -35,6 +35,8 @@ public class Square {
 			1.0f, 0.0f // bottom right (V3)
 	};
 
+	private Bitmap bitmap;
+
 	public Square() {
 		// a float has 4 bytes so we allocate for each coordinate 4 bytes
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
@@ -58,8 +60,15 @@ public class Square {
 	}
 
 	public void loadGLTexture(Bitmap bitmap) {
+		if (bitmap == null || this.bitmap == bitmap) {
+			return;
+		}
+		this.bitmap = bitmap;
 		// loading texture
 		Bitmap flippedBitmap = flip(bitmap);
+		if (flippedBitmap == null) {
+			return;
+		}
 		// generate one texture pointer
 		GLES10.glGenTextures(1, textures, 0);
 		// ...and bind it to our array
@@ -76,6 +85,13 @@ public class Square {
 		GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, flippedBitmap, 0);
 
 		// Clean up
+		
+		if (bitmap != null && !bitmap.isRecycled()) 
+        {
+			bitmap.recycle();
+//			bitmap = null;
+//            System.gc(); 
+        }
 //		 bitmap.recycle();
 	}
 
@@ -119,9 +135,12 @@ public class Square {
 	Bitmap flip(Bitmap d) {
 		Matrix m = new Matrix();
 		m.preScale(1, -1);
-		Bitmap dst = Bitmap.createBitmap(d, 0, 0, d.getWidth(), d.getHeight(),
-				m, false);
-		dst.setDensity(DisplayMetrics.DENSITY_DEFAULT);
+		Bitmap dst = null;
+		if (!d.isRecycled()) {
+			dst = Bitmap.createBitmap(d, 0, 0, d.getWidth(), d.getHeight(), m,
+					false);
+			dst.setDensity(DisplayMetrics.DENSITY_DEFAULT);
+		}
 		return dst;
 	}
 }
