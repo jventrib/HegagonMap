@@ -23,6 +23,7 @@ public class Matrix4 {
     }
 
     public void preTranslate(int posx, int posy) {
+        Matrix.setIdentityM(m, 0);
         Matrix.translateM(m, 0, posx, posy, 0.0f);
     }
 
