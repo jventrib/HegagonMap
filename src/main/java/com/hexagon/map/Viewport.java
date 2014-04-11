@@ -12,7 +12,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -250,7 +249,7 @@ public class Viewport extends AbstractPositionableElement implements
 				for (int iy = 0; iy < nbTileY; iy++) {
 					Tile t = grid1[ix][iy];
 					t.positionImage();
-					t.correctMapImage(false);
+					t.correctMapImage(false, context);
 					if (!t.visible && t.visibleOnTop) {
 						// Out of syncro, scrolling was too quick, need to recompute
 						// all tiles
@@ -415,7 +414,7 @@ public class Viewport extends AbstractPositionableElement implements
 		for (Tile t : sortedTiles) {
 			t.clearImage();
 			t.fillImage();
-			t.correctMapImage(true);
+			t.correctMapImage(true, context);
 //			t.updateMapImage(true);
 		}
 
