@@ -1,0 +1,53 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // replace with the current version of the Android plugin
+        classpath 'com.android.tools.build:gradle:0.9+'
+    }
+}
+
+apply plugin: 'android'
+def AAVersion = '3.0.1'
+
+//task _debugCompile(dependsOn: "Hexaloc-AppEngine:assemble")
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+
+    compile 'com.squareup.picasso:picasso:2.2.0'
+
+
+    compile 'com.netflix.rxjava:rxjava-android:+'
+    compile 'com.netflix.rxjava:rxjava-async-util:+'
+
+//    provided 'com.squareup.dagger:dagger-compiler:1.2.0'
+
+    compile 'com.android.support:support-v4:19.0.+'
+    compile 'com.google.android.gms:play-services:4.+'
+    compile 'com.android.support:appcompat-v7:+'
+}
+
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion '19.0.1'
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 19
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+        }
+    }
+
+}
+
