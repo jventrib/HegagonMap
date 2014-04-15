@@ -766,8 +766,6 @@ public class Viewport extends AbstractPositionableElement implements
 	 * Draw the viewport, including the tiles, the location Point and the target
 	 * point
 	 * 
-	 * @param canvas
-	 * @param paint
 	 */
 	public synchronized void draw(GL10 gl) {
 		synchronized (frame) {
@@ -779,15 +777,15 @@ public class Viewport extends AbstractPositionableElement implements
 			m1 = new Matrix4(m);
 			m1.setScale(zoomScale, zoomScale, mapScreenWidth / 2,
 					mapScreenHeight / 2);
-			if (!isGridLoaded()) {
-				tiles = getTilesList2();
-				for (Tile t : tiles) {
-					if (t.visible) {
-						t.positionOldImage();
-						t.draw(gl, m1);
-					}
-				}
-			}
+//			if (!isGridLoaded()) {
+//				tiles = getTilesList2();
+//				for (Tile t : tiles) {
+//					if (t.visible) {
+//						t.positionOldImage();
+//						t.draw(gl, m1);
+//					}
+//				}
+//			}
 			tiles = getTilesList();
 			// paint2.setAlpha(100);
 
@@ -832,9 +830,7 @@ public class Viewport extends AbstractPositionableElement implements
 				for (int iy = 0; iy < nbTileY; iy++) {
 					Tile tileSrc = grid1[ix][iy];
 					grid2[ix][iy] = (Tile) tileSrc.clone();
-					if (tileSrc.image != null) {
 						tileSrc.visibleOnTop = false;
-					}
 				}
 			}
 			// zoomScale = 1.0f;
@@ -854,7 +850,7 @@ public class Viewport extends AbstractPositionableElement implements
 			for (int iy = 0; iy < this.nbTileY; iy++) {
 				Tile t = this.grid1[ix][iy];
 				boolean v = t.visibleOnTop;
-				boolean opaque = t.image.alpha == 255;
+				boolean opaque = true;
 				if (zoomOnGoing || !v || !opaque) {
 					return false;
 				}
