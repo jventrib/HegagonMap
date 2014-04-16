@@ -120,15 +120,6 @@ public class MapActivity extends Activity implements OnGestureListener,
             // Use 1/8th of the available memory for this memory cache.
             final int cacheSize = 1024 * 1024 * memClass / 8;
 
-            Viewport.mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
-                @Override
-                protected int sizeOf(String key, Bitmap bitmap) {
-                    // The cache size will be measured in bytes rather than
-                    // number
-                    // of items.
-                    return bitmap.getByteCount();
-                }
-            };
         }
 
         // Init the cache directory

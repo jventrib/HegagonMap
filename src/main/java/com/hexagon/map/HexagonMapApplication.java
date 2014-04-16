@@ -10,7 +10,7 @@ public class HexagonMapApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 
-		HttpBitmapDownloadService.getInstance().setContext(this);
+//		HttpBitmapDownloadService.getInstance().setContext(this);
 		// The following line triggers the initialization of ACRA
 //		ACRA.init(this);
 	}

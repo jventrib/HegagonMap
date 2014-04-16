@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
+import android.widget.ImageView;
 
 import com.hexagon.map.enums.LoadState;
 import com.hexagon.map.geo.AbstractPositionableElement;
@@ -18,6 +19,7 @@ import com.hexagon.map.util.JveLog;
 import com.koushikdutta.async.future.Future;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.UrlConnectionDownloader;
 
@@ -331,20 +333,13 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
         state = LoadState.LOADING;
         setLoading(true);
-        mBitmapFuture = Ion.with(context, src)
+        mBitmapFuture = Ion.with(context, src).noCache()
                 .setHeader("user-agent",
                         "Android").setHeader("referer",
                         "HexagonMap.fr").withBitmap().asBitmap();
         mBitmapFuture.setCallback(new FutureCallback<Bitmap>() {
             @Override
             public synchronized void onCompleted(Exception e, Bitmap result) {
-
-                if (isCleared()) {
-                    JveLog.d(TAG, "Cleared, Aborting !");
-//                    state= LoadState.ABORTED;
-                    updateMapImage(false, context);
-                    return;
-                }
 
                 //TEST ONLY
                 bmp = result;
@@ -359,65 +354,46 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
 
     private void loadImageWithPicasso(final String src, final Context context) {
-        Observable.create(new Observable.OnSubscribe<Bitmap>() {
-                              @Override
-                              public void call(Subscriber<? super Bitmap> subscriber) {
-                                  try {
-                                      Picasso.Builder builder = new Picasso.Builder(context);
-                                      Picasso picasso = builder
-                                              .downloader(new UrlConnectionDownloader(context) {
-                                                              @Override
-                                                              protected HttpURLConnection openConnection(
-                                                                      Uri uri)
-                                                                      throws IOException {
-                                                                  HttpURLConnection
-                                                                          connection = super
-                                                                          .openConnection(uri);
-                                                                  connection.setRequestProperty(
-                                                                          "user-agent",
-                                                                          "Android");
-                                                                  connection.setRequestProperty(
-                                                                          "referer",
-                                                                          "HexagonMap.fr");
-
-                                                                  return connection;
-                                                              }
-                                                          }
-                                              ).build();
-
-                                      Bitmap tmpBmp = picasso.load(src).get();
-//                                      bmp = tmpBmp;
-//                                      state = LoadState.LOADED;
-//                                      tile.visibleOnTop = true;
-
-                                      subscriber.onNext(tmpBmp);
-                                  } catch (IOException e) {
-                                      e.printStackTrace();
-                                  }
-
-                              }
-                          }
-        ).subscribeOn(Schedulers.io()).
-                observeOn(AndroidSchedulers.mainThread()
-                ).subscribe(new Action1<Bitmap>() {
+        Picasso.Builder builder = new Picasso.Builder(context);
+        Picasso picasso = builder
+                .downloader(new UrlConnectionDownloader(context) {
                                 @Override
-                                public void call(Bitmap o) {
-                                    if (isCleared()) {
-                                        JveLog.d(TAG, "Cleared, Aborting !");
-//                    state= LoadState.ABORTED;
-                                        updateMapImage(false, context);
-                                        return;
-                                    }
+                                protected HttpURLConnection openConnection(
+                                        Uri uri)
+                                        throws IOException {
+                                    HttpURLConnection
+                                            connection = super
+                                            .openConnection(uri);
+                                    connection.setRequestProperty(
+                                            "user-agent",
+                                            "Android");
+                                    connection.setRequestProperty(
+                                            "referer",
+                                            "HexagonMap.fr");
 
-                                    //TEST ONLY
-                                    bmp = o;
-
-//                drawDebugInfo();
-                                    state = LoadState.LOADED;
-                                    visibleOnTop = true;
+                                    return connection;
                                 }
                             }
-        );
+                ).build();
+
+        final ImageView iv = new ImageView(context);
+        picasso.load(src).into(iv, new Callback() {
+            @Override
+            public void onSuccess() {
+                //TEST ONLY
+                bmp = iv.getDrawingCache();
+
+//                drawDebugInfo();
+                state = LoadState.LOADED;
+                visibleOnTop = true;
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+
     }
 
 
