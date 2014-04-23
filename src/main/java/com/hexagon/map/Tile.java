@@ -128,6 +128,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         int y = posy;
         if (visible && Preferences.drawMap) {
             m = new Matrix4(scaleM);
+//            JveLog.d(TAG, scaleM.toString());
             m.preTranslate(posx, posy);
             if (isLoaded() && !isUploaded()) {
                 square.loadGLTexture(bmp);
@@ -333,7 +334,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
         state = LoadState.LOADING;
         setLoading(true);
-        mBitmapFuture = Ion.with(context, src).noCache()
+        mBitmapFuture = Ion.with(context, src)
                 .setHeader("user-agent",
                         "Android").setHeader("referer",
                         "HexagonMap.fr").withBitmap().asBitmap();
