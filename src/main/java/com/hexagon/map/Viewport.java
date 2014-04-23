@@ -136,6 +136,8 @@ public class Viewport extends AbstractPositionableElement implements
 
     private Object frame = new Object();
 
+    private Matrix4 mMScaled = new Matrix4();
+
     // //////////////////////////////////////////////////////////////
 
     public Location getCurrentBestLocation() {
@@ -372,32 +374,32 @@ public class Viewport extends AbstractPositionableElement implements
         return coordY;
     }
 
-    public List<Tile> getTilesList() {
-        List<Tile> result = new ArrayList<Tile>();
-        for (int ix = 0; ix < this.nbTileX; ix++) {
-            for (int iy = 0; iy < this.nbTileY; iy++) {
-                result.add(grid1[ix][iy]);
-            }
-        }
-        return result;
-
-    }
-
-    public synchronized List<Tile> getTilesList2() {
-        List<Tile> result = new ArrayList<Tile>();
-
-        for (int ix = 0; ix < this.nbTileX; ix++) {
-            for (int iy = 0; iy < this.nbTileY; iy++) {
-                Tile tile = grid2[ix][iy];
-                if (tile != null) {
-                    result.add(tile);
-                }
-            }
-        }
-        return result;
-
-    }
-
+    //    public List<Tile> getTilesList() {
+//        List<Tile> result = new ArrayList<Tile>();
+//        for (int ix = 0; ix < this.nbTileX; ix++) {
+//            for (int iy = 0; iy < this.nbTileY; iy++) {
+//                result.add(grid1[ix][iy]);
+//            }
+//        }
+//        return result;
+//
+//    }
+//
+//    public synchronized List<Tile> getTilesList2() {
+//        List<Tile> result = new ArrayList<Tile>();
+//
+//        for (int ix = 0; ix < this.nbTileX; ix++) {
+//            for (int iy = 0; iy < this.nbTileY; iy++) {
+//                Tile tile = grid2[ix][iy];
+//                if (tile != null) {
+//                    result.add(tile);
+//                }
+//            }
+//        }
+//        return result;
+//
+//    }
+//
     public synchronized void refresh() {
 
         if (zoomOnGoing) {
@@ -799,27 +801,29 @@ public class Viewport extends AbstractPositionableElement implements
             handleAnimations();
 
             List<Tile> tiles;
-            Matrix4 m1;
-            m1 = new Matrix4(m);
+            Matrix4.copy(m, mMScaled);
 //            JveLog.d("m", zoomScale + "");
 
-            m1.setScale(zoomScale, zoomScale, mapScreenWidth / 2,
+            mMScaled.setScale(zoomScale, zoomScale, mapScreenWidth / 2,
                     mapScreenHeight / 2);
-			if (!isGridLoaded()) {
-				tiles = getTilesList2();
-				for (Tile t : tiles) {
-					if (t.visible) {
-						t.positionOldImage();
-						t.draw(gl, m1);
-					}
-				}
-			}
-            tiles = getTilesList();
+            if (!isGridLoaded()) {
+                for (int ix = 0; ix < this.nbTileX; ix++) {
+                    for (int iy = 0; iy < this.nbTileY; iy++) {
+                        Tile t = grid2[ix][iy];
+                        if (t.visible) {
+                            t.positionOldImage();
+                            t.draw(gl, mMScaled);
+                        }
+                    }
+                }
+            }
             // paint2.setAlpha(100);
-
-            for (Tile t : tiles) {
-                if (t.visibleOnTop && !zoomOnGoing) {
-                    t.draw(gl, m);
+            for (int ix = 0; ix < this.nbTileX; ix++) {
+                for (int iy = 0; iy < this.nbTileY; iy++) {
+                    Tile t = grid1[ix][iy];
+                    if (t.visibleOnTop && !zoomOnGoing) {
+                        t.draw(gl, m);
+                    }
                 }
             }
 
@@ -851,21 +855,21 @@ public class Viewport extends AbstractPositionableElement implements
 
     public synchronized void copyGrid() {
 
-		zoomOnGoing = true;
-		oldScale = scale;
-		try {
-			for (int ix = 0; ix < nbTileX; ix++) {
-				for (int iy = 0; iy < nbTileY; iy++) {
-					Tile tileSrc = grid1[ix][iy];
-					grid2[ix][iy] = (Tile) tileSrc.clone();
-						tileSrc.visibleOnTop = false;
-				}
-			}
-			// zoomScale = 1.0f;
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        zoomOnGoing = true;
+        oldScale = scale;
+        try {
+            for (int ix = 0; ix < nbTileX; ix++) {
+                for (int iy = 0; iy < nbTileY; iy++) {
+                    Tile tileSrc = grid1[ix][iy];
+                    grid2[ix][iy] = (Tile) tileSrc.clone();
+                    tileSrc.visibleOnTop = false;
+                }
+            }
+            // zoomScale = 1.0f;
+        } catch (CloneNotSupportedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public synchronized void zoomAnimated(int zoomOffset) {

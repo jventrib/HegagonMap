@@ -127,7 +127,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         int x = posx;
         int y = posy;
         if (visible && Preferences.drawMap) {
-            m = new Matrix4(scaleM);
+            Matrix4.copy(scaleM, m);
 //            JveLog.d(TAG, scaleM.toString());
             m.preTranslate(posx, posy);
             if (isLoaded() && !isUploaded()) {

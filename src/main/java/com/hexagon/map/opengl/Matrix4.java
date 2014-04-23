@@ -46,4 +46,10 @@ public class Matrix4 {
                 "m=" + Arrays.toString(m) +
                 '}';
     }
+
+    public static void copy(Matrix4 src, Matrix4 target) {
+        for (int i = 0; i < src.m.length; i++) {
+            target.m[i] = src.m[i];
+        }
+    }
 }
