@@ -547,9 +547,7 @@ public class Viewport extends AbstractPositionableElement implements
 
             float pX = deltaX * interpolatedTime + initialX;
             float pY = deltaY * interpolatedTime + initialY;
-            synchronized (getMapActivity().surfaceHolder) {
-                setPosition(pX, pY);
-            }
+            setPosition(pX, pY);
             move();
 
         }
@@ -584,7 +582,7 @@ public class Viewport extends AbstractPositionableElement implements
             scale = newScale;
             JveLog.d(TAG, "zoomOnGoing : " + zoomOnGoing);
             refresh();
-            // zoomScale = 1.0f;
+            zoomScale = 1.0f;
         }
 
         @Override

@@ -79,7 +79,7 @@ public class MapActivity extends Activity implements OnGestureListener,
 
     private MenuItem locationButton;
 
-    public SurfaceHolder surfaceHolder;
+//    public SurfaceHolder surfaceHolder;
 
     // private ImageButton searchButton;
     // private AdView adView;
@@ -703,49 +703,6 @@ public class MapActivity extends Activity implements OnGestureListener,
     // View
     // /////////////////////////////////////////////////////////////////
 
-    /**
-     * Dedicated Render thread, following standard Android pattern.
-     *
-     * @author Jerome
-     */
-    class MapRenderThread extends Thread {
-
-        private MapView mapView;
-
-        private boolean run = false;
-
-        public MapRenderThread(SurfaceHolder surfaceHolder, MapView mv) {
-            MapActivity.this.surfaceHolder = surfaceHolder;
-            mapView = mv;
-
-        }
-
-        public void setRunning(boolean run) {
-            this.run = run;
-        }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            Canvas c;
-            while (run) {
-                c = null;
-                try {
-                    c = surfaceHolder.lockCanvas(null);
-                    synchronized (surfaceHolder) {
-                        mapView.onDraw(c);
-                    }
-                } finally {
-                    // do this in a finally so that if an exception is thrown
-                    // during the above, we don't leave the Surface in an
-                    // inconsistent state
-                    if (c != null) {
-                        surfaceHolder.unlockCanvasAndPost(c);
-                    }
-                }
-            }
-        }
-    }
 
     public class InstantReScaleGestureListener implements
             OnScaleGestureListener {
