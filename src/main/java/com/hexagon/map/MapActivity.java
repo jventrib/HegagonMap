@@ -792,7 +792,7 @@ public class MapActivity extends Activity implements OnGestureListener,
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            if (viewport.zoomOnGoing) {
+            if (!viewport.zoomOnGoing) {
                 return true;
             }
 

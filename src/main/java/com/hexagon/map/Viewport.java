@@ -805,21 +805,21 @@ public class Viewport extends AbstractPositionableElement implements
 
             m1.setScale(zoomScale, zoomScale, mapScreenWidth / 2,
                     mapScreenHeight / 2);
-//			if (!isGridLoaded()) {
-//				tiles = getTilesList2();
-//				for (Tile t : tiles) {
-//					if (t.visible) {
-//						t.positionOldImage();
-//						t.draw(gl, m1);
-//					}
-//				}
-//			}
+			if (!isGridLoaded()) {
+				tiles = getTilesList2();
+				for (Tile t : tiles) {
+					if (t.visible) {
+						t.positionOldImage();
+						t.draw(gl, m1);
+					}
+				}
+			}
             tiles = getTilesList();
             // paint2.setAlpha(100);
 
             for (Tile t : tiles) {
                 if (t.visibleOnTop && !zoomOnGoing) {
-                    t.draw(gl, m1);
+                    t.draw(gl, m);
                 }
             }
 
@@ -850,22 +850,22 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     public synchronized void copyGrid() {
-//
-//		zoomOnGoing = true;
-//		oldScale = scale;
-//		try {
-//			for (int ix = 0; ix < nbTileX; ix++) {
-//				for (int iy = 0; iy < nbTileY; iy++) {
-//					Tile tileSrc = grid1[ix][iy];
-//					grid2[ix][iy] = (Tile) tileSrc.clone();
-//						tileSrc.visibleOnTop = false;
-//				}
-//			}
-//			// zoomScale = 1.0f;
-//		} catch (CloneNotSupportedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+
+		zoomOnGoing = true;
+		oldScale = scale;
+		try {
+			for (int ix = 0; ix < nbTileX; ix++) {
+				for (int iy = 0; iy < nbTileY; iy++) {
+					Tile tileSrc = grid1[ix][iy];
+					grid2[ix][iy] = (Tile) tileSrc.clone();
+						tileSrc.visibleOnTop = false;
+				}
+			}
+			// zoomScale = 1.0f;
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     public synchronized void zoomAnimated(int zoomOffset) {
