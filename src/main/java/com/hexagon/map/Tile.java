@@ -7,9 +7,14 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.opengl.Matrix;
+import android.util.Log;
 import android.widget.ImageView;
 
+import com.hexagon.map.download.CacheBitmapDownloadService;
+import com.hexagon.map.download.PicassoFactory;
 import com.hexagon.map.enums.LoadState;
 import com.hexagon.map.geo.AbstractPositionableElement;
 import com.hexagon.map.opengl.Matrix4;
@@ -21,6 +26,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 import com.squareup.picasso.UrlConnectionDownloader;
 
 import java.io.IOException;
@@ -61,6 +67,8 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
     private Future<Bitmap> mBitmapFuture;
 
     private boolean mLoading;
+
+    private Target mTarget;
 
     // public AbstractPositionableElement position = new Point();
 
@@ -128,8 +136,10 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         int y = posy;
         if (visible && Preferences.drawMap) {
             Matrix4.copy(scaleM, m);
-//            JveLog.d(TAG, scaleM.toString());
+//            Matrix4 result = new Matrix4();
             m.preTranslate(posx, posy);
+//            JveLog.d(TAG, this + "posx : " + posx + " - posy :" + posy);
+//            Matrix4.Multiply(m, scaleM, result);
             if (isLoaded() && !isUploaded()) {
                 square.loadGLTexture(bmp);
                 state = LoadState.UPLOADED;
@@ -218,9 +228,18 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
      * src url.
      */
     synchronized void clearImage() {
+
+        //For ION
         if (mBitmapFuture != null) {
             mBitmapFuture.cancel(true);
+//            mBitmapFuture = null;
         }
+
+        //For Picasso
+        if (mTarget != null) {
+            PicassoFactory.getInstance(viewport.context).getPicasso().cancelRequest(mTarget);
+        }
+
         if (bmp != null) {
 //            bmp.recycle();
         }
@@ -261,8 +280,10 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
             if (isCleared()) {
                 String calcTileSrc = calcTileSrc();
-                loadImageWithIon(calcTileSrc, context);
-//                loadImageWithPicasso(calcTileSrc, context);
+//                fakeLoad();
+//                loadImageWithIon(calcTileSrc, context);
+                loadImageWithPicasso(calcTileSrc, context);
+
 //                mCanvas = new Canvas(image.bmp);
                 // image = new Image(calcTileSrc, cacheFileName);
                 // Log.d(TAG, "cache name : " + cacheFileName);
@@ -285,6 +306,16 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
                 visible = true;
             }
         }
+    }
+
+    private void fakeLoad() {
+//                bmp.eraseColor(Color.rgb(random256(), random256(), random256()));
+        bmp = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+        bmp.eraseColor(Color.rgb((mapTileX % 32) * 8, (mapTileY % 32) * 8, 128));
+
+        state = LoadState.LOADED;
+        setLoading(false);
+        visibleOnTop = true;
     }
 
 
@@ -326,7 +357,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
     }
 
 
-    private void loadImageWithIon(final String src, final Context context) {
+    private synchronized void loadImageWithIon(final String src, final Context context) {
         if (isLoading()) {
             JveLog.d(TAG, "Already Loading !");
             return;
@@ -334,7 +365,10 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
         state = LoadState.LOADING;
         setLoading(true);
-        mBitmapFuture = Ion.with(context, src)
+        Ion ion = Ion.getDefault(context);
+        ion.configure().setLogging("ion", Log.DEBUG);
+
+        mBitmapFuture = ion.with(context, src)
                 .setHeader("user-agent",
                         "Android").setHeader("referer",
                         "HexagonMap.fr").withBitmap().asBitmap();
@@ -356,46 +390,35 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
     private void loadImageWithPicasso(final String src, final Context context) {
         Picasso.Builder builder = new Picasso.Builder(context);
-        Picasso picasso = builder
-                .downloader(new UrlConnectionDownloader(context) {
-                                @Override
-                                protected HttpURLConnection openConnection(
-                                        Uri uri)
-                                        throws IOException {
-                                    HttpURLConnection
-                                            connection = super
-                                            .openConnection(uri);
-                                    connection.setRequestProperty(
-                                            "user-agent",
-                                            "Android");
-                                    connection.setRequestProperty(
-                                            "referer",
-                                            "HexagonMap.fr");
-
-                                    return connection;
-                                }
-                            }
-                ).build();
+        Picasso picasso = PicassoFactory.getInstance(context).getPicasso();
 
         final ImageView iv = new ImageView(context);
-        picasso.load(src).into(iv, new Callback() {
+        mTarget = new Target() {
             @Override
-            public void onSuccess() {
-                //TEST ONLY
-                bmp = iv.getDrawingCache();
-
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                bmp = bitmap;
 //                drawDebugInfo();
                 state = LoadState.LOADED;
                 visibleOnTop = true;
+
             }
 
             @Override
-            public void onError() {
+            public void onBitmapFailed(Drawable errorDrawable) {
 
             }
-        });
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+            }
+        };
+        picasso.load(src).into(mTarget);
+
+
 
     }
+
 
 
     private void drawDebugInfo() {
@@ -416,8 +439,41 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         }
     }
 
+
 //    /////////////////////////
+
 //    STATE METHODS
+private void loadImageWithPicasso2(final String src, final Context context) {
+    Observable.create(new Observable.OnSubscribe<Bitmap>() {
+                          @Override
+                          public void call(Subscriber<? super Bitmap> subscriber) {
+                              try {
+                                  Picasso picasso = PicassoFactory.getInstance(context).getPicasso();
+
+                                  Bitmap tmpBmp = picasso.load(src).get();
+                                  bmp = tmpBmp;
+                                  state = LoadState.LOADED;
+                                  visibleOnTop = true;
+
+                                  subscriber.onNext(tmpBmp);
+                              } catch (IOException e) {
+                                  e.printStackTrace();
+                              }
+
+                          }
+
+
+                      }
+    ).subscribeOn(Schedulers.io()).
+            observeOn(AndroidSchedulers.mainThread()
+            ).subscribe(new Action1<Bitmap>() {
+                            @Override
+                            public void call(Bitmap o) {
+
+                            }
+                        }
+    );
+}
 //    /////////////////////////
 
 
@@ -446,5 +502,6 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
     private boolean isUploaded() {
         return state == LoadState.UPLOADED;
     }
+
 
 }

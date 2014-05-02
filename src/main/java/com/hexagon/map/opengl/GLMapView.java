@@ -27,9 +27,6 @@ public class GLMapView extends GLSurfaceView implements SurfaceHolder.Callback {
 
 	public class GlRenderer implements Renderer {
 
-		private Square mSquare;
-		private Triangle mTriangle;
-
 		@Override
 		public void onDrawFrame(GL10 gl) {
 			GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -71,8 +68,8 @@ public class GLMapView extends GLSurfaceView implements SurfaceHolder.Callback {
 		@Override
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 			gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			mSquare = new Square();
-			mTriangle = new Triangle();
+//			mSquare = new Square();
+//			mTriangle = new Triangle();
 
 		}
 

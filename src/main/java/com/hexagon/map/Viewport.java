@@ -33,7 +33,6 @@ import com.hexagon.map.opengl.Matrix4;
 import com.hexagon.map.util.JveLog;
 import com.jhlabs.map.awt.Point2D;
 import com.jhlabs.map.proj.MercatorProjection;
-import com.koushikdutta.ion.Ion;
 
 public class Viewport extends AbstractPositionableElement implements
         LocationListener {

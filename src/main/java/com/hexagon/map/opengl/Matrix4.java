@@ -52,4 +52,8 @@ public class Matrix4 {
             target.m[i] = src.m[i];
         }
     }
+
+    public static void Multiply(Matrix4 one, Matrix4  two, Matrix4 result) {
+        Matrix.multiplyMM(result.m, 0, two.m, 0, two.m, 0);
+    }
 }

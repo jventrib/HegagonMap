@@ -57,6 +57,7 @@ import com.hexagon.map.preference.MapPreferenceActivity;
 import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
 import com.jhlabs.map.awt.Point2D;
+import com.koushikdutta.ion.Ion;
 
 public class MapActivity extends Activity implements OnGestureListener,
         OnDoubleTapListener, SensorEventListener {
@@ -109,6 +110,8 @@ public class MapActivity extends Activity implements OnGestureListener,
         super.onCreate(savedInstanceState);
         new Disclaimer(this).show();
 
+//        Ion ion = Ion.getDefault(this);
+//        ion.getBitmapCache().setHeapRatio(1d / 100d);
         HttpBitmapDownloadService.getInstance().setActivity(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Get memory class of this device, exceeding this amount will throw

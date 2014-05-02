@@ -58,20 +58,20 @@ public class Square {
         textureBuffer.put(texture);
         textureBuffer.position(0);
 
+
+
     }
 
     public synchronized void loadGLTexture(Bitmap bitmap) {
-		if (bitmap == null || bitmap.isRecycled()) {
-			return;
-		}
+        if (bitmap == null || bitmap.isRecycled()) {
+            return;
+        }
         this.bitmap = bitmap;
-        // loading texture
-//		Bitmap flippedBitmap = flip(bitmap);
-//		if (flippedBitmap == null) {
-//			return;
-//		}
         // generate one texture pointer
-        GLES10.glGenTextures(1, textures, 0);
+        if (textures[0] == 0) {
+            GLES10.glGenTextures(1, textures, 0);
+        }
+
         // ...and bind it to our array
         GLES10.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
 
@@ -102,23 +102,14 @@ public class Square {
         gl.glEnable(GL10.GL_TEXTURE_2D);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
 
-//		float[] pts = new float[2];
-//		m.mapPoints(pts);
-//		float[] anM = new float[9];
-//		m.getValues(anM);
-//		float[] glM = MatrixUtil.convertM9ToM16(anM);
 
         gl.glLoadMatrixf(m.m, 0);
-//		gl.glTranslatef(pts[0], pts[1], 0.0f);
 
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
         // Set the face rotation
         gl.glFrontFace(GL10.GL_CW);
-
-        // // set the colour for the square
-        // gl.glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
 
         // Point to our vertex buffer
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
@@ -133,15 +124,4 @@ public class Square {
 
     }
 
-    Bitmap flip(Bitmap d) {
-        Matrix m = new Matrix();
-        m.preScale(1, -1);
-        Bitmap dst = null;
-        if (!d.isRecycled()) {
-            dst = Bitmap.createBitmap(d, 0, 0, d.getWidth(), d.getHeight(), m,
-                    false);
-            dst.setDensity(DisplayMetrics.DENSITY_DEFAULT);
-        }
-        return dst;
-    }
 }
