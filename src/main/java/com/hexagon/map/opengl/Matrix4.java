@@ -19,6 +19,10 @@ public class Matrix4 {
     }
 
     public Matrix4() {
+        init();
+    }
+
+    public void init() {
         Matrix.setIdentityM(m, 0);
     }
 
@@ -28,15 +32,15 @@ public class Matrix4 {
         }
     }
 
-    public void preTranslate(int posx, int posy) {
+    public void translate(int posx, int posy) {
 //        Matrix.setIdentityM(m, 0);
         Matrix.translateM(m, 0, posx, posy, 0.0f);
     }
 
-    public void setScale(float zoomScale, float zoomScale1, int i, int i1) {
-        Matrix.translateM(m, 0, i, i1, 0.0f);
+    public void scale(float zoomScale, float zoomScale1, int offsetX, int offsetY) {
+//        Matrix.translateM(m, 0, offsetX, offsetY, 0.0f);
         Matrix.scaleM(m, 0, zoomScale, zoomScale1, 1.0f);
-        Matrix.translateM(m, 0, -i, -i1, 0.0f);
+//        Matrix.translateM(m, 0, -offsetX, -offsetY, 0.0f);
     }
 
 

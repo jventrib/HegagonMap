@@ -98,7 +98,7 @@ public class Square {
     /**
      * The draw method for the square with the GL context
      */
-    public synchronized void draw(GL10 gl, Matrix4 m) {
+    public synchronized void draw(GL10 gl, Matrix4 m, float alpha) {
         gl.glEnable(GL10.GL_TEXTURE_2D);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
 
@@ -114,6 +114,7 @@ public class Square {
         // Point to our vertex buffer
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
         gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
+        gl.glColor4f(1.0f, 1.0f, 1.0f, alpha);
 
         // Draw the vertices as triangle strip
         gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);

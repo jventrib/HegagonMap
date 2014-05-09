@@ -4,6 +4,7 @@
 package com.hexagon.map.opengl;
 
 import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
@@ -63,6 +64,9 @@ public class GLMapView extends GLSurfaceView implements SurfaceHolder.Callback {
 
 			float ratio = (float) width / height;
 
+                        gl.glEnable(GL10.GL_BLEND);
+                        gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+//
 		}
 
 		@Override
@@ -104,7 +108,7 @@ public class GLMapView extends GLSurfaceView implements SurfaceHolder.Callback {
 		this.mapActivity = mapActivity;
 		// getHolder().addCallback(this);
 		// mapActivity.surfaceHolder = getHolder();
-		// setEGLContextClientVersion(2);
+//		setEGLContextClientVersion(2);
 		setRenderer(new GlRenderer());
 		setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 	}

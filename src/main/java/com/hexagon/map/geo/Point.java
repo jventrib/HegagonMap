@@ -17,8 +17,8 @@ public class Point extends AbstractPositionableElement {
 
 
 	public void getPosFromCoord(Viewport viewport){
-		posx = Math.round(viewport.centerX + (coordX - viewport.coordX) / Viewport.zoomRatios[viewport.scale]);
-		posy = Math.round(viewport.centerY + (coordY - viewport.coordY) / Viewport.zoomRatios[viewport.scale]);
+		posx = Math.round((coordX - viewport.coordX) / Viewport.zoomRatios[viewport.scale]);
+		posy = Math.round((coordY - viewport.coordY) / Viewport.zoomRatios[viewport.scale]);
 	}
 
 }

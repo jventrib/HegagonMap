@@ -11,8 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -22,10 +20,8 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.LruCache;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
@@ -35,7 +31,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -57,7 +52,6 @@ import com.hexagon.map.preference.MapPreferenceActivity;
 import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
 import com.jhlabs.map.awt.Point2D;
-import com.koushikdutta.ion.Ion;
 
 public class MapActivity extends Activity implements OnGestureListener,
         OnDoubleTapListener, SensorEventListener {
@@ -720,7 +714,6 @@ public class MapActivity extends Activity implements OnGestureListener,
 
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
-            viewport.copyGrid();
             initialScaleFactor = 1.0f;
             return true;
         }
@@ -738,7 +731,7 @@ public class MapActivity extends Activity implements OnGestureListener,
                 initialScaleFactor = detector.getScaleFactor();
                 viewport.refresh();
             }
-            viewport.zoomScale = scaleDelta + 1.0f;
+            viewport.setZoomScale(scaleDelta + 1.0f);
 
             return false;
         }
@@ -754,7 +747,7 @@ public class MapActivity extends Activity implements OnGestureListener,
 
         @Override
         public void onScaleEnd(ScaleGestureDetector detector) {
-            int zoomOffset = Math.round(viewport.zoomScale) - 1;
+            int zoomOffset = Math.round(viewport.getZoomScale()) - 1;
             Log.d(TAG, "zoom offset : " + zoomOffset);
 
             if (zoomOffset > 1) {
@@ -767,14 +760,14 @@ public class MapActivity extends Activity implements OnGestureListener,
             if (zoomOffset == 0) {
                 viewport.zoomReset(null);
             }
-            float oldScale = viewport.zoomScale;
+            float oldScale = viewport.getZoomScale();
             // if (viewport.zoomScale < ZOOM_OUT_THESHOLD) {
             // oldScale = ZOOM_OUT_THESHOLD;
             //
             // } else if (viewport.zoomScale > ZOOM_IN_THESHOLD) {
             // oldScale = ZOOM_IN_THESHOLD;
             // }
-            viewport.zoomScale = 1.0f;
+            viewport.setZoomScale(1.0f);
             // viewport.refresh();
             if (zoomOffset != 0) {
                 viewport.zoomReset(oldScale);
@@ -789,7 +782,7 @@ public class MapActivity extends Activity implements OnGestureListener,
             if (viewport.zoomOnGoing) {
                 return true;
             }
-            viewport.copyGrid();
+            viewport.zoomOnGoing = true;
             return true;
         }
 
@@ -799,8 +792,8 @@ public class MapActivity extends Activity implements OnGestureListener,
                 return true;
             }
 
-            viewport.zoomScale *= detector.getScaleFactor();
-            JveLog.d(TAG, "zoom ongoing, scale: " + viewport.zoomScale);
+            viewport.setZoomScale(viewport.getZoomScale() * detector.getScaleFactor());
+            JveLog.d(TAG, "zoom ongoing, scale: " + viewport.getZoomScale());
             pinchDone = true;
             return true;
         }
