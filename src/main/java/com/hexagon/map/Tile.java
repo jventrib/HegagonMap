@@ -63,6 +63,8 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
 
     private TileMatrix mTileMatrix;
+    private int loadX;
+    private int loadY;
 
     // public AbstractPositionableElement position = new Point();
 
@@ -167,6 +169,9 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         Ion ion = Ion.getDefault(context);
 //        ion.configure().setLogging("ion", Log.DEBUG);
 
+        loadX = mapTileX;
+        loadY = mapTileY;
+
         mBitmapFuture = ion.with(context, src)
                 .setHeader("user-agent",
                         "Android").setHeader("referer",
@@ -174,6 +179,12 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         mBitmapFuture.setCallback(new FutureCallback<Bitmap>() {
             @Override
             public synchronized void onCompleted(Exception e, Bitmap result) {
+
+                //Check if coords have changed since loading
+                if (mapTileX != loadX || mapTileY != loadY) {
+                    JveLog.d(TAG, "Tile changed while loading ! " + this);
+//                    clearImage();
+                }
 
                 //TEST ONLY
                 bmp = result;
@@ -183,7 +194,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
                 setLoading(false);
                 visibleOnTop = true;
                 visible = true;
-                mTileMatrix.cache.put(new TilePos(mapTileX, mapTileY), result);
+//                mTileMatrix.cache.put(new TilePos(mapTileX, mapTileY), result);
             }
         });
     }
@@ -221,22 +232,28 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
     }
 
 
-    private void drawDebugInfo() {
-        if (bmp != null) {
-            bmp = bmp.copy(Bitmap.Config.RGB_565, true);
-//                bmp = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
-//                bmp.eraseColor(Color.rgb(random256(), random256(), random256()));
-//                bmp.eraseColor(Color.rgb((mapTileX % 32) * 8, (mapTileY % 32) * 8, 128));
+    void drawDebugInfo() {
+//            bmp = bmp.copy(Bitmap.Config.RGB_565, true);
+        bmp = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+//            bmp.eraseColor(Color.rgb(random256(), random256(), random256()));
+        bmp.eraseColor(Color.rgb((mapTileX % 32) * 8, (mapTileY % 32) * 8, 128));
 
-//            Canvas canvas = new Canvas(bmp);
-//            Paint paint = new Paint();
-//            paint.setColor(Color.BLACK);
-//            paint.setTextSize(40);
-//            canvas.drawText("TileX : " + mapTileX, 5,
-//                    50, paint);
-//            canvas.drawText("TileY : " + mapTileY, 5,
-//                    130, paint);
-        }
+        Canvas canvas = new Canvas(bmp);
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(40);
+        canvas.drawText("Tile : " + toString(), 5,
+                50, paint);
+
+        canvas.drawText("TileX : " + mapTileX, 5,
+                130, paint);
+        canvas.drawText("TileY : " + mapTileY, 5,
+                180, paint);
+        visible = true;
+        state = LoadState.LOADED;
+        setLoading(false);
+        visibleOnTop = true;
+
     }
 
 //    /////////////////////////
