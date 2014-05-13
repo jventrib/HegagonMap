@@ -725,7 +725,8 @@ public class Viewport extends AbstractPositionableElement implements
         synchronized (frame) {
             handleAnimations();
             m.init();
-            float tmAlpha = (2 - zoomScale) * ALPHA_OFFSET;
+//            float tmAlpha = (2 - zoomScale) * ALPHA_OFFSET;
+            float tmAlpha = 1.0f;
             tm.draw(gl, tmAlpha);
             if (zoomScale > 1.0f) {
                 float tmZoomInAlpha = (zoomScale - 1) * ALPHA_OFFSET;
