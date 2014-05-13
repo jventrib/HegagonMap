@@ -1,14 +1,11 @@
 package com.hexagon.map;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.hexagon.map.download.PicassoFactory;
@@ -64,10 +61,14 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
     private Target mTarget;
 
+
+    private TileMatrix mTileMatrix;
+
     // public AbstractPositionableElement position = new Point();
 
-    public Tile(Viewport layer, int ix, int iy) {
+    public Tile(Viewport layer, TileMatrix tileMatrix, int ix, int iy) {
         this.viewport = layer;
+        mTileMatrix = tileMatrix;
         indexX = ix;
         indexY = iy;
     }
@@ -164,7 +165,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         state = LoadState.LOADING;
         setLoading(true);
         Ion ion = Ion.getDefault(context);
-        ion.configure().setLogging("ion", Log.DEBUG);
+//        ion.configure().setLogging("ion", Log.DEBUG);
 
         mBitmapFuture = ion.with(context, src)
                 .setHeader("user-agent",
@@ -182,6 +183,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
                 setLoading(false);
                 visibleOnTop = true;
                 visible = true;
+                mTileMatrix.cache.put(new TilePos(mapTileX, mapTileY), result);
             }
         });
     }
@@ -302,4 +304,31 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Tile)) {
+            return false;
+        }
+
+        Tile tile = (Tile) o;
+
+        if (mapTileX != tile.mapTileX) {
+            return false;
+        }
+        if (mapTileY != tile.mapTileY) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mapTileX;
+        result = 31 * result + mapTileY;
+        return result;
+    }
 }

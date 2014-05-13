@@ -6,7 +6,11 @@ import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.FloatMath;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -23,6 +27,8 @@ public class TileMatrix {
     private static final int MARGIN_X = 2;
 
     private static final int MARGIN_Y = 2;
+
+    private static final String TAG = "TileMatrix";
 
 
     private Tile[][] grid;
@@ -43,6 +49,8 @@ public class TileMatrix {
 
     private int oldRX;
 
+    Map<TilePos, Bitmap> cache = new HashMap<TilePos, Bitmap>();
+
 
     public TileMatrix(Viewport viewport, Context context) {
         this.viewport = viewport;
@@ -62,7 +70,7 @@ public class TileMatrix {
         for (int ix = 0; ix < this.nbTileX; ix++) {
             grid[ix] = new Tile[nbTileY];
             for (int iy = 0; iy < this.nbTileY; iy++) {
-                this.grid[ix][iy] = new Tile(viewport, ix, iy);
+                this.grid[ix][iy] = new Tile(viewport, this, ix, iy);
             }
         }
     }
@@ -128,6 +136,7 @@ public class TileMatrix {
 
     public synchronized void draw(GL10 gl, float alpha) {
         m.init();
+        m.translate(viewport.mapScreenWidth / 2, viewport.mapScreenHeight / 2);
         int relativePosX = getTopLeftTileX() - getViewportAbsoluteX();
         int relativePosY = getTopLeftTileY() - getViewportAbsoluteY();
 
@@ -140,15 +149,27 @@ public class TileMatrix {
             for (int iy = 0; iy < this.nbTileY; iy++) {
                 Tile t = grid[ix][iy];
 
-                int newMapTileX = getTopLeftTileIndexX() + ix - 1;
-                int newMapTileY = getTopLeftTileIndexY() + iy - 1;
+                int newMapTileX = getTopLeftTileIndexX() + ix - 2;
+                int newMapTileY = getTopLeftTileIndexY() + iy - 3;
 
                 if (t.mapTileX != newMapTileX || t.mapTileY != newMapTileY) {
-                    t.mapTileX = newMapTileX;
-                    t.mapTileY = newMapTileY;
-                    String calcTileSrc = t.calcTileSrc(scale);
-                    t.clearImage();
-                    t.loadImageWithPicasso(calcTileSrc, context);
+                    TilePos mTilePos = new TilePos();
+                    mTilePos.x = newMapTileX;
+                    mTilePos.y = newMapTileY;
+
+                    Bitmap cachedTile = cache.get(mTilePos);
+                    if (cachedTile != null) {
+                        t.bmp = cachedTile;
+                        JveLog.d(TAG, "cached Tile : " + cachedTile);
+                        t.visible = true;
+                    } else {
+                        t.mapTileX = newMapTileX;
+                        t.mapTileY = newMapTileY;
+                        String calcTileSrc = t.calcTileSrc(scale);
+                        t.clearImage();
+                        t.loadImageWithIon(calcTileSrc, context);
+                    }
+
                 }
 
                 if (t.visible) {

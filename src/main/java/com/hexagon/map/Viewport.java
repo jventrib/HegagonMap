@@ -41,6 +41,8 @@ public class Viewport extends AbstractPositionableElement implements
     // requirement. 2 is fastest
     private static final int PRELOAD_SIZE = 2;
 
+    public static final float ALPHA_OFFSET = 1.5f;
+
 
     public static String type = "jpg";
 
@@ -130,7 +132,9 @@ public class Viewport extends AbstractPositionableElement implements
 
     private TileMatrix tm;
 
-    private TileMatrix tm2;
+    private TileMatrix tmZoomIn;
+
+    private TileMatrix tmZoomOut;
     // //////////////////////////////////////////////////////////////
 
     public Location getCurrentBestLocation() {
@@ -162,7 +166,8 @@ public class Viewport extends AbstractPositionableElement implements
         centerY = mapScreenHeight / 2;
 
         tm = new TileMatrix(this, context);
-        tm2 = new TileMatrix(this, context);
+        tmZoomIn = new TileMatrix(this, context);
+        tmZoomOut = new TileMatrix(this, context);
 
         // for (int ix = 0; ix < this.nbTileX; ix++) {
         // grid2[ix] = new Tile[nbTileY];
@@ -198,9 +203,9 @@ public class Viewport extends AbstractPositionableElement implements
 
     }
 
-    private Tile createTile(int ix, int iy) {
-        return new Tile(this, ix, iy);
-    }
+//    private Tile createTile(int ix, int iy) {
+//        return new Tile(this, ix, iy);
+//    }
 
     public static String encodeFileName(String fileName) {
         byte[] tmp = fileName.getBytes();
@@ -399,9 +404,11 @@ public class Viewport extends AbstractPositionableElement implements
         centerY = mapScreenHeight / 2;
 
         tm.scale = scale;
-        tm2.scale = scale - 1;
+        tmZoomIn.scale = scale + 1;
+        tmZoomOut.scale = scale - 1;
         tm.zoomScale = 1.0f;
-        tm2.zoomScale = 2.0f;
+        tmZoomIn.zoomScale = 0.5f;
+        tmZoomOut.zoomScale = 2f;
 
 
     }
@@ -459,7 +466,8 @@ public class Viewport extends AbstractPositionableElement implements
     public void setZoomScale(float zoomScale) {
         this.zoomScale = zoomScale;
         tm.zoomScale = zoomScale;
-        tm2.zoomScale = zoomScale * 2;
+        tmZoomIn.zoomScale = zoomScale / 2;
+        tmZoomOut.zoomScale = zoomScale * 2;
     }
 
     private final class TileComparator implements Comparator<Tile> {
@@ -717,11 +725,16 @@ public class Viewport extends AbstractPositionableElement implements
         synchronized (frame) {
             handleAnimations();
             m.init();
-            float tmAlpha = tm2.zoomScale / 2 - 1;
-            float tm2Alpha = 2 - tm.zoomScale;
-            JveLog.d(TAG, "tmAplha : "  + tmAlpha);
+            float tmAlpha = (2 - zoomScale) * ALPHA_OFFSET;
             tm.draw(gl, tmAlpha);
-            tm2.draw(gl, tm2Alpha);
+            if (zoomScale > 1.0f) {
+                float tmZoomInAlpha = (zoomScale - 1) * ALPHA_OFFSET;
+                tmZoomIn.draw(gl, tmZoomInAlpha);
+            }
+            if (zoomScale < 1.0f) {
+                float tmZoomOutAlpha = (1 / zoomScale - 1) * ALPHA_OFFSET;
+                tmZoomOut.draw(gl, tmZoomOutAlpha);
+            }
 
             Point p = locationPoint;
             p.getPosFromCoord(this);
@@ -729,6 +742,8 @@ public class Viewport extends AbstractPositionableElement implements
             Circle c = new Circle();
             mLocation.init();
 //            mLocation.set(zoomOnGoing ? m1 : m);
+            mLocation.translate(mapScreenWidth / 2, mapScreenHeight / 2);
+
             mLocation
                     .scale(getZoomScale(), getZoomScale(), mapScreenWidth / 2, mapScreenHeight / 2);
             mLocation.translate(p.posx, p.posy);
