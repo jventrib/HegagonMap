@@ -263,8 +263,6 @@ public class TileMatrix {
         for (int ix = 0; ix < this.nbTileX; ix++) {
             for (int iy = 0; iy < this.nbTileY; iy++) {
                 Tile tile = grid[ix][iy];
-                tmpTileX[ix][iy] = tile.mapTileX;
-                tmpTileY[ix][iy] = tile.mapTileY;
                 if (tile.isLoaded() || tile.isUploaded()) {
                     tmpBmp[ix][iy] = tile.bmp;
                 } else {
