@@ -730,11 +730,11 @@ public class Viewport extends AbstractPositionableElement implements
             tm.draw(gl, tmAlpha);
             if (zoomScale > 1.0f) {
                 float tmZoomInAlpha = (zoomScale - 1) * ALPHA_OFFSET;
-                tmZoomIn.draw(gl, tmZoomInAlpha);
+//                tmZoomIn.draw(gl, tmZoomInAlpha);
             }
             if (zoomScale < 1.0f) {
                 float tmZoomOutAlpha = (1 / zoomScale - 1) * ALPHA_OFFSET;
-                tmZoomOut.draw(gl, tmZoomOutAlpha);
+  //              tmZoomOut.draw(gl, tmZoomOutAlpha);
             }
 
             Point p = locationPoint;

@@ -5,6 +5,7 @@ import com.hexagon.map.opengl.Matrix4;
 import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.FloatMath;
@@ -206,7 +207,8 @@ public class TileMatrix {
                     if (!cachedTile) {
                         String calcTileSrc = t.calcTileSrc(scale);
                         t.clearImage();
-                        t.loadImageWithIon(calcTileSrc, context);
+//                        t.loadImageWithIon(calcTileSrc, context);
+                        t.loadImageWithPicasso(calcTileSrc, context);
 //                        t.drawDebugInfo();
                     }
 //                    }
@@ -214,26 +216,23 @@ public class TileMatrix {
                 }
 
                 if (t.visible) {
+                    t.handleAlpha();
 
-                    synchronized (t) {
-                        if (t.visible && Preferences.drawMap) {
-                            Matrix4.copy(m, t.m);
+                    Matrix4.copy(m, t.m);
 
-                            t.m.scale(zoomScale, zoomScale,
-                                    viewport.mapScreenWidth / 2,
-                                    viewport.mapScreenHeight / 2);
-                            t.m.translate(relativePosX,
-                                    relativePosY);
-                            t.m.translate(t.mapTileX * tileWidth - getTopLeftTileX(),
-                                    t.mapTileY * tileHeight - getTopLeftTileY());
-                            if (t.isLoaded() && !t.isUploaded()) {
-                                t.square.loadGLTexture(t.bmp);
-                                t.state = LoadState.UPLOADED;
-                            }
-                            if (t.isUploaded()) {
-                                t.square.draw(gl, t.m, alpha);
-                            }
-                        }
+                    t.m.scale(zoomScale, zoomScale,
+                            viewport.mapScreenWidth / 2,
+                            viewport.mapScreenHeight / 2);
+                    t.m.translate(relativePosX,
+                            relativePosY);
+                    t.m.translate(t.mapTileX * tileWidth - getTopLeftTileX(),
+                            t.mapTileY * tileHeight - getTopLeftTileY());
+                    if (t.isLoaded() && !t.isUploaded()) {
+                        t.square.loadGLTexture(t.bmp);
+                        t.state = LoadState.UPLOADED;
+                    }
+                    if (t.isUploaded()) {
+                        t.square.draw(gl, t.m, t.alpha);
                     }
                 }
             }
@@ -247,6 +246,7 @@ public class TileMatrix {
                     t.bmp = tmpBmp[ix][iy];
                     if (t.bmp != null) {
                         t.state = LoadState.LOADED;
+                        t.alpha = 1.0f;
                         return true;
                     } else {
                         return false;

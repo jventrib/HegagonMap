@@ -1,11 +1,15 @@
 package com.hexagon.map;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Transformation;
 import android.widget.ImageView;
 
 import com.hexagon.map.download.PicassoFactory;
@@ -32,6 +36,7 @@ import rx.schedulers.Schedulers;
 public class Tile extends AbstractPositionableElement implements Cloneable {
 
     private static final String TAG = "Tile";
+    private static final long FADE_DURATION = 1000;
 
     LoadState state;
 
@@ -61,10 +66,13 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
     private Target mTarget;
 
+    float alpha = 1.0f;
 
     private TileMatrix mTileMatrix;
     private int loadX;
     private int loadY;
+    private long fadeInTimerStart;
+    private long fadeInTimerCurrent;
 
     // public AbstractPositionableElement position = new Point();
 
@@ -117,6 +125,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         visible = false;
 //        JveLog.d(TAG, this + "-task cancelled");
         // }
+        alpha = 0f;
     }
 
 
@@ -194,6 +203,8 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
                 setLoading(false);
                 visibleOnTop = true;
                 visible = true;
+
+//                fadeInStart();
 //                mTileMatrix.cache.put(new TilePos(mapTileX, mapTileY), result);
             }
         });
@@ -348,4 +359,24 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         result = 31 * result + mapTileY;
         return result;
     }
+
+
+    private void fadeInStart() {
+        fadeInTimerStart = System.currentTimeMillis();
+    }
+
+
+    void handleAlpha() {
+        if (alpha == 1.0f) {
+            return;
+        }
+        long timer = System.currentTimeMillis() - fadeInTimerStart;
+        if (timer > FADE_DURATION) {
+            alpha = 1.0f;
+            return;
+        }
+        float c = timer / (float) FADE_DURATION;
+        alpha = c;
+    }
+
 }
