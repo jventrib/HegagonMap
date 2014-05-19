@@ -323,7 +323,7 @@ public class Viewport extends AbstractPositionableElement implements
      * @param Y2 second y of rectangle 2
      */
     static boolean rectIntersectRect(int x1, int x2, int y1, int y2, int X1,
-            int X2, int Y1, int Y2) {
+                                     int X2, int Y1, int Y2) {
         if (x1 > X2) {
             return false;
         }
@@ -408,22 +408,21 @@ public class Viewport extends AbstractPositionableElement implements
         centerY = mapScreenHeight / 2;
 
         tm.scale = scale;
+        tmZoomIn.scale = scale + 1;
+        tmZoomOut.scale = scale - 1;
         tm.refresh();
+        tmZoomIn.refresh();
+        tmZoomOut.refresh();
 
         if (tm.scale == tmZoomIn.scale) {
 //            tm.copyFrom(tmZoomIn);
-            tmZoomIn.refresh();
         }
         if (tm.scale == tmZoomOut.scale) {
 //            tm.copyFrom(tmZoomOut);
-            tmZoomOut.refresh();
         }
-        tmZoomIn.scale = scale + 1;
-        tmZoomOut.scale = scale - 1;
         tm.zoomScale = 1.0f;
         tmZoomIn.zoomScale = 0.5f;
         tmZoomOut.zoomScale = 2f;
-
 
 
     }
@@ -530,7 +529,7 @@ public class Viewport extends AbstractPositionableElement implements
 
         @Override
         protected void applyTransformation(float interpolatedTime,
-                Transformation t) {
+                                           Transformation t) {
             float tX = -vX * (1.0f - interpolatedTime) / 40;
             float tY = -vY * (1.0f - interpolatedTime) / 40;
             handleScroll(tX, tY);
@@ -554,7 +553,7 @@ public class Viewport extends AbstractPositionableElement implements
 
         @Override
         protected void applyTransformation(float interpolatedTime,
-                Transformation t) {
+                                           Transformation t) {
             float deltaX = finalX - initialX;
             float deltaY = finalY - initialY;
 
@@ -582,7 +581,7 @@ public class Viewport extends AbstractPositionableElement implements
 
         @Override
         protected synchronized void applyTransformation(float interpolatedTime,
-                Transformation t) {
+                                                        Transformation t) {
             float deltaZoom = finalZoom - initialZoom;
             setZoomScale(deltaZoom * interpolatedTime + initialZoom);
 
@@ -755,6 +754,8 @@ public class Viewport extends AbstractPositionableElement implements
 //            float tmAlpha = (2 - zoomScale) * ALPHA_OFFSET;
         float tmAlpha = 1.0f;
         tm.draw(gl, tmAlpha);
+//        tmZoomIn.draw(gl, 0.5f);
+//        tmZoomOut.draw(gl, 0.5f);
         if (zoomScale > 1.0f) {
             float tmZoomInAlpha = (zoomScale - 1) * ALPHA_OFFSET;
             tmZoomIn.draw(gl, tmZoomInAlpha);

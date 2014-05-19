@@ -123,14 +123,14 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         }
 
         if (bmp != null) {
-//            bmp.recycle();
+            bmp.recycle();
         }
 
         state = LoadState.CLEARED;
         visible = false;
 //        JveLog.d(TAG, this + "-task cancelled");
         // }
-        alpha = 0f;
+//        alpha = 0f;
     }
 
 
@@ -248,28 +248,29 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
 
     void drawDebugInfo() {
-//        bmp = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+
+        if (bmp == null) {
+            bmp = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+            bmp.eraseColor(Color.rgb((mapTileX % 32) * 8, (mapTileY % 32) * 8, 128));
 //            bmp.eraseColor(Color.rgb(random256(), random256(), random256()));
-//        bmp.eraseColor(Color.rgb((mapTileX % 32) * 8, (mapTileY % 32) * 8, 128));
-
-        if (bmp != null) {
+        } else {
             bmp = bmp.copy(Bitmap.Config.RGB_565, true);
-            Canvas canvas = new Canvas(bmp);
-            Paint paint = new Paint();
-            paint.setColor(Color.BLACK);
-            paint.setTextSize(40);
-            canvas.drawText("Tile : " + toString(), 5,
-                    50, paint);
-
-            canvas.drawText("TileX : " + mapTileX, 5,
-                    130, paint);
-            canvas.drawText("TileY : " + mapTileY, 5,
-                    180, paint);
-            visible = true;
-            state = LoadState.LOADED;
-            setLoading(false);
-            visibleOnTop = true;
         }
+        Canvas canvas = new Canvas(bmp);
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(40);
+        canvas.drawText("Tile : " + toString(), 5,
+                50, paint);
+
+        canvas.drawText("TileX : " + mapTileX, 5,
+                130, paint);
+        canvas.drawText("TileY : " + mapTileY, 5,
+                180, paint);
+        visible = true;
+        state = LoadState.LOADED;
+        setLoading(false);
+        visibleOnTop = true;
 
     }
 
