@@ -189,12 +189,15 @@ public class TileMatrix {
 
 
                 if (t.mapTileX != newMapTileX || t.mapTileY != newMapTileY || t.bmp == null) {
+                    if (t.isLoading())return;
+                    t.setLoading(true);
                     t.mapTileX = newMapTileX;
                     t.mapTileY = newMapTileY;
 
                     String calcTileSrc = t.calcTileSrc(scale);
                     t.clearImage();
-                    t.loadImageWithIon(calcTileSrc, context);
+                    t.loadImageAsync(calcTileSrc, context);
+//                    t.loadImageWithIon(calcTileSrc, context);
 //                        t.loadImageWithPicasso(calcTileSrc, context);
 //                        t.drawDebugInfo();
                 }

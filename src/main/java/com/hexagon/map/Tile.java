@@ -128,6 +128,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
         state = LoadState.CLEARED;
         visible = false;
+        setLoading(false);
 //        JveLog.d(TAG, this + "-task cancelled");
         // }
 //        alpha = 0f;
@@ -316,12 +317,12 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         return state == LoadState.LOADED;
     }
 
-    private boolean isLoading() {
+    boolean isLoading() {
         return mLoading == true;
 
     }
 
-    private void setLoading(boolean loading) {
+    void setLoading(boolean loading) {
         mLoading = loading;
 
     }
@@ -386,4 +387,22 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         alpha = c;
     }
 
+
+    void loadImageAsync(final String src, final Context context) {
+
+        Observable.create(new Observable.OnSubscribe<Bitmap>() {
+                              @Override
+                              public void call(Subscriber<? super Bitmap> subscriber) {
+                                  loadImageWithIon(src, context);
+                              }
+                          }
+        ).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Bitmap>() {
+                               @Override
+                               public void call(Bitmap o) {
+                               }
+                           }
+                );
+    }
 }
