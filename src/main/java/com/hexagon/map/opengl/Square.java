@@ -20,7 +20,6 @@ public class Square {
     private FloatBuffer textureBuffer; // buffer holding the texture coordinates
 
     /** The texture pointer */
-    private int[] textures = new int[1];
 
     private float vertices[] = {0.0f, 0.0f, 0.0f, // V1 - bottom left
             0.0f, 256.0f, 0.0f, // V2 - top left
@@ -37,6 +36,8 @@ public class Square {
     };
 
     private Bitmap bitmap;
+
+    private int mTexIndex;
 
     public Square() {
         // a float has 4 bytes so we allocate for each coordinate 4 bytes
@@ -62,18 +63,18 @@ public class Square {
 
     }
 
-    public synchronized void loadGLTexture(Bitmap bitmap) {
+    public synchronized void loadGLTexture(Bitmap bitmap, int[] textures) {
         if (bitmap == null || bitmap.isRecycled()) {
             return;
         }
         this.bitmap = bitmap;
         // generate one texture pointer
-        if (textures[0] == 0) {
-            GLES10.glGenTextures(1, textures, 0);
-        }
+//        if (textures[0] == 0) {
+//            GLES10.glGenTextures(1, textures, 0);
+//        }
 
         // ...and bind it to our array
-        GLES10.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+        GLES10.glBindTexture(GL10.GL_TEXTURE_2D, textures[mTexIndex]);
 
         // create nearest filtered texture
         GLES10.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
@@ -98,9 +99,9 @@ public class Square {
     /**
      * The draw method for the square with the GL context
      */
-    public synchronized void draw(GL10 gl, Matrix4 m, float alpha) {
+    public synchronized void draw(GL10 gl, int[] textures, Matrix4 m, float alpha) {
         gl.glEnable(GL10.GL_TEXTURE_2D);
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[mTexIndex]);
 
 
         gl.glLoadMatrixf(m.m, 0);
@@ -125,4 +126,7 @@ public class Square {
 
     }
 
+    public void initTexture(GL10 gl, int texIndex) {
+        mTexIndex = texIndex;
+    }
 }

@@ -36,7 +36,8 @@ import rx.schedulers.Schedulers;
 public class Tile extends AbstractPositionableElement implements Cloneable {
 
     private static final String TAG = "Tile";
-    private static final long FADE_DURATION = 1000;
+
+    private static final long FADE_DURATION = 200;
 
     LoadState state;
 
@@ -69,9 +70,13 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
     float alpha = 1.0f;
 
     private TileMatrix mTileMatrix;
+
     private int loadX;
+
     private int loadY;
+
     private long fadeInTimerStart;
+
     private long fadeInTimerCurrent;
 
     // public AbstractPositionableElement position = new Point();
@@ -167,7 +172,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
     }
 
 
-    synchronized void loadImageWithIon(final String src, final Context context) {
+    void loadImageWithIon(final String src, final Context context) {
         if (isLoading()) {
             JveLog.d(TAG, "Already Loading !");
             return;
@@ -181,30 +186,29 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         loadX = mapTileX;
         loadY = mapTileY;
 
-        mBitmapFuture = ion.with(context, src)
+        mBitmapFuture = ion.with(context, src).noCache()
                 .setHeader("user-agent",
                         "Android").setHeader("referer",
                         "HexagonMap.fr").withBitmap().asBitmap();
         mBitmapFuture.setCallback(new FutureCallback<Bitmap>() {
             @Override
-            public synchronized void onCompleted(Exception e, Bitmap result) {
+            public void onCompleted(Exception e, Bitmap result) {
 
                 //Check if coords have changed since loading
                 if (mapTileX != loadX || mapTileY != loadY) {
-                    JveLog.d(TAG, "Tile changed while loading ! " + this);
+//                    JveLog.d(TAG, "Tile changed while loading ! " + this);
 //                    clearImage();
                 }
 
                 //TEST ONLY
                 bmp = result;
-
-//                drawDebugInfo();
                 state = LoadState.LOADED;
                 setLoading(false);
                 visibleOnTop = true;
                 visible = true;
+//                drawDebugInfo();
 
-//                fadeInStart();
+                fadeInStart();
 //                mTileMatrix.cache.put(new TilePos(mapTileX, mapTileY), result);
             }
         });
@@ -244,26 +248,28 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
 
     void drawDebugInfo() {
-//            bmp = bmp.copy(Bitmap.Config.RGB_565, true);
-        bmp = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+//        bmp = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
 //            bmp.eraseColor(Color.rgb(random256(), random256(), random256()));
-        bmp.eraseColor(Color.rgb((mapTileX % 32) * 8, (mapTileY % 32) * 8, 128));
+//        bmp.eraseColor(Color.rgb((mapTileX % 32) * 8, (mapTileY % 32) * 8, 128));
 
-        Canvas canvas = new Canvas(bmp);
-        Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(40);
-        canvas.drawText("Tile : " + toString(), 5,
-                50, paint);
+        if (bmp != null) {
+            bmp = bmp.copy(Bitmap.Config.RGB_565, true);
+            Canvas canvas = new Canvas(bmp);
+            Paint paint = new Paint();
+            paint.setColor(Color.BLACK);
+            paint.setTextSize(40);
+            canvas.drawText("Tile : " + toString(), 5,
+                    50, paint);
 
-        canvas.drawText("TileX : " + mapTileX, 5,
-                130, paint);
-        canvas.drawText("TileY : " + mapTileY, 5,
-                180, paint);
-        visible = true;
-        state = LoadState.LOADED;
-        setLoading(false);
-        visibleOnTop = true;
+            canvas.drawText("TileX : " + mapTileX, 5,
+                    130, paint);
+            canvas.drawText("TileY : " + mapTileY, 5,
+                    180, paint);
+            visible = true;
+            state = LoadState.LOADED;
+            setLoading(false);
+            visibleOnTop = true;
+        }
 
     }
 
@@ -372,10 +378,10 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         }
         long timer = System.currentTimeMillis() - fadeInTimerStart;
         if (timer > FADE_DURATION) {
-            alpha = 1.0f;
+            alpha = mTileMatrix.mAlpha;
             return;
         }
-        float c = timer / (float) FADE_DURATION;
+        float c = timer * mTileMatrix.mAlpha / (float) FADE_DURATION;
         alpha = c;
     }
 

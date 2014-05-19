@@ -2,6 +2,7 @@ package com.hexagon.map;
 
 import com.hexagon.map.enums.LoadState;
 import com.hexagon.map.opengl.Matrix4;
+import com.hexagon.map.opengl.Square;
 import com.hexagon.map.preference.Preferences;
 import com.hexagon.map.util.JveLog;
 
@@ -38,9 +39,9 @@ public class TileMatrix {
 
     float zoomScale = 1.0f;
 
-    private int nbTileX;
+    int nbTileX;
 
-    private int nbTileY;
+    int nbTileY;
 
     private Matrix4 m = new Matrix4();
 
@@ -51,11 +52,18 @@ public class TileMatrix {
     private int oldRX;
 
     Map<TilePos, Bitmap> cache = new HashMap<TilePos, Bitmap>();
+
     private int oldTopLeftTileIndexX = 0;
+
     private int oldTopLeftTileIndexY = 0;
+
     private int[][] tmpTileX;
+
     private int[][] tmpTileY;
-    private Bitmap[][] tmpBmp;
+
+    private Square[][] tmpBmp;
+
+    float mAlpha;
 
 
     public TileMatrix(Viewport viewport, Context context) {
@@ -75,7 +83,7 @@ public class TileMatrix {
         grid = new Tile[nbTileX][nbTileY];
         tmpTileX = new int[nbTileX][nbTileY];
         tmpTileY = new int[nbTileX][nbTileY];
-        tmpBmp = new Bitmap[nbTileX][nbTileY];
+        tmpBmp = new Square[nbTileX][nbTileY];
         for (int ix = 0; ix < this.nbTileX; ix++) {
             grid[ix] = new Tile[nbTileY];
             for (int iy = 0; iy < this.nbTileY; iy++) {
@@ -144,6 +152,7 @@ public class TileMatrix {
 
 
     public synchronized void draw(GL10 gl, float alpha) {
+        mAlpha = alpha;
         m.init();
         m.translate(viewport.mapScreenWidth / 2, viewport.mapScreenHeight / 2);
         int relativePosX = getTopLeftTileX() - getViewportAbsoluteX();
@@ -151,31 +160,31 @@ public class TileMatrix {
 
         int offsetX = 0;
         int offsetY = 0;
-        storeGrid();
-     /*   if (oldTopLeftTileIndexX != 0) {
+//        storeGrid();
+        if (oldTopLeftTileIndexX != 0) {
             if (oldTopLeftTileIndexX < getTopLeftTileIndexX()) {
                 //Shift right
                 storeGrid();
-                offsetX = -1;
+                offsetX = 1;
             }
             if (oldTopLeftTileIndexX > getTopLeftTileIndexX()) {
                 //Shift left
                 storeGrid();
-                offsetX = 1;
+                offsetX = -1;
             }
         }
         if (oldTopLeftTileIndexY != 0) {
             if (oldTopLeftTileIndexY < getTopLeftTileIndexY()) {
                 //Shift down
                 storeGrid();
-                offsetY = -1;
+                offsetY = 1;
             }
             if (oldTopLeftTileIndexY > getTopLeftTileIndexY()) {
                 //Shift up
                 storeGrid();
-                offsetY = 1;
+                offsetY = -1;
             }
-        }*/
+        }
 
         oldTopLeftTileIndexX = getTopLeftTileIndexX();
         oldTopLeftTileIndexY = getTopLeftTileIndexY();
@@ -186,7 +195,6 @@ public class TileMatrix {
 
                 int newMapTileX = getTopLeftTileIndexX() + ix - 2;
                 int newMapTileY = getTopLeftTileIndexY() + iy - 3;
-
 
                 if (t.mapTileX != newMapTileX || t.mapTileY != newMapTileY) {
 //                    TilePos mTilePos = new TilePos();
@@ -201,15 +209,18 @@ public class TileMatrix {
                     t.mapTileX = newMapTileX;
                     t.mapTileY = newMapTileY;
 
-                    boolean cachedTile = getCached(t);
+                    boolean cachedTile = getCached(t, offsetX, offsetY);
 //                    boolean cachedTile = false;
+
 
                     if (!cachedTile) {
                         String calcTileSrc = t.calcTileSrc(scale);
                         t.clearImage();
-//                        t.loadImageWithIon(calcTileSrc, context);
-                        t.loadImageWithPicasso(calcTileSrc, context);
+                        t.loadImageWithIon(calcTileSrc, context);
+//                        t.loadImageWithPicasso(calcTileSrc, context);
 //                        t.drawDebugInfo();
+                    } else {
+                        t.state = LoadState.UPLOADED;
                     }
 //                    }
 
@@ -228,25 +239,49 @@ public class TileMatrix {
                     t.m.translate(t.mapTileX * tileWidth - getTopLeftTileX(),
                             t.mapTileY * tileHeight - getTopLeftTileY());
                     if (t.isLoaded() && !t.isUploaded()) {
-                        t.square.loadGLTexture(t.bmp);
+                        t.square.loadGLTexture(t.bmp, viewport.mTextures);
                         t.state = LoadState.UPLOADED;
                     }
                     if (t.isUploaded()) {
-                        t.square.draw(gl, t.m, t.alpha);
+                        t.square.draw(gl, viewport.mTextures, t.m, t.alpha);
                     }
                 }
             }
         }
     }
 
-    private boolean getCached(Tile t) {
+    private boolean getCached(Tile t, int offsetX, int offsetY) {
+
+        if (offsetX == 0 && offsetY == 0 && (t.isLoaded() || t.isUploaded())) {
+            return true;
+        }
+        int ox = t.indexX + offsetX;
+        int oy = t.indexY + offsetY;
+        if (ox < 0 || oy < 0 || ox >= nbTileX || oy >= nbTileY) {
+            return false;
+        }
+        if (tmpTileX[ox][oy] == t.mapTileX && tmpTileY[ox][oy] == t.mapTileY) {
+            t.square = tmpBmp[ox][oy];
+            if (t.bmp != null) {
+//                t.state = LoadState.LOADED;
+//                        t.alpha = 1.0f;
+                return true;
+            } else {
+                return false;
+            }
+        }
+        t.bmp = null;
+        return false;
+    }
+
+    private boolean getCached2(Tile t) {
         for (int ix = 0; ix < this.nbTileX; ix++) {
             for (int iy = 0; iy < this.nbTileY; iy++) {
                 if (tmpTileX[ix][iy] == t.mapTileX && tmpTileY[ix][iy] == t.mapTileY) {
-                    t.bmp = tmpBmp[ix][iy];
+                    t.square = tmpBmp[ix][iy];
                     if (t.bmp != null) {
-                        t.state = LoadState.LOADED;
-                        t.alpha = 1.0f;
+//                        t.state = LoadState.LOADED;
+//                        t.alpha = 1.0f;
                         return true;
                     } else {
                         return false;
@@ -263,12 +298,24 @@ public class TileMatrix {
         for (int ix = 0; ix < this.nbTileX; ix++) {
             for (int iy = 0; iy < this.nbTileY; iy++) {
                 Tile tile = grid[ix][iy];
+                tmpTileX[ix][iy] = tile.mapTileX;
+                tmpTileY[ix][iy] = tile.mapTileY;
                 if (tile.isLoaded() || tile.isUploaded()) {
-                    tmpBmp[ix][iy] = tile.bmp;
-                } else {
-                    tmpBmp[ix][iy] = null;
+                    tmpBmp[ix][iy] = tile.square;
+//                } else {
+//                    tmpBmp[ix][iy] = null;
                 }
             }
         }
+    }
+
+    public int initTextures(GL10 gl, int texIndex) {
+        for (int ix = 0; ix < this.nbTileX; ix++) {
+            for (int iy = 0; iy < this.nbTileY; iy++) {
+                Tile tile = grid[ix][iy];
+                tile.square.initTexture(gl, texIndex++);
+            }
+        }
+        return texIndex;
     }
 }

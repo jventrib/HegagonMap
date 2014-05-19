@@ -13,6 +13,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
+import android.opengl.GLES10;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.LruCache;
@@ -135,6 +136,9 @@ public class Viewport extends AbstractPositionableElement implements
     private TileMatrix tmZoomIn;
 
     private TileMatrix tmZoomOut;
+
+    int[] mTextures;
+
     // //////////////////////////////////////////////////////////////
 
     public Location getCurrentBestLocation() {
@@ -236,7 +240,7 @@ public class Viewport extends AbstractPositionableElement implements
 //        return Math.round(FloatMath.floor(coordY / calcMapTileHeight));
 //    }
 
-    public void mouseDrag(int l, int m) {
+    public synchronized void mouseDrag(int l, int m) {
         setCoordX(calcMapDeltaX(getcoordX(), l));
         setCoordY(calcMapDeltaY(getcoordY(), m));
 //        move();
@@ -404,6 +408,15 @@ public class Viewport extends AbstractPositionableElement implements
         centerY = mapScreenHeight / 2;
 
         tm.scale = scale;
+        if (tm.scale == tmZoomIn.scale) {
+            tm = tmZoomIn;
+            tmZoomIn = new TileMatrix(this, context);
+
+        }
+        if (tm.scale == tmZoomOut.scale) {
+            tm = tmZoomOut;
+            tmZoomOut = new TileMatrix(this, context);
+        }
         tmZoomIn.scale = scale + 1;
         tmZoomOut.scale = scale - 1;
         tm.zoomScale = 1.0f;
@@ -468,6 +481,19 @@ public class Viewport extends AbstractPositionableElement implements
         tm.zoomScale = zoomScale;
         tmZoomIn.zoomScale = zoomScale / 2;
         tmZoomOut.zoomScale = zoomScale * 2;
+    }
+
+    public void initTextures(GL10 gl) {
+        int texIndex = 0;
+        int nbTextures = tm.nbTileX * tm.nbTileY * 3;
+        mTextures = new int[nbTextures];
+
+        GLES10.glGenTextures(nbTextures, mTextures, 0);
+
+        texIndex = tm.initTextures(gl, texIndex);
+        texIndex = tmZoomIn.initTextures(gl, texIndex);
+        texIndex = tmZoomOut.initTextures(gl, texIndex);
+
     }
 
     private final class TileComparator implements Comparator<Tile> {
@@ -722,39 +748,34 @@ public class Viewport extends AbstractPositionableElement implements
      * point
      */
     public synchronized void draw(GL10 gl) {
-        synchronized (frame) {
-            handleAnimations();
-            m.init();
+        handleAnimations();
+        m.init();
 //            float tmAlpha = (2 - zoomScale) * ALPHA_OFFSET;
-            float tmAlpha = 1.0f;
-            tm.draw(gl, tmAlpha);
-            if (zoomScale > 1.0f) {
-                float tmZoomInAlpha = (zoomScale - 1) * ALPHA_OFFSET;
-//                tmZoomIn.draw(gl, tmZoomInAlpha);
-            }
-            if (zoomScale < 1.0f) {
-                float tmZoomOutAlpha = (1 / zoomScale - 1) * ALPHA_OFFSET;
-  //              tmZoomOut.draw(gl, tmZoomOutAlpha);
-            }
-
-            Point p = locationPoint;
-            p.getPosFromCoord(this);
-
-            Circle c = new Circle();
-            mLocation.init();
-//            mLocation.set(zoomOnGoing ? m1 : m);
-            mLocation.translate(mapScreenWidth / 2, mapScreenHeight / 2);
-
-            mLocation
-                    .scale(getZoomScale(), getZoomScale(), mapScreenWidth / 2, mapScreenHeight / 2);
-            mLocation.translate(p.posx, p.posy);
-//            mLocation.preRotate(azimuth_angle, locationPoint.bmp.getWidth() / 2,
-//                    locationPoint.bmp.getHeight() / 2);
-            c.draw(gl, mLocation.m);
-
-
+        float tmAlpha = 1.0f;
+        tm.draw(gl, tmAlpha);
+        if (zoomScale > 1.0f) {
+            float tmZoomInAlpha = (zoomScale - 1) * ALPHA_OFFSET;
+            tmZoomIn.draw(gl, tmZoomInAlpha);
+        }
+        if (zoomScale < 1.0f) {
+            float tmZoomOutAlpha = (1 / zoomScale - 1) * ALPHA_OFFSET;
+            tmZoomOut.draw(gl, tmZoomOutAlpha);
         }
 
+        Point p = locationPoint;
+        p.getPosFromCoord(this);
+
+        Circle c = new Circle();
+        mLocation.init();
+//            mLocation.set(zoomOnGoing ? m1 : m);
+        mLocation.translate(mapScreenWidth / 2, mapScreenHeight / 2);
+
+        mLocation
+                .scale(getZoomScale(), getZoomScale(), mapScreenWidth / 2, mapScreenHeight / 2);
+        mLocation.translate(p.posx, p.posy);
+//            mLocation.preRotate(azimuth_angle, locationPoint.bmp.getWidth() / 2,
+//                    locationPoint.bmp.getHeight() / 2);
+        c.draw(gl, mLocation.m);
 
     }
 

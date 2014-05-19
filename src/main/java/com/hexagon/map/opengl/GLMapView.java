@@ -66,6 +66,8 @@ public class GLMapView extends GLSurfaceView implements SurfaceHolder.Callback {
 
                         gl.glEnable(GL10.GL_BLEND);
                         gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+
+                        mapActivity.viewport.initTextures(gl);
 //
 		}
 
