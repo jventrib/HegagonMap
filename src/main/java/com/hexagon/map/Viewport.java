@@ -408,21 +408,25 @@ public class Viewport extends AbstractPositionableElement implements
         centerY = mapScreenHeight / 2;
 
         tm.scale = scale;
-        if (tm.scale == tmZoomIn.scale) {
-            tm = tmZoomIn;
-            tmZoomIn = new TileMatrix(this, context);
-
-        }
-        if (tm.scale == tmZoomOut.scale) {
-            tm = tmZoomOut;
-            tmZoomOut = new TileMatrix(this, context);
-        }
+//        if (tm.scale == tmZoomIn.scale) {
+//            tm = tmZoomIn;
+//            tmZoomIn = new TileMatrix(this, context);
+//
+//        }
+//        if (tm.scale == tmZoomOut.scale) {
+//            tm = tmZoomOut;
+//            tmZoomOut = new TileMatrix(this, context);
+//        }
         tmZoomIn.scale = scale + 1;
         tmZoomOut.scale = scale - 1;
         tm.zoomScale = 1.0f;
         tmZoomIn.zoomScale = 0.5f;
         tmZoomOut.zoomScale = 2f;
 
+
+        tm.refresh();
+        tmZoomIn.refresh();
+        tmZoomOut.refresh();
 
     }
 

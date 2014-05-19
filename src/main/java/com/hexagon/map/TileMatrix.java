@@ -31,6 +31,7 @@ public class TileMatrix {
     private static final int MARGIN_Y = 2;
 
     private static final String TAG = "TileMatrix";
+    public static final int SCREEN_MARGIN = 200;
 
 
     private Tile[][] grid;
@@ -64,7 +65,6 @@ public class TileMatrix {
     private Square[][] tmpBmp;
 
     float mAlpha;
-
 
     public TileMatrix(Viewport viewport, Context context) {
         this.viewport = viewport;
@@ -158,72 +158,45 @@ public class TileMatrix {
         int relativePosX = getTopLeftTileX() - getViewportAbsoluteX();
         int relativePosY = getTopLeftTileY() - getViewportAbsoluteY();
 
-        int offsetX = 0;
-        int offsetY = 0;
-//        storeGrid();
-        if (oldTopLeftTileIndexX != 0) {
-            if (oldTopLeftTileIndexX < getTopLeftTileIndexX()) {
-                //Shift right
-                storeGrid();
-                offsetX = 1;
-            }
-            if (oldTopLeftTileIndexX > getTopLeftTileIndexX()) {
-                //Shift left
-                storeGrid();
-                offsetX = -1;
-            }
-        }
-        if (oldTopLeftTileIndexY != 0) {
-            if (oldTopLeftTileIndexY < getTopLeftTileIndexY()) {
-                //Shift down
-                storeGrid();
-                offsetY = 1;
-            }
-            if (oldTopLeftTileIndexY > getTopLeftTileIndexY()) {
-                //Shift up
-                storeGrid();
-                offsetY = -1;
-            }
-        }
-
         oldTopLeftTileIndexX = getTopLeftTileIndexX();
         oldTopLeftTileIndexY = getTopLeftTileIndexY();
 
-        for (int ix = 0; ix < this.nbTileX; ix++) {
-            for (int iy = 0; iy < this.nbTileY; iy++) {
+        for (int ix = 0; ix < nbTileX; ix++) {
+            for (int iy = 0; iy < nbTileY; iy++) {
                 Tile t = grid[ix][iy];
 
-                int newMapTileX = getTopLeftTileIndexX() + ix - 2;
-                int newMapTileY = getTopLeftTileIndexY() + iy - 3;
+                int newMapTileX = t.mapTileX;
+                int newMapTileY = t.mapTileY;
 
-                if (t.mapTileX != newMapTileX || t.mapTileY != newMapTileY) {
-//                    TilePos mTilePos = new TilePos();
-//                    mTilePos.x = newMapTileX;
-//                    mTilePos.y = newMapTileY;
-//                    Bitmap cachedTile = cache.get(mTilePos);
-//                    if (cachedTile != null) {
-//                        t.bmp = cachedTile;
-//                        JveLog.d(TAG, "cached Tile : " + cachedTile);
-//                        t.visible = true;
-//                    } else {
+                //Correct tiles indexes
+                if ((newMapTileX + nbTileX / 2) * tileWidth > getViewportAbsoluteX() + viewport.mapScreenWidth + SCREEN_MARGIN) {
+                    //Out of the screen by right
+                    newMapTileX -= nbTileX;
+
+                }
+                if ((newMapTileX + nbTileX / 2) * tileWidth < getViewportAbsoluteX() - SCREEN_MARGIN) {
+                    //Out of the screen by left
+                    newMapTileX += nbTileX;
+                }
+                if ((newMapTileY + nbTileY / 2) * tileHeight > getViewportAbsoluteY() + viewport.mapScreenHeight + SCREEN_MARGIN) {
+                    //Out of the screen by right
+                    newMapTileY -= nbTileY;
+                }
+                if ((newMapTileY + nbTileY / 2) * tileHeight < getViewportAbsoluteY() - SCREEN_MARGIN) {
+                    //Out of the screen by left
+                    newMapTileY += nbTileY;
+                }
+
+
+                if (t.mapTileX != newMapTileX || t.mapTileY != newMapTileY || t.bmp == null) {
                     t.mapTileX = newMapTileX;
                     t.mapTileY = newMapTileY;
 
-                    boolean cachedTile = getCached(t, offsetX, offsetY);
-//                    boolean cachedTile = false;
-
-
-                    if (!cachedTile) {
-                        String calcTileSrc = t.calcTileSrc(scale);
-                        t.clearImage();
-                        t.loadImageWithIon(calcTileSrc, context);
+                    String calcTileSrc = t.calcTileSrc(scale);
+                    t.clearImage();
+                    t.loadImageWithIon(calcTileSrc, context);
 //                        t.loadImageWithPicasso(calcTileSrc, context);
 //                        t.drawDebugInfo();
-                    } else {
-                        t.state = LoadState.UPLOADED;
-                    }
-//                    }
-
                 }
 
                 if (t.visible) {
@@ -250,72 +223,27 @@ public class TileMatrix {
         }
     }
 
-    private boolean getCached(Tile t, int offsetX, int offsetY) {
-
-        if (offsetX == 0 && offsetY == 0 && (t.isLoaded() || t.isUploaded())) {
-            return true;
-        }
-        int ox = t.indexX + offsetX;
-        int oy = t.indexY + offsetY;
-        if (ox < 0 || oy < 0 || ox >= nbTileX || oy >= nbTileY) {
-            return false;
-        }
-        if (tmpTileX[ox][oy] == t.mapTileX && tmpTileY[ox][oy] == t.mapTileY) {
-            t.square = tmpBmp[ox][oy];
-            if (t.bmp != null) {
-//                t.state = LoadState.LOADED;
-//                        t.alpha = 1.0f;
-                return true;
-            } else {
-                return false;
-            }
-        }
-        t.bmp = null;
-        return false;
-    }
-
-    private boolean getCached2(Tile t) {
-        for (int ix = 0; ix < this.nbTileX; ix++) {
-            for (int iy = 0; iy < this.nbTileY; iy++) {
-                if (tmpTileX[ix][iy] == t.mapTileX && tmpTileY[ix][iy] == t.mapTileY) {
-                    t.square = tmpBmp[ix][iy];
-                    if (t.bmp != null) {
-//                        t.state = LoadState.LOADED;
-//                        t.alpha = 1.0f;
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            }
-        }
-        t.bmp = null;
-        return false;
-    }
-
-
-    private void storeGrid() {
-        for (int ix = 0; ix < this.nbTileX; ix++) {
-            for (int iy = 0; iy < this.nbTileY; iy++) {
-                Tile tile = grid[ix][iy];
-                tmpTileX[ix][iy] = tile.mapTileX;
-                tmpTileY[ix][iy] = tile.mapTileY;
-                if (tile.isLoaded() || tile.isUploaded()) {
-                    tmpBmp[ix][iy] = tile.square;
-//                } else {
-//                    tmpBmp[ix][iy] = null;
-                }
-            }
-        }
-    }
-
     public int initTextures(GL10 gl, int texIndex) {
-        for (int ix = 0; ix < this.nbTileX; ix++) {
-            for (int iy = 0; iy < this.nbTileY; iy++) {
+        for (int ix = 0; ix < nbTileX; ix++) {
+            for (int iy = 0; iy < nbTileY; iy++) {
                 Tile tile = grid[ix][iy];
                 tile.square.initTexture(gl, texIndex++);
             }
         }
         return texIndex;
+    }
+
+    public void refresh() {
+
+        for (int ix = 0; ix < nbTileX; ix++) {
+            for (int iy = 0; iy < nbTileY; iy++) {
+                Tile t = grid[ix][iy];
+
+                t.mapTileX = getTopLeftTileIndexX() + ix - nbTileX / 2;
+                t.mapTileY = getTopLeftTileIndexY() + iy - nbTileY / 2;
+                t.bmp = null;
+                //t.state = LoadState.LOADED;
+            }
+        }
     }
 }
