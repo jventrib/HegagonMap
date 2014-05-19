@@ -246,4 +246,18 @@ public class TileMatrix {
             }
         }
     }
+
+    public void copyFrom(TileMatrix srcTm) {
+        for (int ix = 0; ix < nbTileX; ix++) {
+            for (int iy = 0; iy < nbTileY; iy++) {
+                Tile target = grid[ix][iy];
+                Tile src = srcTm.grid[ix][iy];
+                Square backSq = target.square;
+                target = src;
+                target.state = LoadState.LOADED;
+                target.square = backSq;
+            }
+        }
+
+    }
 }
