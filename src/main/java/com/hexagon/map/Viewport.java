@@ -411,15 +411,16 @@ public class Viewport extends AbstractPositionableElement implements
         tmZoomIn.scale = scale + 1;
         tmZoomOut.scale = scale - 1;
         tm.refresh();
+
+        if (tm.scale == tmZoomIn.scale) {
+            tm.copyFrom(tmZoomIn);
+        }
+        if (tm.scale == tmZoomOut.scale) {
+            tm.copyFrom(tmZoomOut);
+        }
         tmZoomIn.refresh();
         tmZoomOut.refresh();
 
-        if (tm.scale == tmZoomIn.scale) {
-//            tm.copyFrom(tmZoomIn);
-        }
-        if (tm.scale == tmZoomOut.scale) {
-//            tm.copyFrom(tmZoomOut);
-        }
         tm.zoomScale = 1.0f;
         tmZoomIn.zoomScale = 0.5f;
         tmZoomOut.zoomScale = 2f;
