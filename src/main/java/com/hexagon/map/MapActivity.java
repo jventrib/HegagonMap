@@ -788,14 +788,16 @@ public class MapActivity extends Activity implements OnGestureListener,
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            if (!viewport.zoomOnGoing) {
+            synchronized (viewport) {
+                if (!viewport.zoomOnGoing) {
+                    return true;
+                }
+
+                viewport.setZoomScale(viewport.getZoomScale() * detector.getScaleFactor());
+                JveLog.d(TAG, "zoom ongoing, scale: " + viewport.getZoomScale());
+                pinchDone = true;
                 return true;
             }
-
-            viewport.setZoomScale(viewport.getZoomScale() * detector.getScaleFactor());
-            JveLog.d(TAG, "zoom ongoing, scale: " + viewport.getZoomScale());
-            pinchDone = true;
-            return true;
         }
 
     }

@@ -89,7 +89,7 @@ public class Square {
         // Clean up
 
         if (bitmap != null && !bitmap.isRecycled()) {
-            bitmap.recycle();
+//            bitmap.recycle();
         }
     }
 

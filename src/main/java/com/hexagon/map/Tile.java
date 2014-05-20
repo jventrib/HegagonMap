@@ -123,7 +123,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         }
 
         if (bmp != null) {
-            bmp.recycle();
+//            bmp.recycle();
         }
 
         state = LoadState.CLEARED;
@@ -131,7 +131,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         setLoading(false);
 //        JveLog.d(TAG, this + "-task cancelled");
         // }
-//        alpha = 0f;
+        alpha = 0f;
     }
 
 
@@ -145,9 +145,13 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         String scaleString = Integer.toString(scale);
         String mapTileXS = Integer.valueOf(Math.abs(mapTileX)).toString();
         String mapTileYS = Integer.valueOf(Math.abs(mapTileY)).toString();
-        src = src.replaceAll("!SCALE!", scaleString)
-                .replaceAll("!ROW!", mapTileYS).replaceAll("!COL!", mapTileXS);
-//        JveLog.d(TAG, this + "-src : " + src);
+
+        src = new StringBuilder().append(src).append(scaleString).append("&TILEROW=")
+                .append(mapTileYS).append("&TILECOL=").append(mapTileXS).toString();
+//        !SCALE!&amp;TILEROW=!ROW!&amp;TILECOL=!COL!
+//        src = src.replaceAll("!SCALE!", scaleString)
+//                .replaceAll("!ROW!", mapTileYS).replaceAll("!COL!", mapTileXS);
+        JveLog.d(TAG, this + "-src : " + src);
 
         return src;
     }
@@ -186,7 +190,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
         loadX = mapTileX;
         loadY = mapTileY;
-
+        ion.getContext().getMainLooper().getThread().setPriority(Thread.MIN_PRIORITY);
         mBitmapFuture = ion.with(context, src).noCache()
                 .setHeader("user-agent",
                         "Android").setHeader("referer",
@@ -217,9 +221,8 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 
 
     void loadImageWithPicasso(final String src, final Context context) {
-        Picasso.Builder builder = new Picasso.Builder(context);
-        Picasso picasso = PicassoFactory.getInstance(context).getPicasso();
 
+        Picasso picasso = PicassoFactory.getInstance(context).getPicasso();
         final ImageView iv = new ImageView(context);
         mTarget = new Target() {
             @Override

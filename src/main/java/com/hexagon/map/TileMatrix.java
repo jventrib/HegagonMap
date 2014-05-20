@@ -31,6 +31,7 @@ public class TileMatrix {
     private static final int MARGIN_Y = 2;
 
     private static final String TAG = "TileMatrix";
+
     public static final int SCREEN_MARGIN = 200;
 
 
@@ -53,10 +54,6 @@ public class TileMatrix {
     private int oldRX;
 
     Map<TilePos, Bitmap> cache = new HashMap<TilePos, Bitmap>();
-
-    private int oldTopLeftTileIndexX = 0;
-
-    private int oldTopLeftTileIndexY = 0;
 
     private int[][] tmpTileX;
 
@@ -151,16 +148,7 @@ public class TileMatrix {
     }
 
 
-    public synchronized void draw(GL10 gl, float alpha) {
-        mAlpha = alpha;
-        m.init();
-        m.translate(viewport.mapScreenWidth / 2, viewport.mapScreenHeight / 2);
-        int relativePosX = getTopLeftTileX() - getViewportAbsoluteX();
-        int relativePosY = getTopLeftTileY() - getViewportAbsoluteY();
-
-        oldTopLeftTileIndexX = getTopLeftTileIndexX();
-        oldTopLeftTileIndexY = getTopLeftTileIndexY();
-
+    public synchronized void update() {
         for (int ix = 0; ix < nbTileX; ix++) {
             for (int iy = 0; iy < nbTileY; iy++) {
                 Tile t = grid[ix][iy];
@@ -169,38 +157,56 @@ public class TileMatrix {
                 int newMapTileY = t.mapTileY;
 
                 //Correct tiles indexes
-                if ((newMapTileX + nbTileX / 2) * tileWidth > getViewportAbsoluteX() + viewport.mapScreenWidth + SCREEN_MARGIN) {
+                if ((newMapTileX + nbTileX / 2) * tileWidth
+                        > getViewportAbsoluteX() + viewport.mapScreenWidth + SCREEN_MARGIN) {
                     //Out of the screen by right
                     newMapTileX -= nbTileX;
 
                 }
-                if ((newMapTileX + nbTileX / 2) * tileWidth < getViewportAbsoluteX() - SCREEN_MARGIN) {
+                if ((newMapTileX + nbTileX / 2) * tileWidth
+                        < getViewportAbsoluteX() - SCREEN_MARGIN) {
                     //Out of the screen by left
                     newMapTileX += nbTileX;
                 }
-                if ((newMapTileY + nbTileY / 2) * tileHeight > getViewportAbsoluteY() + viewport.mapScreenHeight + SCREEN_MARGIN) {
+                if ((newMapTileY + nbTileY / 2) * tileHeight
+                        > getViewportAbsoluteY() + viewport.mapScreenHeight + SCREEN_MARGIN) {
                     //Out of the screen by right
                     newMapTileY -= nbTileY;
                 }
-                if ((newMapTileY + nbTileY / 2) * tileHeight < getViewportAbsoluteY() - SCREEN_MARGIN) {
+                if ((newMapTileY + nbTileY / 2) * tileHeight
+                        < getViewportAbsoluteY() - SCREEN_MARGIN) {
                     //Out of the screen by left
                     newMapTileY += nbTileY;
                 }
 
-
                 if (t.mapTileX != newMapTileX || t.mapTileY != newMapTileY || t.bmp == null) {
-                    if (t.isLoading())return;
-                    t.setLoading(true);
+//                    if (t.isLoading())return;
+//                    t.setLoading(true);
                     t.mapTileX = newMapTileX;
                     t.mapTileY = newMapTileY;
 
                     String calcTileSrc = t.calcTileSrc(scale);
                     t.clearImage();
-                    t.loadImageAsync(calcTileSrc, context);
-//                    t.loadImageWithIon(calcTileSrc, context);
-//                        t.loadImageWithPicasso(calcTileSrc, context);
+//                    t.loadImageAsync(calcTileSrc, context);
+                    t.loadImageWithIon(calcTileSrc, context);
+//                    t.loadImageWithPicasso(calcTileSrc, context);
 //                        t.drawDebugInfo();
                 }
+            }
+        }
+    }
+
+    public synchronized void draw(GL10 gl, float alpha) {
+        mAlpha = alpha;
+        m.init();
+        m.translate(viewport.mapScreenWidth / 2, viewport.mapScreenHeight / 2);
+        int relativePosX = getTopLeftTileX() - getViewportAbsoluteX();
+        int relativePosY = getTopLeftTileY() - getViewportAbsoluteY();
+
+        for (int ix = 0; ix < nbTileX; ix++) {
+            for (int iy = 0; iy < nbTileY; iy++) {
+                Tile t = grid[ix][iy];
+
 
                 if (t.visible) {
                     t.handleAlpha();

@@ -156,6 +156,7 @@ public class Viewport extends AbstractPositionableElement implements
 
         this.context = context;
         screenScrollingAnimation = new ScreenScrollAnimation();
+
         locationChangedAnimation = new LocationChangedAnimation();
         screenZoomAnimation = new ScreenZoomAnimation();
 
@@ -244,6 +245,19 @@ public class Viewport extends AbstractPositionableElement implements
         setCoordX(calcMapDeltaX(getcoordX(), l));
         setCoordY(calcMapDeltaY(getcoordY(), m));
 //        move();
+        update();
+    }
+
+    private void update() {
+        tm.update();
+        if (zoomScale > 1.0f) {
+            tmZoomIn.update();
+        }
+        if (zoomScale < 1.0f) {
+            tmZoomOut.update();
+        }
+
+
     }
 
 
@@ -323,7 +337,7 @@ public class Viewport extends AbstractPositionableElement implements
      * @param Y2 second y of rectangle 2
      */
     static boolean rectIntersectRect(int x1, int x2, int y1, int y2, int X1,
-                                     int X2, int Y1, int Y2) {
+            int X2, int Y1, int Y2) {
         if (x1 > X2) {
             return false;
         }
@@ -411,7 +425,7 @@ public class Viewport extends AbstractPositionableElement implements
         tmZoomIn.scale = scale + 1;
         tmZoomOut.scale = scale - 1;
         tm.refresh();
-
+        tm.update();
         if (tm.scale == tmZoomIn.scale) {
             tm.copyFrom(tmZoomIn);
         }
@@ -419,7 +433,10 @@ public class Viewport extends AbstractPositionableElement implements
             tm.copyFrom(tmZoomOut);
         }
         tmZoomIn.refresh();
+        tmZoomIn.update();
+
         tmZoomOut.refresh();
+        tmZoomOut.update();
 
         tm.zoomScale = 1.0f;
         tmZoomIn.zoomScale = 0.5f;
@@ -530,7 +547,7 @@ public class Viewport extends AbstractPositionableElement implements
 
         @Override
         protected void applyTransformation(float interpolatedTime,
-                                           Transformation t) {
+                Transformation t) {
             float tX = -vX * (1.0f - interpolatedTime) / 40;
             float tY = -vY * (1.0f - interpolatedTime) / 40;
             handleScroll(tX, tY);
@@ -554,7 +571,7 @@ public class Viewport extends AbstractPositionableElement implements
 
         @Override
         protected void applyTransformation(float interpolatedTime,
-                                           Transformation t) {
+                Transformation t) {
             float deltaX = finalX - initialX;
             float deltaY = finalY - initialY;
 
@@ -582,7 +599,7 @@ public class Viewport extends AbstractPositionableElement implements
 
         @Override
         protected synchronized void applyTransformation(float interpolatedTime,
-                                                        Transformation t) {
+                Transformation t) {
             float deltaZoom = finalZoom - initialZoom;
             setZoomScale(deltaZoom * interpolatedTime + initialZoom);
 
@@ -750,7 +767,7 @@ public class Viewport extends AbstractPositionableElement implements
      * point
      */
     public synchronized void draw(GL10 gl) {
-        handleAnimations();
+//        handleAnimations();
         m.init();
 //            float tmAlpha = (2 - zoomScale) * ALPHA_OFFSET;
         float tmAlpha = 1.0f;
