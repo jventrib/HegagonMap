@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -129,11 +128,9 @@ public class Viewport extends AbstractPositionableElement implements
 
     private Matrix4 mMScaled = new Matrix4();
 
-    private TileMatrix tm;
+    private TileMatrix currentTM;
 
-    private TileMatrix tmZoomIn;
-
-    private TileMatrix tmZoomOut;
+    private TileMatrix preselectTM;
 
     int[] mTextures;
     private ValueAnimator screenScrollingAnimator;
@@ -187,10 +184,8 @@ public class Viewport extends AbstractPositionableElement implements
         centerX = mapScreenWidth / 2;
         centerY = mapScreenHeight / 2;
 
-        tm = new TileMatrix(this, context);
-        tmZoomIn = new TileMatrix(this, context);
-        tmZoomOut = new TileMatrix(this, context);
-
+        currentTM = new TileMatrix(this, context);
+        preselectTM = new TileMatrix(this, context);
 
         BitmapFactory.Options opt = new BitmapFactory.Options();
         // opt.inDither = true;
@@ -234,15 +229,10 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     private void update() {
-        tm.update();
-        if (zoomScale > 1.0f) {
-            tmZoomIn.update();
+        currentTM.update();
+        if (zoomScale != 1.0f) {
+            preselectTM.update();
         }
-        if (zoomScale < 1.0f) {
-            tmZoomOut.update();
-        }
-
-
     }
 
 
@@ -282,29 +272,37 @@ public class Viewport extends AbstractPositionableElement implements
         centerX = mapScreenWidth / 2;
         centerY = mapScreenHeight / 2;
 
-        tm.scale = scale;
-        tm.refresh();
-        tm.update();
-        if (tm.scale == tmZoomIn.scale) {
-            tm.copyFrom(tmZoomIn);
+        currentTM.scale = scale;
+        if (currentTM.scale == preselectTM.scale) {
+            //Swap TileMatrix
+            TileMatrix tmp = currentTM;
+            currentTM = preselectTM;
+            preselectTM = tmp;
+//            currentTM.copyFrom(preselectTM);
+        } else {
+            currentTM.refresh();
+            currentTM.update();
         }
-        if (tm.scale == tmZoomOut.scale) {
-            tm.copyFrom(tmZoomOut);
-        }
-        tmZoomIn.scale = scale + 1;
-        tmZoomOut.scale = scale - 1;
-        tmZoomIn.refresh();
-        tmZoomIn.update();
-
-        tmZoomOut.refresh();
-        tmZoomOut.update();
-
-        tm.zoomScale = 1.0f;
-        tmZoomIn.zoomScale = 0.5f;
-        tmZoomOut.zoomScale = 2f;
 
 
+        currentTM.zoomScale = 1.0f;
     }
+
+
+    private void preselectZoomIn() {
+        preselectTM.scale = scale + 1;
+        preselectTM.zoomScale = 0.5f;
+        preselectTM.refresh();
+        preselectTM.update();
+    }
+
+    private void preselectZoomOut() {
+        preselectTM.scale = scale - 1;
+        preselectTM.zoomScale = 2.0f;
+        preselectTM.refresh();
+        preselectTM.update();
+    }
+
 
     @TargetApi(12)
     public static void addBitmapToMemoryCache(String key, Bitmap bitmap) {
@@ -343,21 +341,24 @@ public class Viewport extends AbstractPositionableElement implements
 
     public void setZoomScale(float zoomScale) {
         this.zoomScale = zoomScale;
-        tm.zoomScale = zoomScale;
-        tmZoomIn.zoomScale = zoomScale / 2;
-        tmZoomOut.zoomScale = zoomScale * 2;
+        currentTM.zoomScale = zoomScale;
+        if (zoomScale > 1.0f) {
+            preselectTM.zoomScale = zoomScale / 2;
+        }
+        if (zoomScale < 1.0f) {
+            preselectTM.zoomScale = zoomScale * 2;
+        }
     }
 
     public void initTextures(GL10 gl) {
         int texIndex = 0;
-        int nbTextures = tm.nbTileX * tm.nbTileY * 3;
+        int nbTextures = currentTM.nbTileX * currentTM.nbTileY * 3;
         mTextures = new int[nbTextures];
 
         GLES10.glGenTextures(nbTextures, mTextures, 0);
 
-        texIndex = tm.initTextures(gl, texIndex);
-        texIndex = tmZoomIn.initTextures(gl, texIndex);
-        texIndex = tmZoomOut.initTextures(gl, texIndex);
+        texIndex = currentTM.initTextures(gl, texIndex);
+        texIndex = preselectTM.initTextures(gl, texIndex);
 
     }
 
@@ -424,11 +425,7 @@ public class Viewport extends AbstractPositionableElement implements
     public synchronized void zoomInAnimated() {
         zoomOnGoing = true;
         newScale++;
-//        screenZoomAnimation.initialZoom = 1.0f;
-//        screenZoomAnimation.finalZoom = 2.0f;
-//        screenZoomAnimation.initialize(0, 0, 0, 0);
-//        screenZoomAnimation.start();
-
+        preselectZoomIn();
 
         screenZoomAnimator.setFloatValues(1.0f, 2.0f);
         screenZoomAnimator.start();
@@ -438,10 +435,7 @@ public class Viewport extends AbstractPositionableElement implements
     public synchronized void zoomOutAnimated() {
         zoomOnGoing = true;
         newScale--;
-//        screenZoomAnimation.initialZoom = 1.0f;
-//        screenZoomAnimation.finalZoom = 0.5f;
-//        screenZoomAnimation.initialize(0, 0, 0, 0);
-//        screenZoomAnimation.start();
+        preselectZoomOut();
         screenZoomAnimator.setFloatValues(1.0f, 0.5f);
         screenZoomAnimator.start();
 
@@ -516,16 +510,16 @@ public class Viewport extends AbstractPositionableElement implements
         m.init();
 //            float tmAlpha = (2 - zoomScale) * ALPHA_OFFSET;
         float tmAlpha = 1.0f;
-        tm.draw(gl, tmAlpha);
-//        tmZoomIn.draw(gl, 0.5f);
-//        tmZoomOut.draw(gl, 0.5f);
+        currentTM.draw(gl, tmAlpha);
+//        preselectTM.draw(gl, 0.5f);
+//        tmB.draw(gl, 0.5f);
         if (zoomScale > 1.0f) {
             float tmZoomInAlpha = (zoomScale - 1) * ALPHA_OFFSET;
-            tmZoomIn.draw(gl, tmZoomInAlpha);
+            preselectTM.draw(gl, tmZoomInAlpha);
         }
         if (zoomScale < 1.0f) {
             float tmZoomOutAlpha = (1 / zoomScale - 1) * ALPHA_OFFSET;
-            tmZoomOut.draw(gl, tmZoomOutAlpha);
+            preselectTM.draw(gl, tmZoomOutAlpha);
         }
 
         Point p = locationPoint;
