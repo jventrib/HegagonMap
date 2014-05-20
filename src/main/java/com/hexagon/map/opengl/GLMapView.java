@@ -42,12 +42,12 @@ public class GLMapView extends GLSurfaceView implements SurfaceHolder.Callback {
 
             // mSquare.draw(gl);
 
-            queueEvent(new Runnable() {
+/*            queueEvent(new Runnable() {
                 @Override
                 public void run() {
                     mapActivity.viewport.handleAnimations();
                 }
-            });
+            });*/
             mapActivity.viewport.draw(gl);
 
 

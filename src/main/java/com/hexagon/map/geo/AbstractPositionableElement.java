@@ -18,7 +18,7 @@ public class AbstractPositionableElement {
 		super();
 	}
 
-	protected void setPosition(float coordX, float coordY) {
+	public void setPosition(float coordX, float coordY) {
 		this.coordX = coordX;
 		this.coordY = coordY;
 	}

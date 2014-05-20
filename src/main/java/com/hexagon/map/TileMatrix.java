@@ -116,7 +116,7 @@ public class TileMatrix {
      */
     private int getTopLeftTileIndexX() {
         return Math.round(FloatMath
-                .floor(viewport.getcoordX() / (tileWidth * viewport.zoomRatios[scale])));
+                .floor(viewport.coordX / (tileWidth * viewport.zoomRatios[scale])));
     }
 
     /**
@@ -126,7 +126,7 @@ public class TileMatrix {
      */
     private int getTopLeftTileIndexY() {
         return Math.round(FloatMath
-                .floor(viewport.getcoordY() / (tileHeight * viewport.zoomRatios[scale])));
+                .floor(viewport.coordY / (tileHeight * viewport.zoomRatios[scale])));
     }
 
     /**
@@ -135,7 +135,7 @@ public class TileMatrix {
      * @return x position
      */
     public int getViewportAbsoluteX() {
-        return Math.round(viewport.getcoordX() / (viewport.zoomRatios[scale]));
+        return Math.round(viewport.coordX / (viewport.zoomRatios[scale]));
     }
 
     /**
@@ -144,7 +144,7 @@ public class TileMatrix {
      * @return y position
      */
     public int getViewportAbsoluteY() {
-        return Math.round(viewport.getcoordY() / (viewport.zoomRatios[scale]));
+        return Math.round(viewport.coordY / (viewport.zoomRatios[scale]));
     }
 
 

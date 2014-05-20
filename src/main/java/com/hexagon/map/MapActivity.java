@@ -560,7 +560,6 @@ public class MapActivity extends Activity implements OnGestureListener,
         }
 
         mScaleDetector.onTouchEvent(me);
-        viewport.resetInertiaScroll();
         // zoom control are reset to visible at each touch on the screen
         controller.setVisible(true);
         return gestureScanner.onTouchEvent(me);

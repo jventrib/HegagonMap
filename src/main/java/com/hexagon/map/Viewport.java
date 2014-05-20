@@ -1,10 +1,11 @@
 package com.hexagon.map;
 
-import java.util.Comparator;
 import java.util.HashMap;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,17 +19,19 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.LruCache;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Transformation;
 
+import com.hexagon.map.anim.Position;
+import com.hexagon.map.anim.PositionAnimatedListener;
+import com.hexagon.map.anim.PositionEvaluator;
+import com.hexagon.map.anim.Velocity;
+import com.hexagon.map.anim.VelocityAnimatedListener;
+import com.hexagon.map.anim.VelocityEvaluator;
+import com.hexagon.map.anim.ZoomAnimatedListener;
 import com.hexagon.map.geo.AbstractPositionableElement;
 import com.hexagon.map.geo.LocationablePoint;
 import com.hexagon.map.geo.Point;
 import com.hexagon.map.opengl.Circle;
 import com.hexagon.map.opengl.Matrix4;
-import com.hexagon.map.util.JveLog;
 import com.jhlabs.map.awt.Point2D;
 import com.jhlabs.map.proj.MercatorProjection;
 
@@ -97,19 +100,14 @@ public class Viewport extends AbstractPositionableElement implements
 
     boolean lock;
 
-    private ScreenScrollAnimation screenScrollingAnimation;
 
-    private LocationChangedAnimation locationChangedAnimation;
-
-    private ScreenZoomAnimation screenZoomAnimation;
+//    private ScreenZoomAnimation screenZoomAnimation;
 
     Context context;
 
     AbstractLocationListener listener;
 
-    private int newScale;
-
-    private int oldScale;
+    public int newScale;
 
     private float zoomScale = 1.0f;
 
@@ -123,7 +121,7 @@ public class Viewport extends AbstractPositionableElement implements
 
     Point targetPoint;
 
-    volatile boolean zoomOnGoing;
+    public volatile boolean zoomOnGoing;
 
     public GL10 gl;
 
@@ -138,6 +136,13 @@ public class Viewport extends AbstractPositionableElement implements
     private TileMatrix tmZoomOut;
 
     int[] mTextures;
+    private ValueAnimator screenScrollingAnimator;
+    private ValueAnimator screenZoomAnimator;
+    private ValueAnimator locationChangedAnimator;
+    private ZoomAnimatedListener zoomAnimatedListener;
+    private PositionAnimatedListener positionAnimatedListener;
+    private VelocityAnimatedListener velocityAnimatedListener;
+
 
     // //////////////////////////////////////////////////////////////
 
@@ -155,10 +160,22 @@ public class Viewport extends AbstractPositionableElement implements
     public void init(Context context, DisplayMetrics dm) {
 
         this.context = context;
-        screenScrollingAnimation = new ScreenScrollAnimation();
 
-        locationChangedAnimation = new LocationChangedAnimation();
-        screenZoomAnimation = new ScreenZoomAnimation();
+        //Init animations
+        zoomAnimatedListener = new ZoomAnimatedListener(this);
+        velocityAnimatedListener = new VelocityAnimatedListener(this);
+        positionAnimatedListener = new PositionAnimatedListener(this);
+
+        screenZoomAnimator = new ValueAnimator();
+        screenZoomAnimator.addUpdateListener(zoomAnimatedListener);
+        screenZoomAnimator.addListener(zoomAnimatedListener);
+        screenZoomAnimator.setDuration(300L);
+
+        locationChangedAnimator = new ValueAnimator();
+        locationChangedAnimator.addUpdateListener(positionAnimatedListener);
+        locationChangedAnimator.setDuration(1000L);
+        locationChangedAnimator.setEvaluator(new PositionEvaluator(this));
+        locationChangedAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
         marginX = 0;
         marginY = 0;
@@ -174,12 +191,6 @@ public class Viewport extends AbstractPositionableElement implements
         tmZoomIn = new TileMatrix(this, context);
         tmZoomOut = new TileMatrix(this, context);
 
-        // for (int ix = 0; ix < this.nbTileX; ix++) {
-        // grid2[ix] = new Tile[nbTileY];
-        // for (int iy = 0; iy < this.nbTileY; iy++) {
-        // this.grid2[ix][iy] = createTile(ix, iy);
-        // }
-        // }
 
         BitmapFactory.Options opt = new BitmapFactory.Options();
         // opt.inDither = true;
@@ -208,43 +219,17 @@ public class Viewport extends AbstractPositionableElement implements
 
     }
 
-//    private Tile createTile(int ix, int iy) {
-//        return new Tile(this, ix, iy);
-//    }
-
-    public static String encodeFileName(String fileName) {
-        byte[] tmp = fileName.getBytes();
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < tmp.length; i++) {
-            byte b = tmp[i];
-            sb.append(b);
-        }
-        String encoded = sb.toString();
-        return encoded;
+    public synchronized void mouseDrag(int l, int m) {
+        coordX = calcMapDeltaX(coordX, l);
+        coordY = calcMapDeltaY(coordY, m);
+//        move();
+        update();
     }
 
-//    float calcMapTileWidth() {
-//        return tileWidth * zoomRatios[this.scale];
-//    }
 
-//    float calcMapTileHeight() {
-//        return tileHeight * zoomRatios[this.scale];
-//    }
-
-//    int calcNumTileX(float coordX) {
-//        float calcMapTileWidth = this.calcMapTileWidth();
-//        return Math.round(FloatMath.floor(coordX / calcMapTileWidth));
-//    }
-
-//    int calcNumTileY(float coordY) {
-//        float calcMapTileHeight = this.calcMapTileHeight();
-//        return Math.round(FloatMath.floor(coordY / calcMapTileHeight));
-//    }
-
-    public synchronized void mouseDrag(int l, int m) {
-        setCoordX(calcMapDeltaX(getcoordX(), l));
-        setCoordY(calcMapDeltaY(getcoordY(), m));
-//        move();
+    @Override
+    public void setPosition(float coordX, float coordY) {
+        super.setPosition(coordX, coordY);
         update();
     }
 
@@ -262,8 +247,8 @@ public class Viewport extends AbstractPositionableElement implements
 
 
     public void mouseDragAnimated(int l, int m) {
-        float newCoordX = calcMapDeltaX(getcoordX(), l);
-        float newCoordY = calcMapDeltaY(getcoordY(), m);
+        float newCoordX = calcMapDeltaX(coordX, l);
+        float newCoordY = calcMapDeltaY(coordY, m);
         com.jhlabs.map.awt.Point2D.Float pos = new com.jhlabs.map.awt.Point2D.Float(newCoordX,
                 newCoordY);
         moveToPositionAnimated(pos, false);
@@ -274,43 +259,6 @@ public class Viewport extends AbstractPositionableElement implements
         // move(0, 0);
     }
 
-//    public void move() {
-//        synchronized (frame) {
-//            if (zoomOnGoing) {
-//                return;
-//            }
-//            for (int ix = 0; ix < nbTileX; ix++) {
-//                for (int iy = 0; iy < nbTileY; iy++) {
-//                    Tile t = grid1[ix][iy];
-//                    t.positionImage();
-//                    t.correctMapImage(false, context);
-//                    if (!t.visible && t.visibleOnTop) {
-//                        Out of syncro, scrolling was too quick, need to recompute
-//                        all tiles
-//                        refresh();
-//                        return;
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    int calcPixelX(float _3c) {
-        return Math.round(centerX + (_3c - coordX) / (zoomRatios[scale] * getZoomScale()));
-    }
-
-    int calcPixelY(float _3c) {
-        return Math.round(centerY + (_3c - coordY) / (zoomRatios[scale] * getZoomScale()));
-    }
-
-    int calcOldPixelX(float _3c) {
-        return Math.round(centerX + (_3c - coordX) / zoomRatios[oldScale]);
-    }
-
-    int calcOldPixelY(float _3c) {
-        return Math.round(centerY + (_3c - coordY) / zoomRatios[oldScale]);
-    }
-
     private float calcMapDeltaX(float initiaPos, int delta) {
         return initiaPos + delta * zoomRatios[scale] / getZoomScale();
     }
@@ -319,93 +267,6 @@ public class Viewport extends AbstractPositionableElement implements
         return initialPos + delta * zoomRatios[scale] / getZoomScale();
     }
 
-    public void moveToScreenCoord(float sx, float sy) {
-        coordX = sx * zoomRatios[scale];
-        coordY = sy * zoomRatios[scale];
-    }
-
-    /**
-     * Test intersection of two rectangle
-     *
-     * @param x1 first x of rectangle 1
-     * @param x2 second x of rectangle 1
-     * @param y1 first y of rectangle 1
-     * @param y2 second y of rectangle 1
-     * @param X1 first x of rectangle 2
-     * @param X2 second x of rectangle 2
-     * @param Y1 first y of rectangle 2
-     * @param Y2 second y of rectangle 2
-     */
-    static boolean rectIntersectRect(int x1, int x2, int y1, int y2, int X1,
-            int X2, int Y1, int Y2) {
-        if (x1 > X2) {
-            return false;
-        }
-        if (x2 < X1) {
-            return false;
-        }
-        if (y1 > Y2) {
-            return false;
-        }
-        if (y2 < Y1) {
-            return false;
-        }
-        return true;
-    }
-
-    private int calcPixelX(int _3c) {
-        return Math.round(this.centerX + (_3c - this.getcoordX())
-                / zoomRatios[scale]);
-    }
-
-    private int calcPixelY(int _3f) {
-        return Math.round(this.centerY + (_3f - this.getcoordY())
-                / zoomRatios[scale]);
-    }
-
-    public void setCoordX(float coordX) {
-        this.coordX = coordX;
-    }
-
-    public float getcoordX() {
-        return coordX;
-    }
-
-    public void setCoordY(float coordY) {
-        this.coordY = coordY;
-    }
-
-    public float getcoordY() {
-        return coordY;
-    }
-
-
-    //    public List<Tile> getTilesList() {
-//        List<Tile> result = new ArrayList<Tile>();
-//        for (int ix = 0; ix < this.nbTileX; ix++) {
-//            for (int iy = 0; iy < this.nbTileY; iy++) {
-//                result.add(grid1[ix][iy]);
-//            }
-//        }
-//        return result;
-//
-//    }
-//
-//    public synchronized List<Tile> getTilesList2() {
-//        List<Tile> result = new ArrayList<Tile>();
-//
-//        for (int ix = 0; ix < this.nbTileX; ix++) {
-//            for (int iy = 0; iy < this.nbTileY; iy++) {
-//                Tile tile = grid2[ix][iy];
-//                if (tile != null) {
-//                    result.add(tile);
-//                }
-//            }
-//        }
-//        return result;
-//
-//    }
-//
     public synchronized void refresh() {
 //        Ion ion = Ion.getDefault(context);
 //        ion.dump();
@@ -422,8 +283,6 @@ public class Viewport extends AbstractPositionableElement implements
         centerY = mapScreenHeight / 2;
 
         tm.scale = scale;
-        tmZoomIn.scale = scale + 1;
-        tmZoomOut.scale = scale - 1;
         tm.refresh();
         tm.update();
         if (tm.scale == tmZoomIn.scale) {
@@ -432,6 +291,8 @@ public class Viewport extends AbstractPositionableElement implements
         if (tm.scale == tmZoomOut.scale) {
             tm.copyFrom(tmZoomOut);
         }
+        tmZoomIn.scale = scale + 1;
+        tmZoomOut.scale = scale - 1;
         tmZoomIn.refresh();
         tmZoomIn.update();
 
@@ -443,21 +304,6 @@ public class Viewport extends AbstractPositionableElement implements
         tmZoomOut.zoomScale = 2f;
 
 
-    }
-
-    public synchronized void zoomIn() {
-        scale++;
-        refresh();
-    }
-
-    public synchronized void zoomOut() {
-        scale--;
-        refresh();
-    }
-
-    public void positionPoint(AbstractPositionableElement p) {
-        p.posx = calcPixelX(p.mapx);
-        p.posy = calcPixelY(p.mapy);
     }
 
     @TargetApi(12)
@@ -515,45 +361,7 @@ public class Viewport extends AbstractPositionableElement implements
 
     }
 
-    private final class TileComparator implements Comparator<Tile> {
-
-        private int numTileX;
-
-        private int numTileY;
-
-        public TileComparator(int numTileX, int numTileY) {
-            this.numTileX = numTileX;
-            this.numTileY = numTileY;
-        }
-
-        @Override
-        public int compare(Tile lhs, Tile rhs) {
-            int lIndex = lhs.mapTileX - numTileX + lhs.mapTileY - numTileY;
-            int rIndex = rhs.mapTileX - numTileX + rhs.mapTileY - numTileY;
-            return rIndex - lIndex;
-        }
-    }
-
-    private class ScreenScrollAnimation extends Animation {
-
-        public float vY;
-
-        public float vX;
-
-        public ScreenScrollAnimation() {
-            setInterpolator(new DecelerateInterpolator());
-            setDuration(1000L);
-        }
-
-        @Override
-        protected void applyTransformation(float interpolatedTime,
-                Transformation t) {
-            float tX = -vX * (1.0f - interpolatedTime) / 40;
-            float tY = -vY * (1.0f - interpolatedTime) / 40;
-            handleScroll(tX, tY);
-        }
-    }
-
+/*
     public class LocationChangedAnimation extends Animation {
 
         public float initialX;
@@ -571,7 +379,7 @@ public class Viewport extends AbstractPositionableElement implements
 
         @Override
         protected void applyTransformation(float interpolatedTime,
-                Transformation t) {
+                                           Transformation t) {
             float deltaX = finalX - initialX;
             float deltaY = finalY - initialY;
 
@@ -583,72 +391,8 @@ public class Viewport extends AbstractPositionableElement implements
         }
 
     }
+*/
 
-    public class ScreenZoomAnimation extends Animation implements
-            AnimationListener {
-
-        public float finalZoom;
-
-        public float initialZoom;
-
-        public ScreenZoomAnimation() {
-            setInterpolator(new AccelerateDecelerateInterpolator());
-            setDuration(300L);
-            setAnimationListener(this);
-        }
-
-        @Override
-        protected synchronized void applyTransformation(float interpolatedTime,
-                Transformation t) {
-            float deltaZoom = finalZoom - initialZoom;
-            setZoomScale(deltaZoom * interpolatedTime + initialZoom);
-
-        }
-
-        @Override
-        public synchronized void onAnimationEnd(Animation animation) {
-            zoomOnGoing = false;
-            oldScale = scale;
-            scale = newScale;
-            JveLog.d(TAG, "zoomOnGoing : " + zoomOnGoing);
-            refresh();
-            setZoomScale(1.0f);
-        }
-
-        @Override
-        public void onAnimationRepeat(Animation animation) {
-        }
-
-        @Override
-        public synchronized void onAnimationStart(Animation animation) {
-            zoomOnGoing = true;
-        }
-
-    }
-
-    /**
-     * Handle screen scrolling animation step
-     */
-    public void handleAnimations() {
-        if (screenScrollingAnimation != null
-                && screenScrollingAnimation.isInitialized()
-                && !screenScrollingAnimation.hasEnded()) {
-            screenScrollingAnimation.getTransformation(
-                    System.currentTimeMillis(), null);
-        }
-        if (locationChangedAnimation != null
-                && locationChangedAnimation.isInitialized()
-                && !locationChangedAnimation.hasEnded()) {
-            locationChangedAnimation.getTransformation(
-                    System.currentTimeMillis(), null);
-        }
-        if (screenZoomAnimation != null && screenZoomAnimation.isInitialized()
-                && !screenZoomAnimation.hasEnded()) {
-            screenZoomAnimation.getTransformation(System.currentTimeMillis(),
-                    null);
-        }
-
-    }
 
     public void handleScroll(float distX, float distY) {
 //		synchronized (getMapActivity().surfaceHolder) {
@@ -657,34 +401,22 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     public void handleInertiaScroll(float velocityX, float velocityY) {
-        screenScrollingAnimation.vX = velocityX;
-        screenScrollingAnimation.vY = velocityY;
-        screenScrollingAnimation.initialize(0, 0, 0, 0);
-        screenScrollingAnimation.start();
-    }
-
-    public void resetInertiaScroll() {
-        if (screenScrollingAnimation != null
-                && screenScrollingAnimation.hasStarted()) {
-            screenScrollingAnimation.reset();
-
-        }
-
+        screenScrollingAnimator = ValueAnimator.ofObject(new VelocityEvaluator(this), new Velocity(-velocityX / 40, -velocityY / 40), new Velocity(0, 0));
+        screenScrollingAnimator.cancel();
+        screenScrollingAnimator.addUpdateListener(velocityAnimatedListener);
+        screenScrollingAnimator.setDuration(1000L);
+        screenScrollingAnimator.start();
     }
 
     public void moveToPositionAnimated(Point2D.Float pos, boolean project) {
         if (pos != null) {
-            if (locationChangedAnimation.hasEnded()
-                    || !locationChangedAnimation.hasStarted()) {
-                locationChangedAnimation.initialX = getcoordX();
-                locationChangedAnimation.initialY = getcoordY();
+            if (!locationChangedAnimator.isRunning()) {
                 if (project) {
                     pos = MercatorProjection.getInstance().project(pos);
                 }
-                locationChangedAnimation.finalX = pos.x;
-                locationChangedAnimation.finalY = pos.y;
-                locationChangedAnimation.initialize(0, 0, 0, 0);
-                locationChangedAnimation.start();
+                locationChangedAnimator.setObjectValues(new Position(coordX, coordY), new Position(pos.x, pos.y));
+                locationChangedAnimator.setEvaluator(new PositionEvaluator(this));
+                locationChangedAnimator.start();
             }
         }
     }
@@ -692,38 +424,51 @@ public class Viewport extends AbstractPositionableElement implements
     public synchronized void zoomInAnimated() {
         zoomOnGoing = true;
         newScale++;
-        screenZoomAnimation.initialZoom = 1.0f;
-        screenZoomAnimation.finalZoom = 2.0f;
-        screenZoomAnimation.initialize(0, 0, 0, 0);
-        screenZoomAnimation.start();
+//        screenZoomAnimation.initialZoom = 1.0f;
+//        screenZoomAnimation.finalZoom = 2.0f;
+//        screenZoomAnimation.initialize(0, 0, 0, 0);
+//        screenZoomAnimation.start();
+
+
+        screenZoomAnimator.setFloatValues(1.0f, 2.0f);
+        screenZoomAnimator.start();
+
     }
 
     public synchronized void zoomOutAnimated() {
         zoomOnGoing = true;
         newScale--;
-        screenZoomAnimation.initialZoom = 1.0f;
-        screenZoomAnimation.finalZoom = 0.5f;
-        screenZoomAnimation.initialize(0, 0, 0, 0);
-        screenZoomAnimation.start();
+//        screenZoomAnimation.initialZoom = 1.0f;
+//        screenZoomAnimation.finalZoom = 0.5f;
+//        screenZoomAnimation.initialize(0, 0, 0, 0);
+//        screenZoomAnimation.start();
+        screenZoomAnimator.setFloatValues(1.0f, 0.5f);
+        screenZoomAnimator.start();
+
     }
 
     public void zoomReset(Float oldScale) {
 
+        Float start;
+        float end;
         if (oldScale != null) {
-            screenZoomAnimation.initialZoom = oldScale;
-            screenZoomAnimation.finalZoom = Math.round(oldScale);
+            start = oldScale;
+            end = Math.round(oldScale);
         } else {
-            screenZoomAnimation.initialZoom = getZoomScale();
-            screenZoomAnimation.finalZoom = Math.round(getZoomScale());
+            start = getZoomScale();
+            end = Math.round(getZoomScale());
         }
-        if (screenZoomAnimation.finalZoom < 0.5f) {
-            screenZoomAnimation.finalZoom = 0.5f;
+
+
+        if (end < 0.5f) {
+            end = 0.5f;
         }
-        if (screenZoomAnimation.finalZoom > 2.0f) {
-            screenZoomAnimation.finalZoom = 2.0f;
+        if (end > 2.0f) {
+            end = 2.0f;
         }
-        screenZoomAnimation.initialize(0, 0, 0, 0);
-        screenZoomAnimation.start();
+        screenZoomAnimator.setFloatValues(start, end);
+        screenZoomAnimator.start();
+
     }
 
     public void moveToLastLocation() {
