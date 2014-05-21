@@ -106,8 +106,6 @@ public class Viewport extends AbstractPositionableElement implements
 
     AbstractLocationListener listener;
 
-    public int newScale;
-
     private float zoomScale = 1.0f;
 
     public float azimuth_angle;
@@ -231,7 +229,8 @@ public class Viewport extends AbstractPositionableElement implements
     private void update() {
         currentTM.update();
         if (zoomScale != 1.0f) {
-            preselectTM.update();
+            refresh();
+//            preselectTM.update();
         }
     }
 
@@ -265,8 +264,6 @@ public class Viewport extends AbstractPositionableElement implements
             return;
         }
 
-        newScale = scale;
-
         int offsetX = nbTileX / 2;
         int offsetY = nbTileY / 2;
         centerX = mapScreenWidth / 2;
@@ -283,17 +280,15 @@ public class Viewport extends AbstractPositionableElement implements
             currentTM.refresh();
             currentTM.update();
         }
-
-
         currentTM.zoomScale = 1.0f;
         zoomScale  = 1.0f;
     }
 
 
     private void preselectZoomIn() {
-        scale = newScale;
         currentTM.zoomScale = 1.0f;
         zoomScale  = 1.0f;
+//        scale = preselectTM.scale;
         preselectTM.scale = scale + 1;
         preselectTM.zoomScale = 0.5f;
         preselectTM.refresh();
@@ -301,9 +296,9 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     private void preselectZoomOut() {
-        scale = newScale;
         currentTM.zoomScale = 1.0f;
         zoomScale  = 1.0f;
+//        scale = preselectTM.scale;
         preselectTM.scale = scale - 1;
         preselectTM.zoomScale = 2.0f;
         preselectTM.refresh();
@@ -431,7 +426,7 @@ public class Viewport extends AbstractPositionableElement implements
 
     public synchronized void zoomInAnimated() {
         zoomOnGoing = true;
-        newScale++;
+        scale++;
         preselectZoomIn();
 
         screenZoomAnimator.setFloatValues(1.0f, 2.0f);
@@ -441,7 +436,7 @@ public class Viewport extends AbstractPositionableElement implements
 
     public synchronized void zoomOutAnimated() {
         zoomOnGoing = true;
-        newScale--;
+        scale--;
         preselectZoomOut();
         screenZoomAnimator.setFloatValues(1.0f, 0.5f);
         screenZoomAnimator.start();
@@ -552,16 +547,16 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     boolean isZoomMax() {
-        return newScale >= MAX_ZOOM;
+        return scale >= MAX_ZOOM;
     }
 
     boolean isZoomMin() {
-        return newScale <= MIN_ZOOM;
+        return scale <= MIN_ZOOM;
     }
 
 
     public synchronized void zoomAnimated(int zoomOffset) {
-        newScale += zoomOffset;
+        scale += zoomOffset;
 
     }
 
