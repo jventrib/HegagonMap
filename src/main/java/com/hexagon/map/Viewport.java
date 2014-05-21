@@ -286,10 +286,14 @@ public class Viewport extends AbstractPositionableElement implements
 
 
         currentTM.zoomScale = 1.0f;
+        zoomScale  = 1.0f;
     }
 
 
     private void preselectZoomIn() {
+        scale = newScale;
+        currentTM.zoomScale = 1.0f;
+        zoomScale  = 1.0f;
         preselectTM.scale = scale + 1;
         preselectTM.zoomScale = 0.5f;
         preselectTM.refresh();
@@ -297,6 +301,9 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     private void preselectZoomOut() {
+        scale = newScale;
+        currentTM.zoomScale = 1.0f;
+        zoomScale  = 1.0f;
         preselectTM.scale = scale - 1;
         preselectTM.zoomScale = 2.0f;
         preselectTM.refresh();

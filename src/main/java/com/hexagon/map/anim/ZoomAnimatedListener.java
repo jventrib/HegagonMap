@@ -30,9 +30,9 @@ public class ZoomAnimatedListener implements ValueAnimator.AnimatorUpdateListene
     @Override
     public void onAnimationEnd(Animator animator) {
         viewport.zoomOnGoing = false;
-        viewport.scale = viewport.newScale;
-        viewport.refresh();
-        viewport.setZoomScale(1.0f);
+//        viewport.scale = viewport.newScale;
+//        viewport.refresh();
+//        viewport.setZoomScale(1.0f);
     }
 
     @Override
