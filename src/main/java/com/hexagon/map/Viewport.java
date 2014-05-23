@@ -236,15 +236,13 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     private void update() {
-        primaryTM.update();
-        if (zoomScale != 1.0f) {
-//            refresh();
-//            preselectTM.update();
+//        primaryTM.update();
+        if (zoomScale > 1.5f || zoomScale < 0.75f ) {
+            secondaryTM.update();
+        } else {
+            primaryTM.update();
+
         }
-//        if (readyForSwap) {
-//            swapTM();
-//            readyForSwap = false;
-//        }
     }
 
 

@@ -403,6 +403,169 @@ public class MapActivity extends Activity implements OnGestureListener,
         return false;
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent me) {
+        final int action = me.getAction();
+        final int fingersCount = me.getPointerCount();
+        if ((action == MotionEvent.ACTION_POINTER_UP) && (fingersCount == 2)) {
+            onTwoFingersTap();
+            return true;
+        }
+
+        mScaleDetector.onTouchEvent(me);
+        // zoom control are reset to visible at each touch on the screen
+        controller.setVisible(true);
+        return gestureScanner.onTouchEvent(me);
+    }
+
+    private void onTwoFingersTap() {
+        zoomOut();
+    }
+
+    public boolean onScroll(MotionEvent e1, MotionEvent e2,
+            final float distanceX, final float distanceY) {
+        if (pinchDoneTime + 20 > System.currentTimeMillis()) {
+            return true;
+        }
+        disableLocation();
+        viewport.handleScroll(distanceX, distanceY);
+        return true;
+    }
+
+    public boolean onDown(MotionEvent e) {
+        return true;
+    }
+
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+            float velocityY) {
+        viewport.handleInertiaScroll(velocityX, velocityY);
+        return true;
+    }
+
+    public void onLongPress(MotionEvent e) {
+        // zoomOut();
+    }
+
+    public void onShowPress(MotionEvent e) {
+    }
+
+    public boolean onSingleTapUp(MotionEvent e) {
+        return true;
+    }
+
+
+    public class InstantReScaleGestureListener implements
+            OnScaleGestureListener {
+
+        private float initialScaleFactor;
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            // zoom(zoomOffset);
+            // viewport.zoomScale = 1.0f;
+        }
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            initialScaleFactor = 1.0f;
+            return true;
+        }
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            JveLog.d(TAG, "zoom ongoing, scale: " + detector.getScaleFactor());
+            float scaleDelta = detector.getScaleFactor() - initialScaleFactor;
+            pinchDone = true;
+            int zoomOffset = viewport.scale + Math.round(scaleDelta);
+            viewport.correctScale();
+            handleZoomControl();
+            if (viewport.scale != zoomOffset) {
+                viewport.scale = zoomOffset;
+                initialScaleFactor = detector.getScaleFactor();
+                viewport.refresh();
+            }
+            viewport.setZoomScale(scaleDelta + 1.0f);
+
+            return false;
+        }
+
+    }
+
+    public class TouchUpReScaleGestureListener implements
+            OnScaleGestureListener {
+
+        private static final float ZOOM_OUT_THESHOLD = 0.5f;
+
+        private static final float ZOOM_IN_THESHOLD = 2.0f;
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            restoreZoomToClosestScale();
+
+            pinchDone = true;
+            pinchDoneTime = System.currentTimeMillis();
+        }
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            if (viewport.zoomOnGoing) {
+                return true;
+            }
+            viewport.zoomOnGoing = true;
+            return true;
+        }
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            synchronized (viewport) {
+                if (!viewport.zoomOnGoing) {
+                    return true;
+                }
+
+                viewport.setZoomScale(viewport.getZoomScale() * detector.getScaleFactor());
+                JveLog.d(TAG, "zoom ongoing, scale: " + viewport.getZoomScale());
+                pinchDone = true;
+                return true;
+            }
+        }
+
+    }
+
+    private void restoreZoomToClosestScale() {
+        int zoomOffset = Math.round(viewport.getZoomScale()) - 1;
+        Log.d(TAG, "zoom offset : " + zoomOffset);
+
+        if (zoomOffset > 1) {
+            zoomOffset = 1;
+        }
+        if (zoomOffset < -1) {
+            zoomOffset = -1;
+        }
+        zoom(zoomOffset);
+        if (zoomOffset == 0) {
+            viewport.zoomReset(null);
+        }
+        float oldScale = viewport.getZoomScale();
+        viewport.setZoomScale(1.0f);
+        if (zoomOffset != 0) {
+            viewport.zoomReset(oldScale);
+        }
+    }
+
+    public class GestureListenerFactory {
+
+        public OnScaleGestureListener getGestureListener(boolean instant) {
+
+            if (instant) {
+                return new InstantReScaleGestureListener();
+            } else {
+                return new TouchUpReScaleGestureListener();
+            }
+
+        }
+
+    }
+
     private void zoomIn() {
         if (!viewport.isZoomMax() && !viewport.zoomOnGoing) {
             JveLog.d(TAG, "zoom in");
@@ -550,52 +713,7 @@ public class MapActivity extends Activity implements OnGestureListener,
         outState.putFloat("currentY", viewport.coordY);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent me) {
-        final int action = me.getAction();
-        final int fingersCount = me.getPointerCount();
-        if ((action == MotionEvent.ACTION_POINTER_UP) && (fingersCount == 2)) {
-            onTwoFingersTap();
-            return true;
-        }
 
-        mScaleDetector.onTouchEvent(me);
-        // zoom control are reset to visible at each touch on the screen
-        controller.setVisible(true);
-        return gestureScanner.onTouchEvent(me);
-    }
-
-    private void onTwoFingersTap() {
-        zoomOut();
-    }
-
-    public boolean onScroll(MotionEvent e1, MotionEvent e2,
-            final float distanceX, final float distanceY) {
-        disableLocation();
-        viewport.handleScroll(distanceX, distanceY);
-        return true;
-    }
-
-    public boolean onDown(MotionEvent e) {
-        return true;
-    }
-
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-            float velocityY) {
-        viewport.handleInertiaScroll(velocityX, velocityY);
-        return true;
-    }
-
-    public void onLongPress(MotionEvent e) {
-        // zoomOut();
-    }
-
-    public void onShowPress(MotionEvent e) {
-    }
-
-    public boolean onSingleTapUp(MotionEvent e) {
-        return true;
-    }
 
     private void hideKeyboard(View view) {
         InputMethodManager imm = (InputMethodManager) getSystemService(
@@ -700,113 +818,7 @@ public class MapActivity extends Activity implements OnGestureListener,
     // /////////////////////////////////////////////////////////////////
 
 
-    public class InstantReScaleGestureListener implements
-            OnScaleGestureListener {
 
-        private float initialScaleFactor;
-
-        @Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            // zoom(zoomOffset);
-            // viewport.zoomScale = 1.0f;
-        }
-
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            initialScaleFactor = 1.0f;
-            return true;
-        }
-
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            JveLog.d(TAG, "zoom ongoing, scale: " + detector.getScaleFactor());
-            float scaleDelta = detector.getScaleFactor() - initialScaleFactor;
-            pinchDone = true;
-            int zoomOffset = viewport.scale + Math.round(scaleDelta);
-            viewport.correctScale();
-            handleZoomControl();
-            if (viewport.scale != zoomOffset) {
-                viewport.scale = zoomOffset;
-                initialScaleFactor = detector.getScaleFactor();
-                viewport.refresh();
-            }
-            viewport.setZoomScale(scaleDelta + 1.0f);
-
-            return false;
-        }
-
-    }
-
-    public class TouchUpReScaleGestureListener implements
-            OnScaleGestureListener {
-
-        private static final float ZOOM_OUT_THESHOLD = 0.5f;
-
-        private static final float ZOOM_IN_THESHOLD = 2.0f;
-
-        @Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-//            int zoomOffset = Math.round(viewport.getZoomScale()) - 1;
-//            Log.d(TAG, "zoom offset : " + zoomOffset);
-//
-//            if (zoomOffset > 1) {
-//                zoomOffset = 1;
-//            }
-//            if (zoomOffset < -1) {
-//                zoomOffset = -1;
-//            }
-//            zoom(zoomOffset);
-//            if (zoomOffset == 0) {
-//                viewport.zoomReset(null);
-//            }
-//            float oldScale = viewport.getZoomScale();
-//            viewport.setZoomScale(1.0f);
-//            if (zoomOffset != 0) {
-//                viewport.zoomReset(oldScale);
-//            }
-
-            pinchDone = true;
-            pinchDoneTime = System.currentTimeMillis();
-        }
-
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            if (viewport.zoomOnGoing) {
-                return true;
-            }
-            viewport.zoomOnGoing = true;
-            return true;
-        }
-
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            synchronized (viewport) {
-                if (!viewport.zoomOnGoing) {
-                    return true;
-                }
-
-                viewport.setZoomScale(viewport.getZoomScale() * detector.getScaleFactor());
-                JveLog.d(TAG, "zoom ongoing, scale: " + viewport.getZoomScale());
-                pinchDone = true;
-                return true;
-            }
-        }
-
-    }
-
-    public class GestureListenerFactory {
-
-        public OnScaleGestureListener getGestureListener(boolean instant) {
-
-            if (instant) {
-                return new InstantReScaleGestureListener();
-            } else {
-                return new TouchUpReScaleGestureListener();
-            }
-
-        }
-
-    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
