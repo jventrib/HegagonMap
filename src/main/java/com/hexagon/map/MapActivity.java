@@ -746,31 +746,24 @@ public class MapActivity extends Activity implements OnGestureListener,
 
         @Override
         public void onScaleEnd(ScaleGestureDetector detector) {
-            int zoomOffset = Math.round(viewport.getZoomScale()) - 1;
-            Log.d(TAG, "zoom offset : " + zoomOffset);
-
-            if (zoomOffset > 1) {
-                zoomOffset = 1;
-            }
-            if (zoomOffset < -1) {
-                zoomOffset = -1;
-            }
-            zoom(zoomOffset);
-            if (zoomOffset == 0) {
-                viewport.zoomReset(null);
-            }
-            float oldScale = viewport.getZoomScale();
-            // if (viewport.zoomScale < ZOOM_OUT_THESHOLD) {
-            // oldScale = ZOOM_OUT_THESHOLD;
-            //
-            // } else if (viewport.zoomScale > ZOOM_IN_THESHOLD) {
-            // oldScale = ZOOM_IN_THESHOLD;
-            // }
-            viewport.setZoomScale(1.0f);
-            // viewport.refresh();
-            if (zoomOffset != 0) {
-                viewport.zoomReset(oldScale);
-            }
+//            int zoomOffset = Math.round(viewport.getZoomScale()) - 1;
+//            Log.d(TAG, "zoom offset : " + zoomOffset);
+//
+//            if (zoomOffset > 1) {
+//                zoomOffset = 1;
+//            }
+//            if (zoomOffset < -1) {
+//                zoomOffset = -1;
+//            }
+//            zoom(zoomOffset);
+//            if (zoomOffset == 0) {
+//                viewport.zoomReset(null);
+//            }
+//            float oldScale = viewport.getZoomScale();
+//            viewport.setZoomScale(1.0f);
+//            if (zoomOffset != 0) {
+//                viewport.zoomReset(oldScale);
+//            }
 
             pinchDone = true;
             pinchDoneTime = System.currentTimeMillis();

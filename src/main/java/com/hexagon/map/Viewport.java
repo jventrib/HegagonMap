@@ -99,7 +99,6 @@ public class Viewport extends AbstractPositionableElement implements
 
     boolean lock;
 
-
 //    private ScreenZoomAnimation screenZoomAnimation;
 
     Context context;
@@ -107,6 +106,9 @@ public class Viewport extends AbstractPositionableElement implements
     AbstractLocationListener listener;
 
     private float zoomScale = 1.0f;
+
+    private float alphaZoomScale = 1.0f;
+
 
     public float azimuth_angle;
 
@@ -126,18 +128,25 @@ public class Viewport extends AbstractPositionableElement implements
 
     private Matrix4 mMScaled = new Matrix4();
 
-    private TileMatrix currentTM;
+    private TileMatrix primaryTM;
 
-    private TileMatrix preselectTM;
+    private TileMatrix secondaryTM;
 
     int[] mTextures;
+
     private ValueAnimator screenScrollingAnimator;
+
     private ValueAnimator screenZoomAnimator;
+
     private ValueAnimator locationChangedAnimator;
+
     private ZoomAnimatedListener zoomAnimatedListener;
+
     private PositionAnimatedListener positionAnimatedListener;
+
     private VelocityAnimatedListener velocityAnimatedListener;
 
+    public boolean readyForSwap = false;
 
     // //////////////////////////////////////////////////////////////
 
@@ -182,8 +191,8 @@ public class Viewport extends AbstractPositionableElement implements
         centerX = mapScreenWidth / 2;
         centerY = mapScreenHeight / 2;
 
-        currentTM = new TileMatrix(this, context);
-        preselectTM = new TileMatrix(this, context);
+        primaryTM = new TileMatrix(this, context);
+        secondaryTM = new TileMatrix(this, context);
 
         BitmapFactory.Options opt = new BitmapFactory.Options();
         // opt.inDither = true;
@@ -227,11 +236,15 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     private void update() {
-        currentTM.update();
+        primaryTM.update();
         if (zoomScale != 1.0f) {
-            refresh();
+//            refresh();
 //            preselectTM.update();
         }
+//        if (readyForSwap) {
+//            swapTM();
+//            readyForSwap = false;
+//        }
     }
 
 
@@ -257,52 +270,62 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     public synchronized void refresh() {
-//        Ion ion = Ion.getDefault(context);
-//        ion.dump();
-//        ion.getBitmapCache().clear();
-        if (zoomOnGoing) {
-            return;
-        }
-
-        int offsetX = nbTileX / 2;
-        int offsetY = nbTileY / 2;
-        centerX = mapScreenWidth / 2;
-        centerY = mapScreenHeight / 2;
-
-        currentTM.scale = scale;
-        if (currentTM.scale == preselectTM.scale) {
-            //Swap TileMatrix
-            TileMatrix tmp = currentTM;
-            currentTM = preselectTM;
-            preselectTM = tmp;
-//            currentTM.copyFrom(preselectTM);
-        } else {
-            currentTM.refresh();
-            currentTM.update();
-        }
-        currentTM.zoomScale = 1.0f;
-        zoomScale  = 1.0f;
+        primaryTM.scale = scale;
+        primaryTM.refresh();
+        primaryTM.update();
+        primaryTM.zoomScale = 1.0f;
+        zoomScale = 1.0f;
+        alphaZoomScale = 1.0f;
     }
 
 
-    private void preselectZoomIn() {
-        currentTM.zoomScale = 1.0f;
-        zoomScale  = 1.0f;
+    void preselectZoomIn() {
+        if (readyForSwap) {
+            swapTM();
+            readyForSwap = false;
+        }
+
+        primaryTM.zoomScale = 1.0f;
+        zoomScale = 1.0f;
+        alphaZoomScale = 1.0f;
+
 //        scale = preselectTM.scale;
-        preselectTM.scale = scale + 1;
-        preselectTM.zoomScale = 0.5f;
-        preselectTM.refresh();
-        preselectTM.update();
+        secondaryTM.zoomScale = 0.5f;
+//        preselectTM.refresh();
+//        preselectTM.update();
+        //Swap TileMatrix
+        primaryTM.scale = scale;
+        secondaryTM.scale = scale + 1;
+        secondaryTM.refresh();
+        secondaryTM.update();
     }
 
-    private void preselectZoomOut() {
-        currentTM.zoomScale = 1.0f;
-        zoomScale  = 1.0f;
+    void preselectZoomOut() {
+        if (readyForSwap) {
+            swapTM();
+            readyForSwap = false;
+        }
+
+        primaryTM.zoomScale = 1.0f;
+        zoomScale = 1.0f;
+        alphaZoomScale = 1.0f;
+
 //        scale = preselectTM.scale;
-        preselectTM.scale = scale - 1;
-        preselectTM.zoomScale = 2.0f;
-        preselectTM.refresh();
-        preselectTM.update();
+        secondaryTM.zoomScale = 2.0f;
+        primaryTM.scale = scale;
+        secondaryTM.scale = scale - 1;
+        secondaryTM.refresh();
+        secondaryTM.update();
+    }
+
+    public void swapTM() {
+        //Swap
+        scale = secondaryTM.scale;
+        zoomScale = 1.0f;
+        alphaZoomScale = 1.0f;
+        TileMatrix tmp = primaryTM;
+        primaryTM = secondaryTM;
+        secondaryTM = tmp;
     }
 
 
@@ -343,24 +366,47 @@ public class Viewport extends AbstractPositionableElement implements
 
     public void setZoomScale(float zoomScale) {
         this.zoomScale = zoomScale;
-        currentTM.zoomScale = zoomScale;
+        alphaZoomScale = zoomScale;
+        primaryTM.zoomScale = zoomScale;
         if (zoomScale > 1.0f) {
-            preselectTM.zoomScale = zoomScale / 2;
+            secondaryTM.zoomScale = zoomScale / 2;
+            if (secondaryTM.scale != scale + 1) {
+                secondaryTM.scale = scale + 1;
+                secondaryTM.refresh();
+                secondaryTM.update();
+            }
         }
         if (zoomScale < 1.0f) {
-            preselectTM.zoomScale = zoomScale * 2;
+            secondaryTM.zoomScale = zoomScale * 2;
+            if (secondaryTM.scale != scale - 1) {
+                secondaryTM.scale = scale - 1;
+                secondaryTM.refresh();
+                secondaryTM.update();
+            }
+
+        }
+        if (zoomScale >= 2.0f) {
+            if (secondaryTM.scale != scale) {
+                swapTM();
+            }
+        }
+
+        if (zoomScale <= 0.5f) {
+            if (secondaryTM.scale != scale) {
+                swapTM();
+            }
         }
     }
 
     public void initTextures(GL10 gl) {
         int texIndex = 0;
-        int nbTextures = currentTM.nbTileX * currentTM.nbTileY * 3;
+        int nbTextures = primaryTM.nbTileX * primaryTM.nbTileY * 3;
         mTextures = new int[nbTextures];
 
         GLES10.glGenTextures(nbTextures, mTextures, 0);
 
-        texIndex = currentTM.initTextures(gl, texIndex);
-        texIndex = preselectTM.initTextures(gl, texIndex);
+        texIndex = primaryTM.initTextures(gl, texIndex);
+        texIndex = secondaryTM.initTextures(gl, texIndex);
 
     }
 
@@ -404,7 +450,8 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     public void handleInertiaScroll(float velocityX, float velocityY) {
-        screenScrollingAnimator = ValueAnimator.ofObject(new VelocityEvaluator(this), new Velocity(-velocityX / 40, -velocityY / 40), new Velocity(0, 0));
+        screenScrollingAnimator = ValueAnimator.ofObject(new VelocityEvaluator(this),
+                new Velocity(-velocityX / 40, -velocityY / 40), new Velocity(0, 0));
         screenScrollingAnimator.cancel();
         screenScrollingAnimator.addUpdateListener(velocityAnimatedListener);
         screenScrollingAnimator.setDuration(1000L);
@@ -417,7 +464,8 @@ public class Viewport extends AbstractPositionableElement implements
                 if (project) {
                     pos = MercatorProjection.getInstance().project(pos);
                 }
-                locationChangedAnimator.setObjectValues(new Position(coordX, coordY), new Position(pos.x, pos.y));
+                locationChangedAnimator
+                        .setObjectValues(new Position(coordX, coordY), new Position(pos.x, pos.y));
                 locationChangedAnimator.setEvaluator(new PositionEvaluator(this));
                 locationChangedAnimator.start();
             }
@@ -426,7 +474,7 @@ public class Viewport extends AbstractPositionableElement implements
 
     public synchronized void zoomInAnimated() {
         zoomOnGoing = true;
-        scale++;
+//        scale++;
         preselectZoomIn();
 
         screenZoomAnimator.setFloatValues(1.0f, 2.0f);
@@ -436,7 +484,7 @@ public class Viewport extends AbstractPositionableElement implements
 
     public synchronized void zoomOutAnimated() {
         zoomOnGoing = true;
-        scale--;
+//        scale--;
         preselectZoomOut();
         screenZoomAnimator.setFloatValues(1.0f, 0.5f);
         screenZoomAnimator.start();
@@ -454,7 +502,6 @@ public class Viewport extends AbstractPositionableElement implements
             start = getZoomScale();
             end = Math.round(getZoomScale());
         }
-
 
         if (end < 0.5f) {
             end = 0.5f;
@@ -512,16 +559,19 @@ public class Viewport extends AbstractPositionableElement implements
         m.init();
 //            float tmAlpha = (2 - zoomScale) * ALPHA_OFFSET;
         float tmAlpha = 1.0f;
-        currentTM.draw(gl, tmAlpha);
-//        preselectTM.draw(gl, 0.5f);
-//        tmB.draw(gl, 0.5f);
-        if (zoomScale > 1.0f) {
-            float tmZoomInAlpha = (zoomScale - 1) * ALPHA_OFFSET;
-            preselectTM.draw(gl, tmZoomInAlpha);
-        }
-        if (zoomScale < 1.0f) {
-            float tmZoomOutAlpha = (1 / zoomScale - 1) * ALPHA_OFFSET;
-            preselectTM.draw(gl, tmZoomOutAlpha);
+//        secondTM.draw(gl, 1.0f);
+        if (alphaZoomScale > 1.0f) {
+            primaryTM.draw(gl, tmAlpha);
+            float tmZoomInAlpha = (alphaZoomScale - 1) * ALPHA_OFFSET;
+            secondaryTM.draw(gl, tmZoomInAlpha);
+        } else if (alphaZoomScale < 1.0f) {
+            primaryTM.draw(gl, tmAlpha);
+            float tmZoomOutAlpha = (1 / alphaZoomScale - 1) * ALPHA_OFFSET;
+            secondaryTM.draw(gl, tmZoomOutAlpha);
+        } else {
+            secondaryTM.draw(gl, 1.0f);
+            primaryTM.draw(gl, tmAlpha);
+
         }
 
         Point p = locationPoint;

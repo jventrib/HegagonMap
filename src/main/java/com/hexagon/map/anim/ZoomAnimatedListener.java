@@ -33,6 +33,9 @@ public class ZoomAnimatedListener implements ValueAnimator.AnimatorUpdateListene
 //        viewport.scale = viewport.newScale;
 //        viewport.refresh();
 //        viewport.setZoomScale(1.0f);
+//        viewport.swapTM();
+        viewport.readyForSwap = true;
+
     }
 
     @Override
