@@ -500,7 +500,7 @@ public class MapActivity extends Activity implements OnGestureListener,
 
         @Override
         public void onScaleEnd(ScaleGestureDetector detector) {
-            restoreZoomToClosestScale();
+//            restoreZoomToClosestScale();
 
             pinchDone = true;
             pinchDoneTime = System.currentTimeMillis();
@@ -523,7 +523,7 @@ public class MapActivity extends Activity implements OnGestureListener,
                 }
 
                 viewport.setZoomScale(viewport.getZoomScale() * detector.getScaleFactor());
-                JveLog.d(TAG, "zoom ongoing, scale: " + viewport.getZoomScale());
+//                JveLog.d(TAG, "zoom ongoing, scale: " + viewport.getZoomScale());
                 pinchDone = true;
                 return true;
             }

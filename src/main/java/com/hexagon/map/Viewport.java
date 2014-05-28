@@ -31,6 +31,7 @@ import com.hexagon.map.geo.LocationablePoint;
 import com.hexagon.map.geo.Point;
 import com.hexagon.map.opengl.Circle;
 import com.hexagon.map.opengl.Matrix4;
+import com.hexagon.map.util.JveLog;
 import com.jhlabs.map.awt.Point2D;
 import com.jhlabs.map.proj.MercatorProjection;
 
@@ -128,9 +129,9 @@ public class Viewport extends AbstractPositionableElement implements
 
     private Matrix4 mMScaled = new Matrix4();
 
-    private TileMatrix primaryTM;
+    private TileMatrix mTM1;
 
-    private TileMatrix secondaryTM;
+    private TileMatrix mTM2;
 
     int[] mTextures;
 
@@ -147,6 +148,10 @@ public class Viewport extends AbstractPositionableElement implements
     private VelocityAnimatedListener velocityAnimatedListener;
 
     public boolean readyForSwap = false;
+
+    private TileMatrix mMainTM;
+
+    private TileMatrix mSpareTM;
 
     // //////////////////////////////////////////////////////////////
 
@@ -191,8 +196,8 @@ public class Viewport extends AbstractPositionableElement implements
         centerX = mapScreenWidth / 2;
         centerY = mapScreenHeight / 2;
 
-        primaryTM = new TileMatrix(this, context);
-        secondaryTM = new TileMatrix(this, context);
+        mTM1 = new TileMatrix(this, context);
+        mTM2 = new TileMatrix(this, context);
 
         BitmapFactory.Options opt = new BitmapFactory.Options();
         // opt.inDither = true;
@@ -236,13 +241,12 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     private void update() {
-//        primaryTM.update();
-        if (zoomScale > 1.5f || zoomScale < 0.75f ) {
-            secondaryTM.update();
-        } else {
-            primaryTM.update();
-
-        }
+        mMainTM.update();
+//        if (zoomScale > 1.5f || zoomScale < 0.75f) {
+//            mTM2.update();
+//        } else {
+//            mTM1.update();
+//        }
     }
 
 
@@ -268,12 +272,14 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     public synchronized void refresh() {
-        primaryTM.scale = scale;
-        primaryTM.refresh();
-        primaryTM.update();
-        primaryTM.zoomScale = 1.0f;
+        mTM1.scale = scale;
+        mTM1.refresh();
+        mTM1.update();
+        mTM1.zoomScale = 1.0f;
         zoomScale = 1.0f;
         alphaZoomScale = 1.0f;
+        mMainTM = mTM1;
+        mSpareTM = mTM2;
     }
 
 
@@ -283,19 +289,19 @@ public class Viewport extends AbstractPositionableElement implements
             readyForSwap = false;
         }
 
-        primaryTM.zoomScale = 1.0f;
+        mTM1.zoomScale = 1.0f;
         zoomScale = 1.0f;
         alphaZoomScale = 1.0f;
 
 //        scale = preselectTM.scale;
-        secondaryTM.zoomScale = 0.5f;
+        mTM2.zoomScale = 0.5f;
 //        preselectTM.refresh();
 //        preselectTM.update();
         //Swap TileMatrix
-        primaryTM.scale = scale;
-        secondaryTM.scale = scale + 1;
-        secondaryTM.refresh();
-        secondaryTM.update();
+        mTM1.scale = scale;
+        mTM2.scale = scale + 1;
+        mTM2.refresh();
+        mTM2.update();
     }
 
     void preselectZoomOut() {
@@ -304,26 +310,26 @@ public class Viewport extends AbstractPositionableElement implements
             readyForSwap = false;
         }
 
-        primaryTM.zoomScale = 1.0f;
+        mTM1.zoomScale = 1.0f;
         zoomScale = 1.0f;
         alphaZoomScale = 1.0f;
 
 //        scale = preselectTM.scale;
-        secondaryTM.zoomScale = 2.0f;
-        primaryTM.scale = scale;
-        secondaryTM.scale = scale - 1;
-        secondaryTM.refresh();
-        secondaryTM.update();
+        mTM2.zoomScale = 2.0f;
+        mTM1.scale = scale;
+        mTM2.scale = scale - 1;
+        mTM2.refresh();
+        mTM2.update();
     }
 
     public void swapTM() {
         //Swap
-        scale = secondaryTM.scale;
+        scale = mTM2.scale;
         zoomScale = 1.0f;
         alphaZoomScale = 1.0f;
-        TileMatrix tmp = primaryTM;
-        primaryTM = secondaryTM;
-        secondaryTM = tmp;
+        TileMatrix tmp = mTM1;
+        mTM1 = mTM2;
+        mTM2 = tmp;
     }
 
 
@@ -365,46 +371,72 @@ public class Viewport extends AbstractPositionableElement implements
     public void setZoomScale(float zoomScale) {
         this.zoomScale = zoomScale;
         alphaZoomScale = zoomScale;
-        primaryTM.zoomScale = zoomScale;
+        mTM1.zoomScale = zoomScale;
         if (zoomScale > 1.0f) {
-            secondaryTM.zoomScale = zoomScale / 2;
-            if (secondaryTM.scale != scale + 1) {
-                secondaryTM.scale = scale + 1;
-                secondaryTM.refresh();
-                secondaryTM.update();
+            mTM2.zoomScale = zoomScale / 2;
+            if (mTM2.scale != scale + 1) {
+                mTM2.scale = scale + 1;
+                mTM2.refresh();
+                mTM2.update();
             }
         }
         if (zoomScale < 1.0f) {
-            secondaryTM.zoomScale = zoomScale * 2;
-            if (secondaryTM.scale != scale - 1) {
-                secondaryTM.scale = scale - 1;
-                secondaryTM.refresh();
-                secondaryTM.update();
+            mTM2.zoomScale = zoomScale * 2;
+            if (mTM2.scale != scale - 1) {
+                mTM2.scale = scale - 1;
+                mTM2.refresh();
+                mTM2.update();
             }
 
         }
-        if (zoomScale >= 2.0f) {
-            if (secondaryTM.scale != scale) {
-                swapTM();
+
+        JveLog.d(TAG, new StringBuilder().append("ZoomScale : " + zoomScale + " / Scale : ").append(scale)
+                .append(" / TM1 scale : ").append(mTM1.scale)
+                .append(" / TM2 scale : ").append(mTM2.scale)
+                .append("/ main :").append(mMainTM == mTM1 ? "tm1" : "tm2").toString());
+        if (scale != mTM2.scale) {
+            if (zoomScale >= 2.0f) {
+                scale = mTM2.scale;
+                mTM1.scale = scale;
+                this.zoomScale = 1.0f;
+                alphaZoomScale = 1.0f;
+
+            }
+
+            if (zoomScale <= 0.5f) {
+                scale = mTM2.scale;
+                mTM1.scale = scale;
+                this.zoomScale = 1.0f;
+                alphaZoomScale = 1.0f;
             }
         }
 
-        if (zoomScale <= 0.5f) {
-            if (secondaryTM.scale != scale) {
-                swapTM();
-            }
+        if (this.zoomScale >= 1.5f) {
+            mMainTM = mTM2;
+            mSpareTM = mTM1;
+        } else {
+            mMainTM = mTM1;
+            mSpareTM = mTM2;
+        }
+
+        if (this.zoomScale <= 0.75f) {
+            mMainTM = mTM2;
+            mSpareTM = mTM1;
+        } else {
+            mMainTM = mTM1;
+            mSpareTM = mTM2;
         }
     }
 
     public void initTextures(GL10 gl) {
         int texIndex = 0;
-        int nbTextures = primaryTM.nbTileX * primaryTM.nbTileY * 3;
+        int nbTextures = mTM1.nbTileX * mTM1.nbTileY * 3;
         mTextures = new int[nbTextures];
 
         GLES10.glGenTextures(nbTextures, mTextures, 0);
 
-        texIndex = primaryTM.initTextures(gl, texIndex);
-        texIndex = secondaryTM.initTextures(gl, texIndex);
+        texIndex = mTM1.initTextures(gl, texIndex);
+        texIndex = mTM2.initTextures(gl, texIndex);
 
     }
 
@@ -553,24 +585,25 @@ public class Viewport extends AbstractPositionableElement implements
      * point
      */
     public synchronized void draw(GL10 gl) {
-//        handleAnimations();
         m.init();
-//            float tmAlpha = (2 - zoomScale) * ALPHA_OFFSET;
-        float tmAlpha = 1.0f;
-//        secondTM.draw(gl, 1.0f);
-        if (alphaZoomScale > 1.0f) {
-            primaryTM.draw(gl, tmAlpha);
-            float tmZoomInAlpha = (alphaZoomScale - 1) * ALPHA_OFFSET;
-            secondaryTM.draw(gl, tmZoomInAlpha);
-        } else if (alphaZoomScale < 1.0f) {
-            primaryTM.draw(gl, tmAlpha);
-            float tmZoomOutAlpha = (1 / alphaZoomScale - 1) * ALPHA_OFFSET;
-            secondaryTM.draw(gl, tmZoomOutAlpha);
-        } else {
-            secondaryTM.draw(gl, 1.0f);
-            primaryTM.draw(gl, tmAlpha);
 
-        }
+        mMainTM.draw(gl, 1.0f);
+        mSpareTM.draw(gl, 1.0f);
+
+
+//        float tmAlpha = 1.0f;
+//        if (alphaZoomScale > 1.0f) {
+//            mMainTM.draw(gl, tmAlpha);
+//            float tmZoomInAlpha = (alphaZoomScale - 1) * ALPHA_OFFSET;
+//            mSpareTM.draw(gl, tmZoomInAlpha);
+//        } else if (alphaZoomScale < 1.0f) {
+//            mMainTM.draw(gl, tmAlpha);
+//            float tmZoomOutAlpha = (1 / alphaZoomScale - 1) * ALPHA_OFFSET;
+//            mSpareTM.draw(gl, tmZoomOutAlpha);
+//        } else {
+//            mSpareTM.draw(gl, 1.0f);
+//            mMainTM.draw(gl, tmAlpha);
+//        }
 
         Point p = locationPoint;
         p.getPosFromCoord(this);

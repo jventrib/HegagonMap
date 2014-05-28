@@ -151,7 +151,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
 //        !SCALE!&amp;TILEROW=!ROW!&amp;TILECOL=!COL!
 //        src = src.replaceAll("!SCALE!", scaleString)
 //                .replaceAll("!ROW!", mapTileYS).replaceAll("!COL!", mapTileXS);
-        JveLog.d(TAG, this + "-src : " + src);
+//        JveLog.d(TAG, this + "-src : " + src);
 
         return src;
     }
