@@ -419,7 +419,7 @@ public class MapActivity extends Activity implements OnGestureListener,
     }
 
     private void onTwoFingersTap() {
-        zoomOut();
+//        zoomOut();
     }
 
     public boolean onScroll(MotionEvent e1, MotionEvent e2,
@@ -504,6 +504,8 @@ public class MapActivity extends Activity implements OnGestureListener,
 
             pinchDone = true;
             pinchDoneTime = System.currentTimeMillis();
+            viewport.zoomOnGoing = false;
+            viewport.fadeoutTM();
         }
 
         @Override

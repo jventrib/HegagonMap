@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -141,6 +142,8 @@ public class Viewport extends AbstractPositionableElement implements
 
     private ValueAnimator locationChangedAnimator;
 
+    private ValueAnimator tmFaderAnimator;
+
     private ZoomAnimatedListener zoomAnimatedListener;
 
     private PositionAnimatedListener positionAnimatedListener;
@@ -148,6 +151,13 @@ public class Viewport extends AbstractPositionableElement implements
     private VelocityAnimatedListener velocityAnimatedListener;
 
     public boolean readyForSwap = false;
+    private float initialAlphaToFade;
+
+    public void setAlphaToFade(float alphaToFade) {
+        this.alphaToFade = alphaToFade;
+    }
+
+    float alphaToFade;
 
 //    private TileMatrix mMainTM;
 
@@ -241,15 +251,14 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
     private void update() {
-        mTM1.update();
-        mTM2.update();
+//        mTM1.update();
+//        mTM2.update();
 
-//        mMainTM.update();
-//        if (zoomScale > 1.5f || zoomScale < 0.75f) {
-//            mTM2.update();
-//        } else {
-//            mTM1.update();
-//        }
+        if (zoomScale > 1.5f || zoomScale < 0.75f) {
+            mTM2.update();
+        } else {
+            mTM1.update();
+        }
     }
 
 
@@ -396,39 +405,12 @@ public class Viewport extends AbstractPositionableElement implements
         if (scale != mTM2.scale) {
             if (zoomScale >= 2.0f) {
                 swapTM();
-
-//                scale = mTM2.scale;
-//                mTM1.scale = scale;
-//                this.zoomScale = 1.0f;
-//                alphaZoomScale = 1.0f;
-//                mTM1.refresh();
             }
 
             if (zoomScale <= 0.5f) {
                 swapTM();
-//                scale = mTM2.scale;
-//                mTM1.scale = scale;
-//                this.zoomScale = 1.0f;
-//                alphaZoomScale = 1.0f;
-//                mTM1.refresh();
             }
         }
-
-//        if (this.zoomScale >= 1.5f) {
-//            mMainTM = mTM2;
-//            mSpareTM = mTM1;
-//        } else {
-//            mMainTM = mTM1;
-//            mSpareTM = mTM2;
-//        }
-//
-//        if (this.zoomScale <= 0.75f) {
-//            mMainTM = mTM2;
-//            mSpareTM = mTM1;
-//        } else {
-//            mMainTM = mTM1;
-//            mSpareTM = mTM2;
-//        }
 
         JveLog.d(TAG, new StringBuilder().append("ZoomScale : " + zoomScale + " / Scale : ").append(scale)
                 .append(" / TM1 scale : ").append(mTM1.scale)
@@ -602,16 +584,35 @@ public class Viewport extends AbstractPositionableElement implements
 
 
         float tmAlpha = 1.0f;
-        if (alphaZoomScale > 1.0f) {
-            mTM1.draw(gl, tmAlpha);
-            float tmZoomInAlpha = (alphaZoomScale - 1) * ALPHA_OFFSET;
-            mTM2.draw(gl, tmZoomInAlpha);
-        } else if (alphaZoomScale < 1.0f) {
-            mTM1.draw(gl, tmAlpha);
-            float tmZoomOutAlpha = (1 / alphaZoomScale - 1) * ALPHA_OFFSET;
-            mTM2.draw(gl, tmZoomOutAlpha);
+
+
+        if (zoomOnGoing) {
+            if (alphaZoomScale > 1.0f) {
+                mTM1.draw(gl, tmAlpha);
+                float tmZoomInAlpha = (alphaZoomScale - 1) * ALPHA_OFFSET;
+                initialAlphaToFade = tmZoomInAlpha;
+                mTM2.draw(gl, tmZoomInAlpha);
+            } else if (alphaZoomScale < 1.0f) {
+                mTM1.draw(gl, tmAlpha);
+                float tmZoomOutAlpha = (1 / alphaZoomScale - 1) * ALPHA_OFFSET;
+                initialAlphaToFade = tmZoomOutAlpha;
+                mTM2.draw(gl, tmZoomOutAlpha);
+            } else {
+                mTM1.draw(gl, tmAlpha);
+            }
         } else {
-            mTM1.draw(gl, tmAlpha);
+            if (alphaZoomScale > 1.5f || alphaZoomScale < 0.75f) {
+                mTM2.draw(gl, tmAlpha);
+//                if (alphaToFade > 0f) {
+//                    mTM1.draw(gl, alphaToFade);
+//                }
+            } else {
+                mTM1.draw(gl, tmAlpha);
+                if (alphaToFade > 0f) {
+                    mTM2.draw(gl, alphaToFade);
+                }
+            }
+
         }
 
         Point p = locationPoint;
@@ -651,4 +652,9 @@ public class Viewport extends AbstractPositionableElement implements
     }
 
 
+    public void fadeoutTM() {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(this, "alphaToFade", initialAlphaToFade, 0f);
+        anim.setDuration(1000);
+        anim.start();
+    }
 }
