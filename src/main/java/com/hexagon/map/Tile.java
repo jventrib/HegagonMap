@@ -191,7 +191,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         loadX = mapTileX;
         loadY = mapTileY;
         ion.getContext().getMainLooper().getThread().setPriority(Thread.MIN_PRIORITY);
-        mBitmapFuture = ion.with(context, src).noCache()
+        mBitmapFuture = ion.with(context, src)
                 .setHeader("user-agent",
                         "Android").setHeader("referer",
                         "HexagonMap.fr").withBitmap().asBitmap();

@@ -586,7 +586,7 @@ public class Viewport extends AbstractPositionableElement implements
         float tmAlpha = 1.0f;
 
 
-        if (zoomOnGoing) {
+        if (true || zoomOnGoing) {
             if (alphaZoomScale > 1.0f) {
                 mTM1.draw(gl, tmAlpha);
                 float tmZoomInAlpha = (alphaZoomScale - 1) * ALPHA_OFFSET;
