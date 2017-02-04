@@ -45,7 +45,7 @@ public class Preferences {
 	}
 
 	public static boolean isDevServer() {
-		return prefs.getBoolean("ign_dev_server", true);
+		return prefs.getBoolean("ign_dev_server", false);
 	}
 
 	

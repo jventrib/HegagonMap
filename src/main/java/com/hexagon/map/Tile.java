@@ -3,6 +3,7 @@ package com.hexagon.map;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -219,7 +220,6 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         });
     }
 
-
     void loadImageWithPicasso(final String src, final Context context) {
 
         Picasso picasso = PicassoFactory.getInstance(context).getPicasso();
@@ -232,12 +232,20 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
                 state = LoadState.LOADED;
                 visibleOnTop = true;
                 visible = true;
+                fadeInStart();
+                viewport.requestRender();
 
             }
 
             @Override
             public void onBitmapFailed(Drawable errorDrawable) {
-
+                Drawable myIcon = viewport.context.getResources().getDrawable( R.drawable.icon );
+                bmp = BitmapFactory.decodeResource(viewport.context.getResources(), R.drawable.icon_error);
+                state = LoadState.LOADED;
+                visibleOnTop = true;
+                visible = true;
+                fadeInStart();
+                viewport.requestRender();
             }
 
             @Override
@@ -388,6 +396,7 @@ public class Tile extends AbstractPositionableElement implements Cloneable {
         }
         float c = timer * mTileMatrix.mAlpha / (float) FADE_DURATION;
         alpha = c;
+        viewport.requestRender();
     }
 
 

@@ -188,8 +188,8 @@ public class TileMatrix {
                     String calcTileSrc = t.calcTileSrc(scale);
                     t.clearImage();
 //                    t.loadImageAsync(calcTileSrc, context);
-                    t.loadImageWithIon(calcTileSrc, context);
-//                    t.loadImageWithPicasso(calcTileSrc, context);
+//                    t.loadImageWithIon(calcTileSrc, context);
+                    t.loadImageWithPicasso(calcTileSrc, context);
 //                        t.drawDebugInfo();
                 }
             }

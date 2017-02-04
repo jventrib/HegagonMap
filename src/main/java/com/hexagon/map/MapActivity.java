@@ -18,6 +18,7 @@ import android.hardware.SensorManager;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -60,7 +61,7 @@ public class MapActivity extends Activity implements OnGestureListener,
 
     private static final String TAG = "IGNMapActivity";
 
-    SurfaceView main;
+    GLSurfaceView main;
 
     GestureDetector gestureScanner;
 
@@ -408,8 +409,8 @@ public class MapActivity extends Activity implements OnGestureListener,
         final int action = me.getAction();
         final int fingersCount = me.getPointerCount();
         if ((action == MotionEvent.ACTION_POINTER_UP) && (fingersCount == 2)) {
-            onTwoFingersTap();
-            return true;
+//            onTwoFingersTap();
+ //           return true;
         }
 
         mScaleDetector.onTouchEvent(me);

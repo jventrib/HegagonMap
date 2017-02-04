@@ -259,6 +259,11 @@ public class Viewport extends AbstractPositionableElement implements
         } else {
             mTM1.update();
         }
+        requestRender();
+    }
+
+    public void requestRender() {
+        getMapActivity().main.requestRender();
     }
 
 
@@ -475,7 +480,7 @@ public class Viewport extends AbstractPositionableElement implements
                 new Velocity(-velocityX / 40, -velocityY / 40), new Velocity(0, 0));
         screenScrollingAnimator.cancel();
         screenScrollingAnimator.addUpdateListener(velocityAnimatedListener);
-        screenScrollingAnimator.setDuration(1000L);
+        screenScrollingAnimator.setDuration(500L);
         screenScrollingAnimator.start();
     }
 
